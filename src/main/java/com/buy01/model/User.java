@@ -2,6 +2,7 @@ package com.buy01.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import com.buy01.model.Role;
 
 @Document(collection = "users")
 public class User {
@@ -10,11 +11,11 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private String role; // "admin" or "user"
+    private Role role;
 
     // constructor
     public User() {}
-    public User(String userId, String name, String email, String password, String role) {
+    public User(String userId, String name, String email, String password, Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -26,10 +27,10 @@ public class User {
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
-    public String getRole() { return role; }
+    public Role getRole() { return role; }
 
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
-    public void setRole(String role) { this.role = role; }
+    public void setRole(Role role) { this.role = role; }
 }
