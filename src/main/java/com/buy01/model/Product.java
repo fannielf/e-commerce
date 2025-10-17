@@ -10,14 +10,16 @@ public class Product {
     private String name;
     private String description;
     private Double price;
+    private int quantity;
     private String userId;
 
     // constructor - both constructors are needed, empty one for Spring Data and one with parameters for creating objects
     public Product() {}
-    public Product(String name, String description, double price, String userId) {
+    public Product(String name, String description, double price, int quantity, String userId) {
         this.name = name;
         this.description = description;
         this.price = price;
+        this.quantity = quantity;
         this.userId = userId;
     }
 
@@ -29,6 +31,8 @@ public class Product {
     public void setDescription(String description) { this.description = description; }
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
 

@@ -4,12 +4,8 @@ import com.buy01.model.User;
 import com.buy01.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.stream.Collectors;
 import com.buy01.dto.UserResponseDTO;
-import com.buy01.dto.SellerCreateDTO;
-import com.buy01.dto.UserUpdateDTO;
-import static com.buy01.security.SecurityUtils.isAdmin;
+import com.buy01.dto.UserUpdateRequest;
 
 
 @RestController
@@ -35,7 +31,7 @@ public class UserController {
     @PutMapping("/{userId}")
     public UserResponseDTO updateUser(
             @PathVariable String userId,
-            @RequestBody UserUpdateDTO request) {
+            @RequestBody UserUpdateRequest request) {
 
         User updatedUser = userService.updateUser(userId, request);
         return new UserResponseDTO(

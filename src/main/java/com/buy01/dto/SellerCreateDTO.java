@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class SellerCreateDTO extends UserCreateDTO {
     private MultipartFile avatar;
 
+    public SellerCreateDTO() {}
     public SellerCreateDTO(String name, String email, String password, Role role, MultipartFile avatar) {
         super(name, email, password, role);
         this.avatar = avatar;

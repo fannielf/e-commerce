@@ -1,10 +1,17 @@
 package com.buy01.dto;
 
-public class UserUpdateDTO {
+public class UserUpdateRequest {
     private String name;
     private String email;
     private String password; // the admin can only change the password
-    private String role;     // the admin can change the role of the user
+    // cannot update role after registration
+
+    public UserUpdateRequest() {}
+    public UserUpdateRequest(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -15,6 +22,4 @@ public class UserUpdateDTO {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
 }

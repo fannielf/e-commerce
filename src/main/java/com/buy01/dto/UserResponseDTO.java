@@ -4,6 +4,7 @@ public class UserResponseDTO {
     private String name;
     private String email;
 
+    public UserResponseDTO() {}
     public UserResponseDTO(String name, String email) {
         this.name = name;
         this.email = email;

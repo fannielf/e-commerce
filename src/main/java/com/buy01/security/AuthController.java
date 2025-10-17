@@ -50,7 +50,7 @@ public class AuthController {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
-        user.setRole("USER");
+        user.setRole(request.getRole());
 
         User created = userService.createUser(user);
         UserResponseDTO response = new UserResponseDTO(created.getName(), created.getEmail());

@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.buy01.security.SecurityUtils;
-import static com.buy01.security.SecurityUtils.isAdmin;
-import com.buy01.dto.UserUpdateDTO;
+import com.buy01.dto.UserUpdateRequest;
 
 @Service
 public class UserService {
@@ -91,7 +90,7 @@ public class UserService {
     }
 
     // method to update user, only updating own profile
-    public User updateUser(String userId, UserUpdateDTO request) {
+    public User updateUser(String userId, UserUpdateRequest request) {
         if (!userId.equals(SecurityUtils.getCurrentUserId())) {
             throw new RuntimeException("Forbidden - user can only modify their own profile");
         }

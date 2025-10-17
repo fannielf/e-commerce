@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import static com.buy01.security.SecurityUtils.getCurrentUserId;
 import static com.buy01.security.SecurityUtils.isAdmin;
-import com.buy01.dto.ProductUpdateDTO;
+import com.buy01.dto.ProductUpdateRequest;
 import com.buy01.dto.ProductCreateDTO;
 import com.buy01.security.SecurityUtils;
 
@@ -20,7 +20,9 @@ import com.buy01.security.SecurityUtils;
 @Service
 public class ProductService {
 
+    @Autowired
     private final ProductRepository productRepository;
+
     private final UserService userService;
 
     @Autowired
@@ -30,17 +32,16 @@ public class ProductService {
     }
 
     // Create a new product, only USER and ADMIN can create products
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SELLER')")
     public Product createProduct(ProductCreateDTO request) {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
 
         // adding current logged-in user
         product.setUserId(SecurityUtils.getCurrentUserId());
-        product.setSellerName(userService.findByIdOrThrow(SecurityUtils.getCurrentUserId()).getName()); // lisa see
-
 
         return productRepository.save(product);
     }
@@ -56,20 +57,21 @@ public class ProductService {
     }
 
     // Update product, only ADMIN or the owner of the product can update
-    @PreAuthorize("hasAnyAuthority('ADMIN') or @productService.isOwner(#productId)")
-    public Product updateProduct(String productId, ProductUpdateDTO request) {
+    @PreAuthorize("@productService.isOwner(#productId)")
+    public Product updateProduct(String productId, ProductUpdateRequest request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Not found"));
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
 
         return productRepository.save(product);
     }
 
 
-    @PreAuthorize("hasAnyAuthority('ADMIN') or @productService.isOwner(#productId)")
+    @PreAuthorize("@productService.isOwner(#productId)")
     public void deleteProduct(String productId) {
         Product product = findProductOrThrow(productId);
         authorizeOwner(product);
@@ -98,7 +100,7 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    // Authorize that the current user is either the owner of the product or an admin
+    // Authorize that the current user is either the owner of the product
     private void authorizeOwner(Product product) {
         String currentUserId = getCurrentUserId();
         if (!product.getUserId().equals(currentUserId) && !isAdmin()) {

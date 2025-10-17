@@ -33,6 +33,7 @@ public class UserCreateDTO {
     @Field(targetType = FieldType.STRING)
     private Role role;
 
+    public UserCreateDTO() {}
     public UserCreateDTO(String name, String email, String password, Role role) {
         this.name = name;
         this.email = email;

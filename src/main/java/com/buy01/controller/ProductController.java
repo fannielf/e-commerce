@@ -7,7 +7,7 @@ import java.util.List;
 import com.buy01.dto.ProductResponseDTO;
 import com.buy01.service.UserService;
 import com.buy01.security.SecurityUtils;
-import com.buy01.dto.ProductUpdateDTO;
+import com.buy01.dto.ProductUpdateRequest;
 import com.buy01.dto.ProductCreateDTO;
 import jakarta.validation.Valid;
 
@@ -33,6 +33,7 @@ public class ProductController {
                 saved.getName(),
                 saved.getDescription(),
                 saved.getPrice(),
+                saved.getQuantity(),
                 sellerName
         );
     }
@@ -46,6 +47,7 @@ public class ProductController {
                         p.getName(),
                         p.getDescription(),
                         p.getPrice(),
+                        p.getQuantity(),
                         userService.findByIdOrThrow(p.getUserId()).getName()
                 ))
                 .toList();
@@ -62,6 +64,7 @@ public class ProductController {
                 p.getName(),
                 p.getDescription(),
                 p.getPrice(),
+                p.getQuantity(),
                 sellerName);
     }
 
@@ -76,6 +79,7 @@ public class ProductController {
                         p.getName(),
                         p.getDescription(),
                         p.getPrice(),
+                        p.getQuantity(),
                         userService.findByIdOrThrow(p.getUserId()).getName()
                 ))
                 .toList();
@@ -84,7 +88,7 @@ public class ProductController {
     // renew a specific product by ID
     @PutMapping("/{productId}")
     public Object updateProduct(@PathVariable String productId,
-                                @RequestBody ProductUpdateDTO request) {
+                                @RequestBody ProductUpdateRequest request) {
         Product updated = productService.updateProduct(productId, request);
         String sellerName = userService.findByIdOrThrow(updated.getUserId()).getName();
 
@@ -93,6 +97,7 @@ public class ProductController {
                     updated.getName(),
                     updated.getDescription(),
                     updated.getPrice(),
+                    updated.getQuantity(),
                     sellerName
             );
     }
