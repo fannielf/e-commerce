@@ -156,3 +156,31 @@ src/main/java/com/letsplay
     - Delete all users: `db.users.deleteMany({})`
     - Exit: `exit` or `quit`
    
+## Install maven or maven-wrapper
+
+### Option 1: Install Maven locally
+
+Install maven:
+
+```bash
+brew install maven
+```
+
+Run:
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+### Option 2: Recreate the Maven Wrapper
+
+Install Maven temporarily:
+```bash
+cd backend
+mvn wrapper:wrapper
+```
+
+Run the program:
+```bash
+./mvnw spring-boot:run
+```

@@ -16,7 +16,7 @@ import com.buy01.dto.UserCreateDTO;
 import com.buy01.dto.UserResponseDTO;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
