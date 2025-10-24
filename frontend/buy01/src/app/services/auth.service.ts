@@ -22,7 +22,7 @@ export class AuthService {
      }
 
    //for testing purpose only
-   loginAsClient() {
+   /*loginAsClient() {
        this.currentUser = { role: 'client' };
        localStorage.setItem('user', JSON.stringify(this.currentUser));
      }
@@ -30,7 +30,7 @@ export class AuthService {
     loginAsSeller() {
        this.currentUser = { role: 'seller' };
        localStorage.setItem('user', JSON.stringify(this.currentUser));
-     }
+     }*/
 
    logout() {
        this.currentUser = null;
