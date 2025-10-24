@@ -9,7 +9,7 @@ import com.buy01.dto.UserUpdateRequest;
 
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired

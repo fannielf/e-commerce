@@ -36,16 +36,16 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyAuthority("USER","ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAuthority("ADMIN")
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/me").hasAnyAuthority("SELLER","ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products","/products/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/products/**").hasAnyAuthority("USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/products/**").permitAll()
 
-                        .requestMatchers(HttpMethod.PUT, "/api/users/me").denyAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/me").denyAll()
+                        .requestMatchers(HttpMethod.PUT, "/users/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyAuthority("USER","ADMIN")
 
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ADMIN")
