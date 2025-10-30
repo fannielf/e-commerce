@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { HttpHeaders } from '@angular/common/http';
 
 export interface User {
   name: string;
@@ -21,6 +22,21 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   getMe(): Observable<User> {
-    return this.http.get<User>(this.apiUrl);
+    // Retrieve the token from localStorage or your AuthService
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Handle the case where the token is not available
+      return of(); // Or throw an error, depending on your error handling strategy
+    }
+
+    // Create the headers object with the Authorization header
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'includeCredentials': 'true'
+    });
+
+    // Pass the headers in the options object of the GET request
+    return this.http.get<User>(this.apiUrl, { headers });
   }
 }
