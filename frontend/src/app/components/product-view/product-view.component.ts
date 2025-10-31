@@ -17,7 +17,6 @@ import { Router } from '@angular/router';
 export class ProductViewComponent implements OnInit {
   product: Product | null = null;
   isLoggedIn = false;
-  currentUserId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -28,7 +27,6 @@ export class ProductViewComponent implements OnInit {
 
 ngOnInit(): void {
   this.isLoggedIn = this.authService.isLoggedIn();
-  this.currentUserId = this.authService.getCurrentUserId();
 
   const productId = this.route.snapshot.paramMap.get('id');
   if (productId) {
@@ -38,9 +36,6 @@ ngOnInit(): void {
     });
   }
 }
- isOwner(product: Product): boolean {
-   return this.currentUserId === product.sellerId;
- }
 
 
   goToUpdateProduct(productId: string) {

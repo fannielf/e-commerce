@@ -20,7 +20,7 @@ export class UpdateProductComponent implements OnInit {
         description: '',
         price: 0,
         quantity: 0,
-        sellerId: ''
+        ownerId: ''
     };
 
   productId: string = '';

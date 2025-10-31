@@ -5,11 +5,11 @@
   <p>Price: {{ product?.price | currency:'EUR':'symbol' }}</p>
   <p>Quantity: {{ product?.quantity }}</p>
 
-  <button *ngIf="isOwner(product)" class="btn btn-success" (click)="goToUpdateProduct(product.productId)">
+  <button *ngIf="product.isProductOwner && isLoggedIn" class="btn btn-success" (click)="goToUpdateProduct(product.productId)">
     Manage Product
   </button>
 
-  <button *ngIf="!isOwner(product) && isLoggedIn" class="btn btn-primary">
+  <button *ngIf="!product.isProductOwner && isLoggedIn" class="btn btn-primary">
     Buy
   </button>
   <p *ngIf="!isLoggedIn" class="text-muted mt-2">Please log in to buy this product.</p>
