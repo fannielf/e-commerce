@@ -1,4 +1,4 @@
-package com.buy01.dto;
+package com.buy01.product.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

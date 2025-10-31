@@ -1,4 +1,4 @@
-package com.buy01.security;
+package com.buy01.product.security;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;

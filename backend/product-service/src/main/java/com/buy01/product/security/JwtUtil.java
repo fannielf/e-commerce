@@ -1,4 +1,4 @@
-package com.buy01.security;
+package com.buy01.product.security;
 
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;

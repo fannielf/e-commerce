@@ -1,20 +1,18 @@
-package com.buy01.service;
+package com.buy01.product.service;
 
-import com.buy01.model.Media;
-import com.buy01.model.Product;
-import com.buy01.repository.MediaRepository;
-import com.buy01.repository.ProductRepository;
+import com.buy01.product.model.Product;
+import com.buy01.product.repository.ProductRepository;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import static com.buy01.security.SecurityUtils.getCurrentUserId;
-import static com.buy01.security.SecurityUtils.isAdmin;
-import com.buy01.dto.ProductUpdateRequest;
-import com.buy01.dto.ProductCreateDTO;
-import com.buy01.security.SecurityUtils;
+import static com.buy01.product.security.SecurityUtils.getCurrentUserId;
+import static com.buy01.product.security.SecurityUtils.isAdmin;
+import com.buy01.product.dto.ProductUpdateRequest;
+import com.buy01.product.dto.ProductCreateDTO;
+import com.buy01.product.security.SecurityUtils;
 
 
 // service is responsible for business logic and data manipulation. It chooses how to handle data and interacts with the repository layer.
@@ -24,19 +22,13 @@ public class ProductService {
 
     @Autowired
     private final ProductRepository productRepository;
-    private final MediaRepository mediaRepository;
-
-    private final UserService userService;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, MediaRepository mediaRepository, UserService userService) {
+    public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.mediaRepository = mediaRepository;
-        this.userService = userService;
     }
 
     // Create a new product, only USER and ADMIN can create products
-    @PreAuthorize("hasAnyAuthority('SELLER')")
     public Product createProduct(ProductCreateDTO request) {
         Product product = new Product();
         product.setName(request.getName());
@@ -65,7 +57,6 @@ public class ProductService {
     }
 
     // Update product, only ADMIN or the owner of the product can update
-    @PreAuthorize("@productService.isOwner(#productId)")
     public Product updateProduct(String productId, ProductUpdateRequest request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Not found"));
@@ -79,16 +70,9 @@ public class ProductService {
     }
 
 
-    @PreAuthorize("@productService.isOwner(#productId)")
     public void deleteProduct(String productId) {
         Product product = findProductOrThrow(productId);
         authorizeOwner(product);
-
-        // delete all media related to the productId
-        List<Media> media = mediaRepository.getMediaByProductId(productId);
-        for (Media mediaItem : media) {
-            mediaRepository.deleteById(mediaItem.getId());
-        }
 
         productRepository.deleteById(productId);
     }

@@ -1,4 +1,4 @@
-package com.buy01.exception;
+package com.buy01.product.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;

@@ -1,17 +1,13 @@
-package com.buy01.controller;
+package com.buy01.product.controller;
 
-import com.buy01.model.Media;
-import com.buy01.model.Product;
-import com.buy01.repository.MediaRepository;
-import com.buy01.service.MediaService;
-import com.buy01.service.ProductService;
+import com.buy01.product.model.Product;
+import com.buy01.product.service.ProductService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import com.buy01.dto.ProductResponseDTO;
-import com.buy01.service.UserService;
-import com.buy01.security.SecurityUtils;
-import com.buy01.dto.ProductUpdateRequest;
-import com.buy01.dto.ProductCreateDTO;
+import com.buy01.product.dto.ProductResponseDTO;
+import com.buy01.product.security.SecurityUtils;
+import com.buy01.product.dto.ProductUpdateRequest;
+import com.buy01.product.dto.ProductCreateDTO;
 import jakarta.validation.Valid;
 
 @RestController // indicates that this class is a REST controller and handles HTTP requests
@@ -19,13 +15,9 @@ import jakarta.validation.Valid;
 public class ProductController {
 
     private final ProductService productService;
-    private final UserService userService;// service that does the business logic
-    private final MediaRepository mediaRepository;
 
-    public ProductController(ProductService productService, UserService userService,  MediaRepository mediaRepository) {
-        this.userService = userService;
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.mediaRepository = mediaRepository;
     }
 
     // add new product, only sellers
