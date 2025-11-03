@@ -21,9 +21,9 @@ public class JwtRequestFilter implements WebFilter {
     private JwtUtil jwtUtil;
 
     private static final List<String> EXCLUDE_URLS = List.of(
-            "/api/auth/login",
-            "/api/auth/signup",
-            "/api/products"
+            "/user-service/api/auth/login",
+            "/user-service/api/auth/signup",
+            "/PRODUCT-SERVICE/api/products"
     );
 
     @Override

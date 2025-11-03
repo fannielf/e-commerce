@@ -6,7 +6,6 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import static com.buy01.product.security.SecurityUtils.getCurrentUserId;
 import static com.buy01.product.security.SecurityUtils.isAdmin;

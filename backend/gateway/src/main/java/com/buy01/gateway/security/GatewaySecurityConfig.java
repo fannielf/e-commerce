@@ -35,8 +35,8 @@ public class GatewaySecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
                 .authorizeExchange(auth -> auth
-                        .pathMatchers("/api/auth/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .pathMatchers("/user-service/api/auth/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/PRODUCT-SERVICE/api/products/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtRequestFilter, SecurityWebFiltersOrder.AUTHENTICATION);
