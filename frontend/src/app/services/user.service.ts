@@ -17,7 +17,7 @@ export interface User {
 
 export class UserService {
 
-  private apiUrl = `${BASE_URL}/users/me`; // endpoint
+  private apiUrl = `${BASE_URL}/user-service/api/users/me`; // endpoint
 
   constructor(private http: HttpClient) {}
 
