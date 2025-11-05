@@ -81,4 +81,7 @@ public class MediaController {
         return ResponseEntity.ok().build();
     }
 
+    // /avatar endpoints
+
+
 }
