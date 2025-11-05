@@ -5,15 +5,21 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/buy01
       database: buy01
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: my-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 
 server:
-  port: 8445
+  port: 8081
   ssl:
     enabled: false
-#    key-store: classpath:ssl/backend.p12
-#    key-store-password: password
-#    key-store-type: PKCS12
-#    key-alias: localhost
 
 eureka:
   instance:
