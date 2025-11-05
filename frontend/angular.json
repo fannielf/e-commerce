@@ -66,9 +66,10 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "ssl": false,
-            "sslKey": "key.pem",
-            "sslCert": "cert.pem"
+            "ssl": true,
+            "sslKey": "certs/localhost-key.pem",
+            "sslCert": "certs/localhost.pem",
+            "port": 4200
           }
         },
         "extract-i18n": {
