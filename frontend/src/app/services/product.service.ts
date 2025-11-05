@@ -13,6 +13,7 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
+  // getting all products with the http call
  getAllProducts(): Observable<Product[]> {
    return this.http.get<Product[]>(this.apiUrl).pipe(
      map(products =>
@@ -24,6 +25,7 @@ export class ProductService {
    );
  }
 
+ // getting the product by id with the http call
   getProductById(productId: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/${productId}`).pipe(
       map(product => ({
@@ -33,6 +35,7 @@ export class ProductService {
     );
   }
 
+ // updating the product with the http call
   updateProduct(productId: string, product: Product): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/${productId}`, product);
   }

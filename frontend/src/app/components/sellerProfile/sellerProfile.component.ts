@@ -21,7 +21,7 @@ export class SellerProfileComponent implements OnInit {
   ngOnInit() {
     this.isLoggedIn = this.authService.isLoggedIn?.() ?? false;
 
-    // getting the products from the backend
+    // getting the user details from the backend
     this.userService.getMe().subscribe({
       next: (data: User) => {
         this.user = data;
