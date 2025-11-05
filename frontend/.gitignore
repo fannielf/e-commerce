@@ -45,5 +45,6 @@ Thumbs.db
 /target/
 *.class
 
+# Node modules
 node_modules/
-.angular/cache/
+

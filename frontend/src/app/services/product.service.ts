@@ -8,7 +8,7 @@ import { Product } from '../models/product.model';
 })
 export class ProductService {
 
-  private apiUrl = 'https://localhost:8443/products'; // endpoint
+  private apiUrl = `${BASE_URL}/product-service/api/products`;  // endpoint
 
   constructor(private http: HttpClient) {}
 

@@ -22,7 +22,7 @@ interface DecodedToken {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://localhost:8443/auth';
+  private apiUrl = `${BASE_URL}/user-service/api/auth`;
   private decodedToken: DecodedToken | null = null;
 
   constructor(
