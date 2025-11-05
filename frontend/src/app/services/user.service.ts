@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { BASE_URL } from '../constants';
+import { BASE_URL } from '../constants/constants';
 
 export interface User {
   name: string;
@@ -21,7 +21,7 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  getMe(): Observable<User> {
-    return this.http.get<User>(this.apiUrl);
+    getMe(): Observable<User> {
+      return this.http.get<User>(this.apiUrl);
+    }
   }
-}

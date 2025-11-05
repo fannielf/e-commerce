@@ -1,7 +1,10 @@
 export interface Product {
-  id?: string;
+  productId: string;
   name: string;
+  description: string;
   price: number;
-  image: string;
-  sellerId?: string;
+  quantity: number;
+  ownerId: string;
+  image?: string;
+  isProductOwner?: boolean;
 }

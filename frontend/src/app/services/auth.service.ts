@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
-import { BASE_URL } from '../constants';
+import { Router } from '@angular/router';
+import { BASE_URL } from '../constants/constants';
+
 
 interface AuthResponse {
   token?: string;
@@ -11,7 +13,10 @@ interface AuthResponse {
 }
 
 interface DecodedToken {
+  sub: string; // The user's unique ID
   role: string;
+  iat: number;
+  exp: number;
 }
 
 @Injectable({
@@ -19,27 +24,33 @@ interface DecodedToken {
 })
 export class AuthService {
   private apiUrl = `${BASE_URL}/user-service/api/auth`;
+  private decodedToken: DecodedToken | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router
+    ) {
+
+     const token = localStorage.getItem('token');
+         if (token) {
+           try {
+             this.decodedToken = jwtDecode<DecodedToken>(token);
+           } catch (error) {
+             console.error('Error decoding token on startup:', error);
+             this.logout();
+           }
+         }
+     }
 
   isLoggedIn(): boolean {
-    const token = localStorage.getItem('token');
-    return !!token;
-  }
+      // Check if token exists and is not expired
+      return !!this.decodedToken && this.decodedToken.exp * 1000 > Date.now();
+    }
 
   getUserRole(): string | null {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decodedToken: DecodedToken = jwtDecode(token);
-        return decodedToken.role;
-      } catch (error) {
-        console.error('Error decoding token:', error);
-        return null;
-      }
+      return this.decodedToken ? this.decodedToken.role : null;
     }
-    return null;
-  }
+
 
   signup(userData: any): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/signup`, userData);
@@ -50,6 +61,7 @@ export class AuthService {
       tap(res => {
         if (res.token) {
           localStorage.setItem('token', res.token);
+          this.decodedToken = jwtDecode<DecodedToken>(res.token);
         }
       })
     );
@@ -57,5 +69,30 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('token');
+    this.decodedToken = null;
+    this.router.navigate(['/']).then(() => {
+      window.location.reload();
+  });
   }
+
 }
+
+
+  // testing helpers
+  /*loginAsClient() {
+    this.currentUser = { role: 'client' };
+    localStorage.setItem('user', JSON.stringify(this.currentUser));
+  }
+
+  loginAsSeller() {
+    this.currentUser = { role: 'seller' };
+    localStorage.setItem('user', JSON.stringify(this.currentUser));
+  }
+
+ getCurrentUserId(): string | null {
+   const user = localStorage.getItem('user');
+   if (!user) return null;
+   return JSON.parse(user).id;
+ }*/
+
+

@@ -3,11 +3,12 @@ import { OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sellerProfile',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './sellerProfile.component.html',
   styleUrl: './sellerProfile.component.css'
 })
@@ -20,7 +21,7 @@ export class SellerProfileComponent implements OnInit {
   ngOnInit() {
     this.isLoggedIn = this.authService.isLoggedIn?.() ?? false;
 
-    // getting the products from the backend
+    // getting the user details from the backend
     this.userService.getMe().subscribe({
       next: (data: User) => {
         this.user = data;
