@@ -1,0 +1,17 @@
+.client-profile {
+    display: flex;
+    align-items: center;
+    margin-top: 6.25rem;
+    margin-left: 12.5rem;
+}
+.client-profile img {
+    border-radius: 50%;
+    width:  9.375rem;
+    height: 9.375rem;
+    margin-right: 1.25rem;
+}
+
+.client-profile p {
+    font-size: 1.5em;
+    margin: 0;
+}
