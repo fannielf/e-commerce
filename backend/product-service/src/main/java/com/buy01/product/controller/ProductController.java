@@ -31,12 +31,13 @@ public class ProductController {
             @RequestHeader("Authorization") String authHeader,
             @Valid @RequestBody ProductCreateDTO request) {
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
-        System.out.println("currentUserId:" + currentUserId);
-        if (!securityUtils.isAdmin(authHeader)) {
+        String role = securityUtils.getRole(currentUserId);
+
+        if (!role.equals("ADMIN") || request.getUserId().isEmpty()) {
             request.setUserId(currentUserId);
         }
-        Product saved = productService.createProduct(request);
-        String token = jwtUtil.getToken(authHeader);
+
+        Product saved = productService.createProduct(request, role, currentUserId);
 
 //        List<String> images = productService.getProductImages(saved.getProductId());
         List<String> images = null;
@@ -77,9 +78,15 @@ public class ProductController {
     // get a specific product by ID
     @GetMapping("/{productId}")
     public ProductResponseDTO getProductById(
-            @RequestHeader("Authorization") String authHeader,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable String productId) {
-        String currentUserId = securityUtils.getCurrentUserId(authHeader);
+
+        String currentUserId = null;
+
+        if (authHeader != null) {
+            currentUserId = securityUtils.getCurrentUserId(authHeader);
+        }
+        System.out.println("Current user id getting product: " + currentUserId);
         Product p = productService.getProductById(productId);
 //        List<String> images = productService.getProductImages(p.getProductId());
         List<String> images = null;
@@ -92,7 +99,7 @@ public class ProductController {
                 p.getQuantity(),
                 p.getUserId(),
                 images,
-                currentUserId.equals(p.getUserId())
+                currentUserId != null && currentUserId.equals(p.getUserId())
         );
     }
 
@@ -127,9 +134,9 @@ public class ProductController {
             @PathVariable String productId,
             @RequestBody ProductUpdateRequest request) {
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
-        boolean isAdmin = securityUtils.isAdmin(authHeader);
+        String role = securityUtils.getRole(currentUserId);
 
-        Product updated = productService.updateProduct(productId, request, currentUserId, isAdmin);
+        Product updated = productService.updateProduct(productId, request, currentUserId, role);
         List<String> images = productService.getProductImages(updated.getProductId());
 
             return new ProductResponseDTO(
@@ -152,8 +159,8 @@ public class ProductController {
             @PathVariable String productId
     ) {
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
-        boolean isAdmin = securityUtils.isAdmin(authHeader);
+        String role = securityUtils.getRole(currentUserId);
 
-        productService.deleteProduct(productId,  currentUserId, isAdmin);
+        productService.deleteProduct(productId,  currentUserId, role);
     }
 }

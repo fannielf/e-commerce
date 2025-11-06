@@ -1,10 +1,11 @@
 package com.buy01.media.service;
 
+import com.buy01.media.client.ProductClient;
 import com.buy01.media.exception.ForbiddenException;
 import com.buy01.media.exception.NotFoundException;
 import com.buy01.media.repository.MediaRepository;
 import com.buy01.media.exception.FileUploadException;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,21 +22,33 @@ import java.util.UUID;
 @Service
 public class MediaService {
     private final MediaRepository mediaRepository;
+    private final ProductClient productClient;
+    private final Path storagePath;
+    private final Path avatarPath;
 
-    public MediaService(MediaRepository mediaRepository) throws IOException {
+    private static final String UPLOAD_DIR = "uploads";
+    private static final String AVATAR_DIR = "avatar";
+
+    public MediaService(MediaRepository mediaRepository, ProductClient productClient) throws IOException {
         this.mediaRepository = mediaRepository;
-        Path storagePath = Paths.get("uploads").toAbsolutePath().normalize();
+        this.productClient = productClient;
+
+        this.storagePath = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
         Files.createDirectories(storagePath);
+
+        this.avatarPath = storagePath.resolve(AVATAR_DIR);
+        Files.createDirectories(avatarPath);
     }
 
-    public Media saveImage(MultipartFile file, String productId, String userId) {
+    // creates path and saves the image to uploads
+    public Media saveImage(MultipartFile file, String productId, String userId,  boolean isAdmin) {
 
-        validateFile(file);
+        authorizeUser(productId, userId, isAdmin);
 
         String extension = Objects.requireNonNull(file.getOriginalFilename())
                 .substring(file.getOriginalFilename().lastIndexOf("."));
         String fileName = UUID.randomUUID() + "." + extension;
-        String path = storeFile(file, "uploads/", fileName); // making sure all unique filenames
+        String path = storeFile(file, storagePath.toString(), fileName); // making sure all unique filenames
 
         Media media = new Media();
         media.setPath(path);
@@ -46,31 +59,25 @@ public class MediaService {
 
     }
 
-    public void deleteMedia(@PathVariable String id, String userId) {
+    public void deleteMedia(@PathVariable String id, String userId, boolean isAdmin) {
         // validate that media exists
         Media media = mediaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Media not found"));
 
-//        // validate ownership
-//        Product product = productRepository.findById(media.getProductId())
-//                .orElseThrow(() -> new NotFoundException("Product not found"));
-//
-//        if (!product.getUserId().equals(userId)) {
-//            throw new ForbiddenException("You are not the product owner");
-//        }
+        authorizeUser(media.getProductId(), userId, isAdmin);
 
-        // delete
+        // delete from repository after validation
         mediaRepository.deleteById(id);
     }
 
     public String saveUserAvatar(MultipartFile file) {
-        validateFile(file);
         String extension = Objects.requireNonNull(file.getOriginalFilename())
                 .substring(file.getOriginalFilename().lastIndexOf("."));
         String fileName = UUID.randomUUID() + "." + extension;
-        return storeFile(file, "uploads/avatar/", fileName);
+        return storeFile(file, avatarPath.toString(), fileName);
     }
 
+    // validating the file before storing
     private String storeFile(MultipartFile file, String directory, String filename) {
         validateFile(file);
         try {
@@ -94,6 +101,16 @@ public class MediaService {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new FileUploadException("Invalid file type");
+        }
+    }
+
+    // throw Forbidden if user is not admin nor productOwner
+    private void authorizeUser(String productId, String userId, boolean isAdmin) {
+        // validate that the user has right to delete the media
+        boolean isOwner = productClient.isOwner(productId, userId);
+
+        if (!isAdmin || !isOwner) {
+            throw new ForbiddenException("Only admin or owner can delete media");
         }
     }
 

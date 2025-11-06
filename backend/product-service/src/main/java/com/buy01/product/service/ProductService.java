@@ -1,42 +1,49 @@
 package com.buy01.product.service;
 
+import com.buy01.product.client.MediaClient;
+import com.buy01.product.client.UserClient;
 import com.buy01.product.exception.ForbiddenException;
+import com.buy01.product.exception.NotFoundException;
 import com.buy01.product.model.Product;
 import com.buy01.product.repository.ProductRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
 import com.buy01.product.dto.ProductUpdateRequest;
 import com.buy01.product.dto.ProductCreateDTO;
-import org.springframework.web.client.RestTemplate;
 
 
-// service is responsible for business logic and data manipulation. It chooses how to handle data and interacts with the repository layer.
-// it doesn't handle HTTP requests directly, that's the controller's job.
+// Service layer is responsible for business logic, validation, verification and data manipulation.
+// It chooses how to handle data and interacts with the repository layer.
 @Service
 public class ProductService {
 
-    @Autowired
     private final ProductRepository productRepository;
-    private final RestTemplate restTemplate;
-    @Autowired
-    private ProductEventService productEventService;
+    private final MediaClient mediaClient;
+    private final UserClient userClient;
+    private final ProductEventService productEventService;
 
     @Autowired
-    public ProductService(ProductRepository productRepository,  RestTemplate restTemplate) {
+    public ProductService(ProductRepository productRepository, MediaClient mediaClient, UserClient userClient, ProductEventService productEventService) {
         this.productRepository = productRepository;
-        this.restTemplate = restTemplate;
+        this.mediaClient = mediaClient;
+        this.userClient = userClient;
+        this.productEventService = productEventService;
     }
 
-    // Create a new product, only USER and ADMIN can create products
-    public Product createProduct(ProductCreateDTO request) {
+    // Create a new product, only SELLER and ADMIN can create products
+    public Product createProduct(ProductCreateDTO request, String role, String currentUserId) {
+
+        // validate that user can create products
+        if (currentUserId.isEmpty() || (!role.equals("ADMIN") && !role.equals("SELLER"))) {
+            throw new ForbiddenException("Your current role cannot create a product.");
+        }
+
+        String productOwnerId = currentUserId;
+
         // validate name
         validateProductName(request.getName());
         // validate description
@@ -52,8 +59,11 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
 
-        // adding current logged-in user
-        product.setUserId(request.getUserId());
+        if (!request.getUserId().isEmpty()){
+            validateUserId(request.getUserId());
+            productOwnerId = request.getUserId();
+        }
+        product.setUserId(productOwnerId);
 
         return productRepository.save(product);
     }
@@ -65,29 +75,32 @@ public class ProductService {
 
     // Get product by id, public endpoint
     public Product getProductById(String productId) {
-        return findProductOrThrow(productId);
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException(productId));
     }
 
-    // Currently limited to ADMIN
-    public List<Product> getAllProductsByUserId(String userId) {
-        // validate that admin
+    // Get all products by userId, currently limited to ADMIN
+    public List<Product> getAllProductsByUserId(String userId, String role) {
+
+        if (!role.equals("ADMIN")) {
+            throw new ForbiddenException(role);
+        }
 
         return productRepository.findAllProductsByUserId(userId);
     }
 
     // Update product, only ADMIN or the owner of the product can update
-    public Product updateProduct(String productId, ProductUpdateRequest request, String userId, boolean isAdmin) {
+    public Product updateProduct(String productId, ProductUpdateRequest request, String userId, String role) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new NotFoundException(productId));
 
-        // check if the user has right to update the product (Admin or product owner)
-        if (!isAdmin || !userId.equals(product.getUserId())) {
-            throw new ForbiddenException("Only admin or product owner can update product");
-        }
-        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+        authProductOwner(product, userId, role);
+
+        if (request.getName() != null && !request.getName().trim().isEmpty()) { // if name exists, validate and update
             validateProductName(request.getName());
             product.setName(request.getName().trim());
         }
+
         if (request.getDescription() != null && !request.getDescription().trim().isEmpty()) {
             validateProductDescription(request.getDescription());
             product.setDescription(request.getDescription().trim());
@@ -108,13 +121,11 @@ public class ProductService {
 
 
     // Deleting product, accessible only by ADMIN or product owner
-    public void deleteProduct(String productId, String userId, boolean isAdmin) {
-        Optional<Product> product = productRepository.findById(productId);
+    public void deleteProduct(String productId, String userId, String role) {
+       Product product = productRepository.findById(productId)
+               .orElseThrow(() -> new NotFoundException(productId));
 
-        // validate that user has role ADMIN or is the product owner
-        if (!isAdmin || !userId.equals(product.get().getUserId())) {
-            throw new ForbiddenException("Only admin or product owner can delete product");
-        }
+        authProductOwner(product, userId, role);
 
         productRepository.deleteById(productId);
         productEventService.publishProductDeletedEvent(productId);
@@ -180,38 +191,23 @@ public class ProductService {
         }
     }
 
-    // Find product by ID or throw exception if not found
-    private Product findProductOrThrow(String productId) {
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    private void validateUserId(String userId) {
+        // call UserClient to verify that the id exists.
+        String role = userClient.getRoleIfUserExists(userId);
+        if (!role.equals("ADMIN") && !role.equals("SELLER")) {
+            throw new BadRequestException();
+        }
     }
 
+    // Call for mediaClient to get all product images
     public List<String> getProductImages(String productId) {
-        try {
-            // Headers
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+        return mediaClient.getProductImages(productId);
+    }
 
-            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-            // GET image urls via gateway
-            ResponseEntity<String> response = restTemplate.exchange(
-                    "http://gateway:8443/media-service/api/media/productId/" + productId,
-                    HttpMethod.GET,
-                    requestEntity,
-                    String.class
-            );
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("Getting images for productId failed: " + response.getStatusCode());
-            }
-
-            // Deserialize JSON array into List<String>
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(response.getBody(), new TypeReference<List<String>>() {});
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error getting product images", e);
+    // Authenticates the product owner (or ADMIN), otherwise throws an error
+    public void authProductOwner(Product product, String userId, String role) {
+        if (!product.getUserId().equals(userId) || !role.equals("ADMIN")) {
+            throw new ForbiddenException("Only admin or product owner can update product");
         }
     }
 }

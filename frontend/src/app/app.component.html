@@ -5,9 +5,11 @@
     <button *ngIf="showProfile" (click)="logout()" class="logout-btn">
       Logout
     </button>
-    <a *ngIf="showProfile" routerLink="/seller-profile" class="profile-link">
-    <img *ngIf="showProfile" src="assets/default.jpg" alt="Profile" class="profile-img" />
+
+    <a *ngIf="showProfile" [routerLink]="profileRoute" class="profile-link">
+      <img src="assets/default.jpg" alt="Profile" class="profile-img" />
     </a>
+
     <button *ngIf="!showProfile" routerLink="/auth" class="login-btn">
       Login
     </button>

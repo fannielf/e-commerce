@@ -1,6 +1,7 @@
 package com.buy01.user.controller;
 
 import com.buy01.user.dto.SellerUpdateRequest;
+import com.buy01.user.dto.UserDTO;
 import com.buy01.user.exception.ForbiddenException;
 import com.buy01.user.exception.NotFoundException;
 import com.buy01.user.model.Role;
@@ -19,13 +20,13 @@ import com.buy01.user.security.JwtUtil;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-    private UserRepository userRepository;
-    private JwtUtil jwtUtil;
-    private SecurityUtils securityUtils;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final SecurityUtils securityUtils;
 
-    public UserController(UserRepository userRepository, JwtUtil jwtUtil, SecurityUtils securityUtils) {
+    public UserController(UserService userService, UserRepository userRepository, JwtUtil jwtUtil, SecurityUtils securityUtils) {
+        this.userService = userService;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.securityUtils = securityUtils;
@@ -48,6 +49,13 @@ public class UserController {
                 user.getAvatarUrl(),
                 currentUserId.equals(userId)
         );
+    }
+
+    @GetMapping("/internal/user/{userId}")
+    public UserDTO getUserById(@PathVariable String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        return new UserDTO(user.getId(), user.getRole().toString());
     }
 
     // updating user by id, only admin
