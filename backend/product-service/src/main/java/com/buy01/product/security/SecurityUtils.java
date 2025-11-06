@@ -35,18 +35,17 @@ public class SecurityUtils {
     }
 
     //if the user is admin
-    public boolean isAdmin(String authHeader) {
+    public String getRole(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return false;
+            return "";
         }
 
         String token = authHeader.substring(7);
         try {
             Claims claims = jwtUtil.extractClaims(token);
-            String role = claims.get("role", String.class);
-            return "ADMIN".equals(role);
+            return claims.get("ROLE_", String.class);
         } catch (Exception e) {
-            return false;
+            return "";
         }
     }
 }

@@ -45,12 +45,13 @@ public class MediaController {
             @RequestHeader("Authorization") String authHeader,
             @Valid @ModelAttribute MediaCreateDTO dto) {
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
+        boolean isAdmin = securityUtils.isAdmin(currentUserId);
         String productId = dto.getProductId();
 
         // Stream files, save them and create a list of MediaResponseDTO for return
         List<MediaResponseDTO> result = dto.getFiles().stream()
                 .map(file -> {
-                    Media media = mediaService.saveImage(file, productId, currentUserId);
+                    Media media = mediaService.saveImage(file, productId, currentUserId, isAdmin);
                     return new MediaResponseDTO(media.getId(), media.getPath(), media.getProductId());
                 })
                 .toList();
@@ -73,10 +74,27 @@ public class MediaController {
                 .body(resource);
     }
 
+    // serves all URLS for productId
+    @GetMapping("/internal/images/productId/{id}")
+    public List<MediaResponseDTO> getProductImages(@PathVariable String productId) {
+        List<Media> mediaList = mediaRepository.getMediaByProductId(productId);
+
+        return mediaList.stream()
+                .map(media -> new MediaResponseDTO(
+                        media.getId(),
+                        media.getPath(),
+                        media.getProductId()
+                ))
+                .toList();
+    }
+
     @DeleteMapping("images/{id}")
-    public ResponseEntity<?> deleteImage(@PathVariable String id, Authentication auth) {
-        String currentUserId = auth.getName(); // get logged-in user ID
-        mediaService.deleteMedia(id, currentUserId);
+    public ResponseEntity<?> deleteImage(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String id, Authentication auth) {
+        String currentUserId = securityUtils.getCurrentUserId(authHeader);
+        boolean isAdmin = securityUtils.isAdmin(currentUserId);
+        mediaService.deleteMedia(id, currentUserId, isAdmin);
 
         return ResponseEntity.ok().build();
     }
