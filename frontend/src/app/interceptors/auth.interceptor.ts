@@ -45,6 +45,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 0) {
           errorMsg = 'Cannot reach server';
         } else if (error.status >= 400 && error.status < 500) {
+          console.log('AuthInterceptor - Client error response', error);
           errorMsg = error.error?.message || 'Client error';
         } else if (error.status >= 500) {
           errorMsg = 'Server error occurred';
