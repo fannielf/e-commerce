@@ -99,17 +99,22 @@ public class UserController {
     public UserResponseDTO getCurrentUser(
             @RequestHeader("Authorization") String authHeader
             ) {
+        System.out.println("Getting current user profile");
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
-        String role = jwtUtil.getToken(authHeader);
+        String role = securityUtils.getRole(authHeader);
+        System.out.println("Current user ID: " + currentUserId + ", role: " + role);
 
-        User user = userService.findById(currentUserId).orElseThrow();
+        User user = userService.findById(currentUserId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (role.equals("ADMIN") || role.equals("SELLER")) {
+            System.out.println("Fetching products for user with role: " + role);
             // get products from product service
             List<ProductDTO> products = userService.getProductsForCurrentUser(currentUserId, role);
             return new SellerResponseDTO(user, products);
         }
 
+        System.out.println("Fetching profile for user with role: " + role);
         return new UserResponseDTO(
                 user.getName(),
                 user.getEmail(),

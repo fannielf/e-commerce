@@ -3,8 +3,26 @@
   <div *ngIf="user; else loading">
     <p>{{ user.name }}</p>
   </div>
-
   <ng-template #loading>
     <p>Loading user profile...</p>
   </ng-template>
+</div>
+
+<div class="container mt-4">
+  <h2>Your Listings</h2>
+
+  <div *ngIf="user.products == null || !user.products || user.products.length === 0">
+    <p>You have no products listed for sale.</p>
+  </div>
+
+  <div class="row" *ngIf="user.products && user.products.length > 0">
+    <div class="col-md-3" *ngFor="let product of user.products">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text">{{ product.price | currency:'EUR':'symbol' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

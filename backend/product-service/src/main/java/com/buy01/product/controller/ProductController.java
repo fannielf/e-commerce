@@ -134,6 +134,7 @@ public class ProductController {
     public List<ProductResponseDTO> getUsersProducts(
             @PathVariable String userId
     ) {
+        System.out.println("Fetching products for user ID: " + userId);
         return productService.getAllProducts().stream()
                 .filter(p -> p.getUserId().equals(userId))
                 .map(p -> {

@@ -80,7 +80,7 @@ public class UserService {
 
     public List<ProductDTO> getProductsForCurrentUser(String userId, String role) {
         // Call product-service to get products for the user
-        if (!role.equals("ADMIN") || !role.equals("SELLER")) {
+        if (!role.equals("ADMIN") && !role.equals("SELLER")) {
             throw new ForbiddenException("Invalid role to fetch products");
         }
 
