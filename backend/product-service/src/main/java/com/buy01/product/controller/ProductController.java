@@ -125,7 +125,28 @@ public class ProductController {
                             p.getQuantity(),
                             p.getUserId(),
                             images,
-                            true
+                            currentUserId.equals(p.getUserId())
+                    );
+                })
+                .toList();
+    }    // get all products of the current logged-in user
+    @GetMapping("/internal/my-products/{userId}")
+    public List<ProductResponseDTO> getUsersProducts(
+            @PathVariable String userId
+    ) {
+        return productService.getAllProducts().stream()
+                .filter(p -> p.getUserId().equals(userId))
+                .map(p -> {
+                    List<String> images = productService.getProductImages(p.getProductId());
+                    return new ProductResponseDTO(
+                            p.getProductId(),
+                            p.getName(),
+                            p.getDescription(),
+                            p.getPrice(),
+                            p.getQuantity(),
+                            p.getUserId(),
+                            images,
+                            userId.equals(p.getUserId())
                     );
                 })
                 .toList();
