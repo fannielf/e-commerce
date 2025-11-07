@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './manage-products.component.html',
-  styleUrl: './manage-products.component.css'
+  styleUrls: ['./manage-products.component.css']
 })
 export class ManageProductsComponent implements OnInit {
     mode: 'create' | 'update' = 'create'
