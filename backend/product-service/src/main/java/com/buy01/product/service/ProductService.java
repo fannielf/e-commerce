@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 import com.buy01.product.dto.ProductUpdateRequest;
 import com.buy01.product.dto.ProductCreateDTO;
@@ -201,8 +202,7 @@ public class ProductService {
 
     // Call for mediaClient to get all product image ids
     public List<String> getProductImageIds(String productId) {
-        return List.of(); // temporary disable media service calls
-//        return mediaClient.getProductImageIds(productId);
+        return Optional.ofNullable(mediaClient.getProductImageIds(productId)).orElse(List.of());
     }
 
     // Authenticates the product owner (or ADMIN), otherwise throws an error

@@ -79,7 +79,12 @@ public class MediaController {
     public List<MediaResponseDTO> getProductImages(
             @PathVariable("id") String productId
     ) {
+        System.out.println("Get product image requested with id: "+ productId);
         List<Media> mediaList = mediaRepository.getMediaByProductId(productId);
+
+        if(mediaList.isEmpty()){
+            return  null;
+        }
 
         return mediaList.stream()
                 .map(media -> new MediaResponseDTO(

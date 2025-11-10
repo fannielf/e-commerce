@@ -21,6 +21,7 @@ public class MediaClient {
 
     public List<String> getProductImageIds(String productId) {
         String url = mediaServiceBaseUrl + "/internal/images/productId/" + productId;
+        System.out.println("Request url: " + url);
 
         ResponseEntity<List> response = restTemplate.exchange(
                 url,
