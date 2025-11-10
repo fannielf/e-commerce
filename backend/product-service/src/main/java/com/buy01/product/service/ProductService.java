@@ -199,10 +199,10 @@ public class ProductService {
         }
     }
 
-    // Call for mediaClient to get all product images
-    public List<String> getProductImages(String productId) {
+    // Call for mediaClient to get all product image ids
+    public List<String> getProductImageIds(String productId) {
         return List.of(); // temporary disable media service calls
-//        return mediaClient.getProductImages(productId);
+//        return mediaClient.getProductImageIds(productId);
     }
 
     // Authenticates the product owner (or ADMIN), otherwise throws an error

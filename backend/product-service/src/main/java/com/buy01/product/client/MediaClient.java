@@ -19,7 +19,7 @@ public class MediaClient {
         this.mediaServiceBaseUrl = "http://localhost:8082/api/media";
     }
 
-    public List<String> getProductImages(String productId) {
+    public List<String> getProductImageIds(String productId) {
         String url = mediaServiceBaseUrl + "/internal/images/productId/" + productId;
 
         ResponseEntity<List> response = restTemplate.exchange(

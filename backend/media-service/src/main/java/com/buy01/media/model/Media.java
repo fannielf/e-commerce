@@ -7,16 +7,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Media {
     @Id
     private String id;
+    private String name;
     private String path;
     private String productId;
 
     public Media() {}
-    public Media(String path, String productId) {
+    public Media(String name, String path, String productId) {
+        this.name = name;
         this.path = path;
         this.productId = productId;
     }
 
     public String getId() { return id; } // MongoDB generates ID, no setter for it
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
     public String getPath() { return path; }
     public void setPath(String path) { this.path = path; }
     public String getProductId() { return productId; }

@@ -159,11 +159,12 @@ public class ProductController {
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId,
             @RequestBody ProductUpdateRequest request) {
+
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
         String role = securityUtils.getRole(currentUserId);
 
         Product updated = productService.updateProduct(productId, request, currentUserId, role);
-        List<String> images = productService.getProductImages(updated.getProductId());
+        List<String> images = productService.getProductImageIds(updated.getProductId());
 
             return new ProductResponseDTO(
                     updated.getProductId(),

@@ -24,8 +24,8 @@ export class SellerProfileComponent implements OnInit {
     this.userService.getMe().subscribe({
       next: (data: User) => {
         this.user = data;
-      }
-      error: (err: unknown) => console.error(err)
+      },
+      error: (err: unknown) => console.error(err),
     });
   }
 }
