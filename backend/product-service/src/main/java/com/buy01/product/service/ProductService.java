@@ -82,7 +82,7 @@ public class ProductService {
     // Get all products by userId, currently limited to ADMIN
     public List<Product> getAllProductsByUserId(String userId, String role) {
 
-        if (!role.equals("ADMIN")) {
+        if (!role.equals("ADMIN") && !role.equals("SELLER")) {
             throw new ForbiddenException(role);
         }
 
