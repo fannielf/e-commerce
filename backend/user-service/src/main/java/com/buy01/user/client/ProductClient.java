@@ -23,6 +23,8 @@ public class ProductClient {
 
     public List<ProductDTO> getUsersProducts(String userId) {
         try {
+            String url = productServiceBaseUrl + "/internal/my-products/" + userId;
+            System.out.println("Requesting URL: " + url); // Debugging line
             List<ProductDTO> products = restTemplate.getForObject(
                     productServiceBaseUrl + "/internal/my-products/" + userId,
                     List.class

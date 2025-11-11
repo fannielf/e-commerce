@@ -1,9 +1,10 @@
 package com.buy01.media.controller;
 
+import com.buy01.media.dto.AvatarCreateDTO;
+import com.buy01.media.dto.AvatarResponseDTO;
 import com.buy01.media.dto.MediaCreateDTO;
 import com.buy01.media.dto.MediaResponseDTO;
 import com.buy01.media.exception.NotFoundException;
-import com.buy01.media.security.SecurityUtils;
 import com.buy01.media.model.Media;
 import com.buy01.media.repository.MediaRepository;
 import com.buy01.media.service.MediaService;
@@ -13,16 +14,13 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -31,75 +29,128 @@ public class MediaController {
 
     private final MediaRepository mediaRepository;
     private final MediaService mediaService;
-    private final SecurityUtils securityUtils;
 
-    public MediaController(MediaRepository mediaRepository,MediaService mediaService,SecurityUtils securityUtils) {
+    public MediaController(MediaRepository mediaRepository,MediaService mediaService) {
         this.mediaRepository = mediaRepository;
         this.mediaService = mediaService;
-        this.securityUtils = securityUtils;
     }
 
     // uploading media to the server, validating and saving metadata to database
-    @PostMapping("/images")
+    @PostMapping("/internal/images")
     public ResponseEntity<List<MediaResponseDTO>> uploadImage(
-            @RequestHeader("Authorization") String authHeader,
-            @Valid @ModelAttribute MediaCreateDTO dto) {
-        String currentUserId = securityUtils.getCurrentUserId(authHeader);
-        boolean isAdmin = securityUtils.isAdmin(currentUserId);
-        String productId = dto.getProductId();
+            @Valid @ModelAttribute MediaCreateDTO dto
+    ) throws IOException {
 
-        // Stream files, save them and create a list of MediaResponseDTO for return
-        List<MediaResponseDTO> result = dto.getFiles().stream()
-                .map(file -> {
-                    Media media = mediaService.saveImage(file, productId, currentUserId, isAdmin);
-                    return new MediaResponseDTO(media.getId(), media.getPath(), media.getProductId());
-                })
-                .toList();
+        List<MediaResponseDTO> result = mediaService.saveProductImages(dto.getProductId(), dto.getFiles());
 
         return ResponseEntity.ok(result);
     }
 
     // serves the raw image bytes
     @GetMapping("/images/{id}")
-    public ResponseEntity<Resource> getImage(@PathVariable String id) throws MalformedURLException {
+    public ResponseEntity<Resource> getImage(
+            @PathVariable String id
+    ) throws IOException {
+        System.out.println("Image requested with id: "+ id);
         Media media = mediaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Image not found"));
 
         Path filePath = Paths.get(media.getPath()).toAbsolutePath();
         Resource resource = new UrlResource(filePath.toUri());
 
+        if (!resource.exists() || !resource.isReadable()) {
+            System.out.println("Resource doesn't exist or is not readable");
+            throw new NotFoundException("Image file not found");
+        }
+
+        System.out.println("Resource found:" + resource);
+
+        String contentType = Files.probeContentType(filePath);
+        MediaType mediaType = (contentType != null) ? MediaType.parseMediaType(contentType) : MediaType.APPLICATION_OCTET_STREAM;
+
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
+                .contentType(mediaType)
                 .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS).cachePublic())
                 .body(resource);
     }
 
     // serves all URLS for productId
     @GetMapping("/internal/images/productId/{id}")
-    public List<MediaResponseDTO> getProductImages(@PathVariable String productId) {
+    public List<MediaResponseDTO> getProductImages(
+            @PathVariable("id") String productId
+    ) {
+        System.out.println("Get product image requested with id: "+ productId);
         List<Media> mediaList = mediaRepository.getMediaByProductId(productId);
+
+        if(mediaList.isEmpty()){
+            return  null;
+        }
 
         return mediaList.stream()
                 .map(media -> new MediaResponseDTO(
                         media.getId(),
-                        media.getPath(),
                         media.getProductId()
                 ))
                 .toList();
     }
 
-    @DeleteMapping("images/{id}")
+    // Delete image as per id
+    @DeleteMapping("/internal/images/{id}")
     public ResponseEntity<?> deleteImage(
-            @RequestHeader("Authorization") String authHeader,
-            @PathVariable String id, Authentication auth) {
-        String currentUserId = securityUtils.getCurrentUserId(authHeader);
-        boolean isAdmin = securityUtils.isAdmin(currentUserId);
-        mediaService.deleteMedia(id, currentUserId, isAdmin);
-
+            @PathVariable String id
+    ) {
+        mediaService.deleteMedia(id);
         return ResponseEntity.ok().build();
     }
 
     // /avatar endpoints
+
+    // uploading avatar to the server, validating and returning path
+    // uploading media to the server, validating and saving metadata to database
+    @PostMapping("/internal/avatar")
+    public ResponseEntity<AvatarResponseDTO> uploadAvatar(
+            @Valid @ModelAttribute AvatarCreateDTO dto
+    ) throws IOException {
+
+        String url = mediaService.saveUserAvatar(dto.getAvatar());
+
+        return ResponseEntity.ok(new AvatarResponseDTO(url));
+    }
+
+    // serve the avatar url from the server
+    @GetMapping("/avatar/{path}")
+    public ResponseEntity<Resource> getAvatar(
+            @PathVariable String path
+    ) throws IOException {
+        System.out.println("Avatar requested with path: "+ path);
+
+        Path filePath = Paths.get(path).toAbsolutePath();
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (!resource.exists() || !resource.isReadable()) {
+            System.out.println("Resource doesn't exist or is not readable");
+            throw new NotFoundException("Image file not found");
+        }
+
+        System.out.println("Resource found:" + resource);
+
+        String contentType = Files.probeContentType(filePath);
+        MediaType mediaType = (contentType != null) ? MediaType.parseMediaType(contentType) : MediaType.APPLICATION_OCTET_STREAM;
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS).cachePublic())
+                .body(resource);
+    }
+
+    // delete avatar from server
+    @DeleteMapping("/internal/avatar/{path}")
+    public ResponseEntity<?> deleteAvatar(
+            @PathVariable String path
+    ) {
+        mediaService.deleteAvatar(path);
+        return ResponseEntity.ok().build();
+    }
 
 
 }

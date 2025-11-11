@@ -1,6 +1,7 @@
 package com.buy01.media.service;
 
 import com.buy01.media.client.ProductClient;
+import com.buy01.media.dto.MediaResponseDTO;
 import com.buy01.media.exception.ForbiddenException;
 import com.buy01.media.exception.NotFoundException;
 import com.buy01.media.repository.MediaRepository;
@@ -16,6 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Savepoint;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -40,10 +44,22 @@ public class MediaService {
         Files.createDirectories(avatarPath);
     }
 
-    // creates path and saves the image to uploads
-    public Media saveImage(MultipartFile file, String productId, String userId,  boolean isAdmin) {
+    // saves all images and returns result, trust validation from product service
+    public List<MediaResponseDTO> saveProductImages(String productId, List<MultipartFile> files) throws IOException {
 
-        authorizeUser(productId, userId, isAdmin);
+        // Stream files, save them and create a list of MediaResponseDTO for return
+        List<MediaResponseDTO> result = files.stream()
+                .map(file -> {
+                    Media media = saveImage(file, productId);
+                    return new MediaResponseDTO(media.getId(), media.getProductId());
+                })
+                .toList();
+
+        return result;
+    }
+
+    // creates path and saves the image to uploads
+    public Media saveImage(MultipartFile file, String productId) {
 
         String extension = Objects.requireNonNull(file.getOriginalFilename())
                 .substring(file.getOriginalFilename().lastIndexOf("."));
@@ -55,18 +71,15 @@ public class MediaService {
         media.setProductId(productId);
 
         return mediaRepository.save(media);
-
-
     }
 
-    public void deleteMedia(@PathVariable String id, String userId, boolean isAdmin) {
-        // validate that media exists
+    // delete media from database
+    public void deleteMedia(String id) {
+        // get media by id
         Media media = mediaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Media not found"));
 
-        authorizeUser(media.getProductId(), userId, isAdmin);
-
-        // delete from repository after validation
+        deleteFile(media.getPath());
         mediaRepository.deleteById(id);
     }
 
@@ -76,6 +89,11 @@ public class MediaService {
         String fileName = UUID.randomUUID() + "." + extension;
         return storeFile(file, avatarPath.toString(), fileName);
     }
+
+    public void deleteAvatar(String path) {
+        deleteFile(path);
+    }
+
 
     // validating the file before storing
     private String storeFile(MultipartFile file, String directory, String filename) {
@@ -90,7 +108,7 @@ public class MediaService {
         }
     }
 
-
+    // validate file type (image) and size (max 2MB)
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new FileUploadException("File is empty");
@@ -104,13 +122,16 @@ public class MediaService {
         }
     }
 
-    // throw Forbidden if user is not admin nor productOwner
-    private void authorizeUser(String productId, String userId, boolean isAdmin) {
-        // validate that the user has right to delete the media
-        boolean isOwner = productClient.isOwner(productId, userId);
-
-        if (!isAdmin || !isOwner) {
-            throw new ForbiddenException("Only admin or owner can delete media");
+    // delete file from server
+    private void deleteFile(String filePathStr) {
+        Path filePath = Paths.get(filePathStr).toAbsolutePath();
+        try {
+            boolean deleted = Files.deleteIfExists(filePath);
+            if (!deleted) {
+                System.out.println("File not found: " + filePath);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file: " + filePath, e);
         }
     }
 

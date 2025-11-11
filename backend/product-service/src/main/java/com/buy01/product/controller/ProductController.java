@@ -4,6 +4,9 @@ import com.buy01.product.model.Product;
 import com.buy01.product.security.JwtUtil;
 import com.buy01.product.service.ProductService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.buy01.product.dto.ProductResponseDTO;
 import com.buy01.product.security.SecurityUtils;
@@ -116,7 +119,7 @@ public class ProductController {
         return productService.getAllProducts().stream()
                 .filter(p -> p.getUserId().equals(currentUserId))
                 .map(p -> {
-                    List<String> images = productService.getProductImages(p.getProductId());
+                    List<String> images = productService.getProductImageIds(p.getProductId());
                     return new ProductResponseDTO(
                             p.getProductId(),
                             p.getName(),
@@ -129,15 +132,27 @@ public class ProductController {
                     );
                 })
                 .toList();
-    }    // get all products of the current logged-in user
+    }
+
+    // get all products of the current logged-in user
     @GetMapping("/internal/my-products/{userId}")
     public List<ProductResponseDTO> getUsersProducts(
             @PathVariable String userId
     ) {
-        return productService.getAllProducts().stream()
-                .filter(p -> p.getUserId().equals(userId))
+        System.out.println("Fetching products for user ID: " + userId);
+
+        List<Product> products = productService.getAllProductsByUserId(userId, "SELLER");
+        if  (products.isEmpty()) {
+            System.out.println("No products for user ID: " + userId);
+            return new ArrayList<>();
+        }
+
+        return products.stream()
                 .map(p -> {
-                    List<String> images = productService.getProductImages(p.getProductId());
+                    // Call the method, but return empty list for now
+                    List<String> images = productService.getProductImageIds(p.getProductId());
+                    if (images == null) images = Collections.emptyList();
+
                     return new ProductResponseDTO(
                             p.getProductId(),
                             p.getName(),
@@ -145,7 +160,7 @@ public class ProductController {
                             p.getPrice(),
                             p.getQuantity(),
                             p.getUserId(),
-                            images,
+                            images, // will be empty for now
                             userId.equals(p.getUserId())
                     );
                 })
@@ -158,11 +173,12 @@ public class ProductController {
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId,
             @RequestBody ProductUpdateRequest request) {
+
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
         String role = securityUtils.getRole(currentUserId);
 
         Product updated = productService.updateProduct(productId, request, currentUserId, role);
-        List<String> images = productService.getProductImages(updated.getProductId());
+        List<String> images = productService.getProductImageIds(updated.getProductId());
 
             return new ProductResponseDTO(
                     updated.getProductId(),

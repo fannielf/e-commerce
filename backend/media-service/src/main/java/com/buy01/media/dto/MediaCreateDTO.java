@@ -1,5 +1,6 @@
 package com.buy01.media.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,7 +9,7 @@ import java.util.List;
 public class MediaCreateDTO {
     @NotEmpty(message = "At least one file is required")
     private List<MultipartFile> files;
-
+    @NotBlank
     private String productId;
 
     public MediaCreateDTO() {}
