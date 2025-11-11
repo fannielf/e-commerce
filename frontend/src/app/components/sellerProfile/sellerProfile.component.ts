@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
+import { Router, RouterModule } from '@angular/router';
+import { goToProduct } from '../dashboard/dashboard.component';
 
 @Component({
   selector: 'app-sellerProfile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, goToProduct],
   templateUrl: './sellerProfile.component.html',
   styleUrl: './sellerProfile.component.css'
 })
@@ -15,12 +17,15 @@ export class SellerProfileComponent implements OnInit {
   user: User | null = null;
   isLoggedIn = false;
 
-  constructor(private authService: AuthService, private userService: UserService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.isLoggedIn = this.authService.isLoggedIn?.() ?? false;
 
-    // getting the user details from the backend
     this.userService.getMe().subscribe({
       next: (data: User) => {
         this.user = data;
