@@ -50,14 +50,14 @@ export class ProductService {
     }
 
     // updating the product with the http call
-   updateProduct(productId: string, product: Product): Observable<Product> {
-      return this.http.put<any>(`${this.apiUrl}/${productId}`, product).pipe(
+   updateProduct(productId: string, formData: FormData): Observable<Product> {
+      return this.http.put<any>(`${this.apiUrl}/${productId}`, formData).pipe(
         map(response => this.mapProduct(response))
       );
     }
 
-   createProduct(product: Product): Observable<Product> {
-      return this.http.post<any>(`${this.apiUrl}`, product).pipe(
+   createProduct(formData: FormData): Observable<Product> {
+      return this.http.post<any>(`${this.apiUrl}`, formData).pipe(
         map(response => this.mapProduct(response))
       );
     }

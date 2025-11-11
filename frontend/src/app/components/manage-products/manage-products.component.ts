@@ -7,6 +7,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { UserService } from '../../services/user.service';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-manage-products',
@@ -22,11 +24,15 @@ export class ManageProductsComponent implements OnInit {
     sellerProducts: Product[] = [];
     loading = false;
     error: string | null = null;
+    selectedFiles: File[] = [];
+    imagePreviewUrl: string | null = null;
+
 
     constructor(
       private route: ActivatedRoute,
       private productService: ProductService,
-      private router: Router
+      private router: Router,
+      private userService: UserService
     ) {}
 
   ngOnInit() {
@@ -36,13 +42,14 @@ export class ManageProductsComponent implements OnInit {
           if (this.productId) {
             this.mode = 'update';
             this.productService.getProductById(this.productId).subscribe({
-              next: (data: Product) => (this.product = data),
+              next: (data: Product) => {
+                (this.product = data);
+                this.imagePreviewUrl = (data.images && data.images.length > 0) ? data.images[0] : null;
+                },
               error: (err: any) => console.error('Failed to load product for editing', err)
             });
           } else {
-            // When no ID, reset to create mode
-            this.mode = 'create';
-            this.product = this.getInitialProductState();
+            this.switchToCreateMode();
           }
         });
         this.loadMyProducts();
@@ -60,12 +67,24 @@ export class ManageProductsComponent implements OnInit {
           };
         }
 
+       onFileSelected(event: Event): void {
+               const input = event.target as HTMLInputElement;
+               if (input.files && input.files.length > 0) {
+                 this.selectedFiles = Array.from(input.files);
+                 const reader = new FileReader();
+                 reader.onload = () => {
+                   this.imagePreviewUrl = reader.result as string;
+                 };
+                 reader.readAsDataURL(this.selectedFiles[0]);
+               }
+           }
+
       loadMyProducts() {
           this.loading = true;
           this.error = null;
-          this.productService.getMyProducts().subscribe({
-            next: (list: Product[]) => {
-              this.sellerProducts = list;
+          this.userService.getMe().subscribe({
+            next: (user: User) => {
+              this.sellerProducts = user.products || [];
               this.loading = false;
             },
             error: (err: HttpErrorResponse) => {
@@ -83,25 +102,45 @@ export class ManageProductsComponent implements OnInit {
         }
 
       submit() {
-           const action = this.mode === 'create'
-             ? this.productService.createProduct(this.product)
-             : this.productService.updateProduct(this.productId, this.product);
+              const formData = new FormData();
+              formData.append('name', this.product.name);
+              formData.append('description', this.product.description);
+              formData.append('price', this.product.price.toString());
+              formData.append('quantity', this.product.quantity.toString());
+              this.selectedFiles.forEach(file => {
+                 formData.append('files', file);
+              });
 
-           action.subscribe({
-             next: (createdOrUpdatedProduct) => {
-               this.loadMyProducts(); // Refresh the list
-               // After submit, reset to a clean create form
-               this.router.navigate(['/products/manage']);
-             },
-             error: (err) => console.error('Submit failed', err)
-           });
-         }
+              if (this.mode === 'create') {
+                  this.productService.createProduct(formData).subscribe({
+                    next: () => this.onSuccess(),
+                    error: (err) => console.error('Create failed', err)
+                  });
+              } else {
+                  // Note: This requires backend changes to accept multipart/form-data
+                  this.productService.updateProduct(this.productId, formData).subscribe({
+                    next: () => this.onSuccess(),
+                    error: (err) => console.error('Update failed', err)
+                  });
+              }
+          }
 
-    edit(p: Product) {
+      private onSuccess() {
+        this.loadMyProducts();
+        this.switchToCreateMode(); // Reset form after success
+      }
+
+      edit(p: Product) {
        this.router.navigate(['/products/update', p.productId]);
-     }
+      }
 
-    switchToCreateMode() {
-          this.router.navigate(['/products/update']);
-        }
+      switchToCreateMode() {
+              this.mode = 'create';
+              this.product = this.getInitialProductState();
+              this.imagePreviewUrl = null;
+              this.selectedFiles = [];
+              if (this.router.url !== '/products/manage') {
+                  this.router.navigate(['/products/manage']);
+              }
+          }
 }

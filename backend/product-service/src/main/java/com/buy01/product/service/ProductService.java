@@ -202,7 +202,8 @@ public class ProductService {
 
     // Call for mediaClient to get all product image ids
     public List<String> getProductImageIds(String productId) {
-        return Optional.ofNullable(mediaClient.getProductImageIds(productId)).orElse(List.of());
+        return List.of();
+//        return Optional.ofNullable(mediaClient.getProductImageIds(productId)).orElse(List.of());
     }
 
     // Authenticates the product owner (or ADMIN), otherwise throws an error
