@@ -1,10 +1,14 @@
 package com.buy01.product.client;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -36,4 +40,35 @@ public class MediaClient {
 
         return response.getBody();
     }
+
+    public List<String> postProductImages(String productId, List<MultipartFile> images) throws IOException {
+        String url = mediaServiceBaseUrl + "/internal/images";
+        System.out.println("Request url: " + url);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("productId", productId);
+
+        for (MultipartFile file : images) {
+            ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename(); // keep original filename
+                }
+            };
+            body.add("files", resource);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<List> response = restTemplate.postForEntity(url, requestEntity, List.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to upload images: " + response.getStatusCode());
+        }
+        return response.getBody();
+    }
+
 }
