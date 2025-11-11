@@ -44,7 +44,7 @@ public class ProductController {
             request.setUserId(currentUserId);
         }
 
-        return productService.createProduct(request, role, currentUserId);
+       return productService.createProduct(request, role, currentUserId);
     }
 
     // get all products

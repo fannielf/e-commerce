@@ -71,16 +71,25 @@ public class ProductService {
         product.setUserId(productOwnerId);
 
         Product savedProduct = productRepository.save(product);
+        System.out.println("Saved product : " + savedProduct);
 
+        List<String> mediaIds = List.of();
 
         if (request.getImagesList() != null) {
             System.out.println("Number of images uploaded: " + request.getImagesList().size());
             if (request.getImagesList().size() > 5) {
                 throw new BadRequestException("You can upload up to 5 images.");
             }
+            try {
+                mediaIds = mediaClient.postProductImages(savedProduct.getProductId(), request.getImagesList());
+                System.out.println("Uploaded product images: " + mediaIds);
+            } catch (Exception e) {
+                System.out.println("Failed to upload images: " + e.getMessage());
+                // decide: either fail entire request or continue without images
+            }
         }
 
-        List<String> mediaIds = mediaClient.postProductImages(savedProduct.getProductId(), request.getImagesList());
+        System.out.println("Uploaded product images: " + mediaIds);
 
         return new ProductResponseDTO(
                 savedProduct.getProductId(),

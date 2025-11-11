@@ -55,7 +55,7 @@ public class MediaService {
                     return new MediaResponseDTO(media.getId(), media.getProductId());
                 })
                 .toList();
-
+        System.out.println("saved images: " + result.size());
         return result;
     }
 

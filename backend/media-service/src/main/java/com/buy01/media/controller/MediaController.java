@@ -43,6 +43,7 @@ public class MediaController {
 
         List<MediaResponseDTO> result = mediaService.saveProductImages(dto.getProductId(), dto.getFiles());
 
+        System.out.println("Responding ok from media-service: "+ result);
         return ResponseEntity.ok(result);
     }
 

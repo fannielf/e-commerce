@@ -1,5 +1,7 @@
 package com.buy01.product.client;
 
+import com.buy01.product.dto.MediaResponseDTO;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MediaClient {
@@ -63,12 +66,24 @@ public class MediaClient {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<List> response = restTemplate.postForEntity(url, requestEntity, List.class);
+        ResponseEntity<List<MediaResponseDTO>> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<List<MediaResponseDTO>>() {}
+        );
+
+        List<MediaResponseDTO> mediaIds = response.getBody();
+        System.out.println("Uploaded product images: " + mediaIds);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
+            System.out.println("Failed to save images: " + response.getStatusCode());
             throw new RuntimeException("Failed to upload images: " + response.getStatusCode());
         }
-        return response.getBody();
+
+        return mediaIds.stream()
+                .map(MediaResponseDTO::getId)
+                .collect(Collectors.toList());
     }
 
 }
