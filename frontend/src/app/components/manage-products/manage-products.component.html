@@ -62,15 +62,14 @@
   <h4>Your listings</h4>
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-2">
     <div class="col" *ngFor="let p of sellerProducts">
-      <div class="card h-100 position-relative">
-        <!-- Fix: Display the first image from the images array -->
+      <div class="card h-100 product-card" (click)="edit(p)">
         <img [src]="(p.images && p.images.length > 0) ? p.images[0] : 'assets/product_image_placeholder.png'"
              class="card-img-top"
              alt="{{p.name}}"
              style="object-fit: cover; height: 180px;">
-        <button class="btn btn-sm btn-outline-primary position-absolute"
-                style="top: 8px; right: 8px;"
-                (click)="edit(p)">Edit</button>
+        <div class="card-img-overlay d-flex justify-content-center align-items-center edit-overlay">
+          <span class="text-white fs-4">Edit</span>
+        </div>
         <div class="card-body">
           <h5 class="card-title mb-1">{{p.name}}</h5>
           <p class="card-text text-truncate mb-1">{{p.description}}</p>
@@ -79,7 +78,6 @@
       </div>
     </div>
   </div>
-</div>
 
 
 <div class="container mt-4 text-muted" *ngIf="!loading && sellerProducts.length === 0">

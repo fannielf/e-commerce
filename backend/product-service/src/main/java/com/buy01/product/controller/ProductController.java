@@ -32,9 +32,12 @@ public class ProductController {
     @PostMapping
     public ProductResponseDTO createProduct(
             @RequestHeader("Authorization") String authHeader,
-            @Valid @RequestBody ProductCreateDTO request) {
+            @Valid @ModelAttribute ProductCreateDTO request) {
+        System.out.println("header: " + authHeader);
+
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
-        String role = securityUtils.getRole(currentUserId);
+        String role = securityUtils.getRole(authHeader);
+        System.out.println("Creating product for user ID: " + currentUserId + " with role: " + role);
 
         if (!role.equals("ADMIN") || request.getUserId().isEmpty()) {
             request.setUserId(currentUserId);

@@ -108,7 +108,7 @@ export class ManageProductsComponent implements OnInit {
               formData.append('price', this.product.price.toString());
               formData.append('quantity', this.product.quantity.toString());
               this.selectedFiles.forEach(file => {
-                 formData.append('files', file);
+                 formData.append('imagesList', file);
               });
 
               if (this.mode === 'create') {

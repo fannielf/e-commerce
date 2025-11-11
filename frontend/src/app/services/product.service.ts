@@ -61,14 +61,6 @@ export class ProductService {
         map(response => this.mapProduct(response))
       );
     }
-
-   getMyProducts(): Observable<Product[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/my-products`).pipe(
-          map(list => list.map(item => this.mapProduct(item)))
-        );
-    }
-
-
   }
 
 
