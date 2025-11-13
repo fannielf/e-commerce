@@ -65,7 +65,10 @@ public class GatewaySecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         System.out.println("CorsConfigurationSource activated");
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("https://localhost:4200"));
+        config.setAllowedOrigins(List.of(
+                "https://frontend:4200",  // Docker internal
+                "https://localhost:4200"  // Host browser
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
