@@ -13,6 +13,7 @@ interface DecodedToken { sub?: string; userId?: string; id?: string; role: strin
 export class AuthService {
   private apiUrl = `${BASE_URL}/user-service/api/auth`;
   private decodedToken: DecodedToken | null = null;
+  private avatarUrl: string | null = null;
 
   constructor(private http: HttpClient, private router: Router) {
     const token = localStorage.getItem('token');
@@ -30,6 +31,14 @@ export class AuthService {
 
   getUserId(): string | null {
     return this.decodedToken?.userId || this.decodedToken?.id || this.decodedToken?.sub || null;
+  }
+
+  setAvatar(url: string) {
+    this.avatarUrl = url;
+  }
+
+  getAvatar(): string | null {
+    return this.avatarUrl;
   }
 
   isLoggedIn(): boolean {

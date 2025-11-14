@@ -7,6 +7,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
+import { BASE_URL } from './constants/constants';
 
 @Component({
   selector: 'app-root',
@@ -40,6 +41,11 @@ export class AppComponent {
 
     const url = this.router.url ?? '';
     this.showProfile = this.isLoggedIn && !url.includes('auth');
+
+      const avatarPath = this.auth.getAvatar(); // e.g., "/api/media/avatar/7d049140-0b48-4cb0-9891-a111697ca084.png"
+      this.profileImageUrl = avatarPath
+        ? `${BASE_URL}${avatarPath}`  // prepend domain
+        : 'assets/default.jpg';
   }
 
   logout() {

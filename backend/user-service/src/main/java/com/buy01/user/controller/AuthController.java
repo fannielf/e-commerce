@@ -51,7 +51,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(
             @RequestHeader(value = "Authorization", required = false) String authHeader ,
-            @ModelAttribute @Valid UserCreateDTO request // accepting avatar at signup
+            @ModelAttribute UserCreateDTO request // accepting avatar at signup
     ) throws IOException {
         final String currentUserId = (authHeader != null) ? securityUtils.getCurrentUserId(authHeader) : null;
 
