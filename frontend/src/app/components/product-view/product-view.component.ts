@@ -1,11 +1,9 @@
-import { Component } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 import { ImageCarouselComponent } from '../shared/image-carousel/image-carousel.component';
 
@@ -27,10 +25,10 @@ export class ProductViewComponent implements OnInit {
     private router: Router
   ) {}
 
-ngOnInit(): void {
-  this.isLoggedIn = this.authService.isLoggedIn();
+  ngOnInit(): void {
+    this.isLoggedIn = this.authService.isLoggedIn();
 
-  const productId = this.route.snapshot.paramMap.get('id');
+const productId = this.route.snapshot.paramMap.get('id');
   if (productId) {
     this.productService.getProductById(productId).subscribe({
       next: (data: Product) => {
