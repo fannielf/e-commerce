@@ -107,15 +107,22 @@ export class ManageProductsComponent implements OnInit {
           countError = `You can only add ${allowedNewFiles} more image(s). Extra files were ignored.`;
         }
 
-        // Size validation
+      // Get names of already selected files for uniqueness check
+        const existingFileNames = new Set(this.selectedFiles.map(f => f.name));
+        const duplicateFiles: string[] = [];
+
+        // Size and uniqueness validation
         const validFiles: File[] = [];
         candidateFiles.forEach(file => {
-          if (file.size > MAX_SIZE) {
+          if (existingFileNames.has(file.name)) {
+            duplicateFiles.push(file.name);
+          } else if (file.size > MAX_SIZE) {
             this.rejectedFiles.push(
               `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
             );
           } else {
             validFiles.push(file);
+            existingFileNames.add(file.name); // Add to set to check for duplicates within the same selection
           }
         });
 
@@ -124,10 +131,14 @@ export class ManageProductsComponent implements OnInit {
           sizeError = `Files can only be up to 2 MB, you have: ${this.rejectedFiles.join(', ')}`;
         }
 
+       let duplicateError: string | null = null;
+              if (duplicateFiles.length > 0) {
+                duplicateError = `Duplicate file names are not allowed: ${duplicateFiles.join(', ')}`;
+              }
+
         // Combine errors if both occurred
-        if (countError || sizeError) {
-          this.error = [countError, sizeError].filter(Boolean).join(' | ');
-        }
+        this.error = [countError, sizeError, duplicateError].filter(Boolean).join(' | ');
+
 
         // Accept valid files
         validFiles.forEach(f => this.selectedFiles.push(f));
