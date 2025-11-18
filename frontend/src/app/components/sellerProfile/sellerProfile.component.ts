@@ -6,6 +6,7 @@ import { User } from '../../models/user.model';
 import { Router, RouterModule } from '@angular/router';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 import { ImageCarouselComponent } from '../shared/image-carousel/image-carousel.component';
+import { BASE_URL } from '../../constants/constants';
 
 @Component({
   selector: 'app-sellerProfile',
@@ -17,6 +18,7 @@ import { ImageCarouselComponent } from '../shared/image-carousel/image-carousel.
 export class SellerProfileComponent implements OnInit {
   user: User | null = null;
   isLoggedIn = false;
+  profileImageUrl: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -26,6 +28,12 @@ export class SellerProfileComponent implements OnInit {
 
   ngOnInit() {
     this.isLoggedIn = this.authService.isLoggedIn?.() ?? false;
+
+    this.authService.getCurrentUser().subscribe(user => {
+              this.profileImageUrl = user.avatar
+                ? `${BASE_URL}/media-service${user.avatar}`
+                : 'assets/default.jpg';
+            });
 
     this.userService.getMe().subscribe({
       next: (data: User) => {
