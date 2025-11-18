@@ -7,7 +7,7 @@
     </button>
 
     <a *ngIf="showProfile" [routerLink]="profileRoute" class="profile-link" [attr.title]="isSeller ? 'Manage my profile and product listings' : null">
-      <img src="assets/default.jpg" alt="Profile" class="profile-img" />
+      <img [src]="profileImageUrl" alt="Profile" class="profile-img" />
     </a>
 
     <button *ngIf="!showProfile && !isOnAuthPage" routerLink="/auth" class="login-btn">

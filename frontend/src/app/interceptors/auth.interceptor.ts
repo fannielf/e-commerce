@@ -22,8 +22,11 @@ export class AuthInterceptor implements HttpInterceptor {
     const token = this.authService.getToken();
     let authReq = req;
 
-    // Only attach the token if it exists and is not expired.
-    if (token && this.authService.isLoggedIn()) {
+    // Exclude signup and any public endpoints
+    const excludedUrls = ['/api/auth/signup', '/api/auth/login'];
+    const isExcluded = excludedUrls.some(url => req.url.includes(url));
+
+    if (!isExcluded && token && this.authService.isLoggedIn()) {
       authReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
@@ -31,7 +34,7 @@ export class AuthInterceptor implements HttpInterceptor {
       });
       console.log('AuthInterceptor - Modified request with Authorization header');
     } else {
-      console.log('AuthInterceptor - No token or token expired, sending request without Authorization header');
+      console.log('AuthInterceptor - No token attached (excluded URL or no token)');
     }
 
     return next.handle(authReq).pipe(

@@ -6,6 +6,7 @@ import com.buy01.media.exception.ForbiddenException;
 import com.buy01.media.exception.NotFoundException;
 import com.buy01.media.repository.MediaRepository;
 import com.buy01.media.exception.FileUploadException;
+import jakarta.ws.rs.InternalServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -149,18 +150,31 @@ public class MediaService {
         }
     }
 
+    public Path getAvatarPath(String filename) {
+        return avatarPath.resolve(filename).toAbsolutePath();
+    }
+
+
     // saves user avatar to server and returns path to file
     public String saveUserAvatar(MultipartFile file) {
         validateFile(file);
-        String extension = Objects.requireNonNull(file.getOriginalFilename())
-                .substring(file.getOriginalFilename().lastIndexOf("."));
+
+        // get extension without dot
+        String originalFileName = Objects.requireNonNull(file.getOriginalFilename());
+        String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
         String fileName = UUID.randomUUID() + "." + extension;
-        return storeFile(file, avatarPath.toString(), fileName);
+
+        // save file
+        storeFile(file, avatarPath.toString(), fileName);
+
+        // return relative URL usable by frontend
+        return "/api/media/avatar/" + fileName;
     }
 
     // delete user avatar from server
-    public void deleteAvatar(String path) {
-        deleteFile(path);
+    public void deleteAvatar(String filename) {
+        Path filePath = avatarPath.resolve(filename).toAbsolutePath();
+        deleteFile(filePath.toString());
     }
 
     // validating the file before storing file to server
@@ -199,7 +213,7 @@ public class MediaService {
                 System.out.println("File not found: " + filePath);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to delete file: " + filePath, e);
+            throw new InternalServerErrorException("Failed to delete file: " + filePath, e);
         }
     }
 
