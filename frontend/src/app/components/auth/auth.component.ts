@@ -28,7 +28,7 @@ export class AuthComponent {
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required]
+    password: ['', [Validators.required, Validators.minLength(3)]]
   });
 
   signupForm = this.fb.group({
@@ -36,7 +36,7 @@ export class AuthComponent {
       lastname: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(3)]],
-      confirmPassword: ['', Validators.required],
+      confirmPassword: ['', [Validators.required, Validators.minLength(3)]],
       role: ['CLIENT', Validators.required]
     }, { validators: passwordsMatchValidator });
 
@@ -46,14 +46,13 @@ export class AuthComponent {
     this.isLogin = !this.isLogin;
   }
 
+  // some bug here? Not reliable when trying to log in with wrong credentials
   onLoginSubmit() {
     if (!this.loginForm.valid) return;
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
         console.log('Login success:', res);
-        this.router.navigate(['/']); // redirect after login
-        //does it need to be reload?       window.location.reload();
       },
       error: (err) => {
         console.error('Login error:', err);
@@ -64,6 +63,7 @@ export class AuthComponent {
   onSignupSubmit() {
     if (!this.signupForm.valid) return;
 
+    console.log('Sending payload: ', this.signupForm.value);
     const formValue = this.signupForm.value;
 
     const formData = new FormData();
