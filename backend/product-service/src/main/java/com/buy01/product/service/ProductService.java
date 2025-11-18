@@ -69,7 +69,7 @@ public class ProductService {
             productOwnerId = request.getUserId();
         }
 
-        if (request.getImagesList().size() > 5) {
+        if (request.getImagesList() != null && request.getImagesList().size() > 5) {
             throw new BadRequestException("You can upload up to 5 images.");
         }
 
