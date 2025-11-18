@@ -27,11 +27,11 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/media")
-@CrossOrigin(origins = "*")
 public class MediaController {
 
     private final MediaRepository mediaRepository;
     private final MediaService mediaService;
+    private final String avatarDir = "uploads/avatar";
 
     public MediaController(MediaRepository mediaRepository,MediaService mediaService) {
         this.mediaRepository = mediaRepository;
@@ -118,27 +118,34 @@ public class MediaController {
     }
 
     // serve the avatar url from the server
-    @GetMapping("/avatar/**")
-    public ResponseEntity<Resource> getAvatar() throws IOException {
-        // get the full request URI
-        String uri = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-                .getRequest()
-                .getRequestURI();
+    @GetMapping("/avatar/{filename}")
+    public ResponseEntity<Resource> getAvatar(
+            @PathVariable String filename
+    ) throws IOException {
+        System.out.println("Avatar requested with path: "+ filename);
 
-        // extract everything after the last slash
-        String filename = uri.substring(uri.lastIndexOf("/") + 1);
 
-        Path filePath = Paths.get(filename).toAbsolutePath();
+        Path baseDir = Paths.get(avatarDir).toAbsolutePath().normalize();
+        Path filePath = baseDir.resolve(filename).normalize();
+
+        System.out.println("Filepath: " + filePath);
+
+        // prevent path traversal
+        if (!filePath.startsWith(baseDir)) {
+            throw new NotFoundException("Invalid path");
+        }
+
         Resource resource = new UrlResource(filePath.toUri());
 
         if (!resource.exists() || !resource.isReadable()) {
+            System.out.println("Resource doesn't exist or is not readable");
             throw new NotFoundException("Image file not found");
         }
 
+        System.out.println("Resource found:" + resource);
+
         String contentType = Files.probeContentType(filePath);
-        MediaType mediaType = (contentType != null)
-                ? MediaType.parseMediaType(contentType)
-                : MediaType.APPLICATION_OCTET_STREAM;
+        MediaType mediaType = (contentType != null) ? MediaType.parseMediaType(contentType) : MediaType.APPLICATION_OCTET_STREAM;
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
