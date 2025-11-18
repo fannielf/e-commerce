@@ -49,7 +49,7 @@ public class AuthController {
 
         Map<String, Object> response = Map.of(
                 "token", token,
-                "avatar", user.getAvatarUrl() != null ? user.getAvatarUrl() : null
+                "avatar", user.getAvatarUrl() != null ? user.getAvatarUrl() : ""
         );
         return ResponseEntity.ok(response);
     }

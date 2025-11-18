@@ -31,7 +31,7 @@
         <input type="password" class="form-control" formControlName="password" placeholder="Enter your password:"
                [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.value">
         <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.value" class="invalid-feedback">
-          <div *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters long.</div>
+          <div *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 3 characters long.</div>
         </div>
       </div>
       <button class="btn btn-dark-green w-100" type="submit" [disabled]="loginForm.invalid">Login</button>
@@ -66,7 +66,7 @@
         <input type="password" class="form-control" formControlName="password" placeholder="Enter your password:"
                [class.is-invalid]="signupForm.get('password')?.invalid && signupForm.get('password')?.value">
         <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.value" class="invalid-feedback">
-          <div *ngIf="signupForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters long.</div>
+          <div *ngIf="signupForm.get('password')?.errors?.['minlength']">Password must be at least 3 characters long.</div>
         </div>
       </div>
       <div class="mb-3">
