@@ -150,18 +150,31 @@ public class MediaService {
         }
     }
 
+    public Path getAvatarPath(String filename) {
+        return avatarPath.resolve(filename).toAbsolutePath();
+    }
+
+
     // saves user avatar to server and returns path to file
     public String saveUserAvatar(MultipartFile file) {
         validateFile(file);
-        String extension = Objects.requireNonNull(file.getOriginalFilename())
-                .substring(file.getOriginalFilename().lastIndexOf("."));
+
+        // get extension without dot
+        String originalFileName = Objects.requireNonNull(file.getOriginalFilename());
+        String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
         String fileName = UUID.randomUUID() + "." + extension;
-        return storeFile(file, avatarPath.toString(), fileName);
+
+        // save file
+        storeFile(file, avatarPath.toString(), fileName);
+
+        // return relative URL usable by frontend
+        return "/api/media/avatar/" + fileName;
     }
 
     // delete user avatar from server
-    public void deleteAvatar(String path) {
-        deleteFile(path);
+    public void deleteAvatar(String filename) {
+        Path filePath = avatarPath.resolve(filename).toAbsolutePath();
+        deleteFile(filePath.toString());
     }
 
     // validating the file before storing file to server

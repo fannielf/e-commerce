@@ -52,26 +52,31 @@ public class UserService {
         checkEmailUniqueness(user);
         validateName(user.getName());
         user.setPassword(validatePassword(user.getPassword()));
+
         if (user.getRole() == null) {
             throw new IllegalArgumentException("Please select a role");
         }
 
-        if (avatar != null && !avatar.isEmpty() && user.getRole() == Role.SELLER) {
-            System.out.println("avatar received in user service: " + avatar.getOriginalFilename());
-            // avatar upload to media server, user avatarCreateDTO
-            AvatarResponseDTO avatarResponseDTO = mediaClient.saveAvatar(new AvatarCreateDTO(avatar, user.getId()));
-            // avatar saved to the user URL
+        // 1. Save user first so it gets a valid ID
+        User savedUser = userRepository.save(user);
+
+        // 2. Only upload avatar if provided
+        if (avatar != null && !avatar.isEmpty()) {
+            System.out.println("Avatar received in user service: " + avatar.getOriginalFilename());
+
+            // Call media-service through MediaClient
+            AvatarResponseDTO avatarResponseDTO =
+                    mediaClient.saveAvatar(new AvatarCreateDTO(avatar, savedUser.getId()));
+
             if (avatarResponseDTO != null) {
-                user.setAvatarUrl(avatarResponseDTO.getAvatarUrl());
+                savedUser.setAvatarUrl(avatarResponseDTO.getAvatarUrl());
+                savedUser = userRepository.save(savedUser); // update with avatarUrl
             }
         }
 
-        try {
-            return userRepository.save(user);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e.getMessage());
-            }
+        return savedUser;
     }
+
 
     // method to find user by id, needs validation what information is sent if own profile
     public Optional<User> findById(String userId) { // optional means it may or may not contain a non-null value

@@ -1,5 +1,6 @@
 package com.buy01.media.controller;
 
+import com.buy01.media.dto.AvatarCreateDTO;
 import com.buy01.media.dto.*;
 import com.buy01.media.exception.NotFoundException;
 import com.buy01.media.model.Media;
@@ -22,11 +23,11 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/media")
-@CrossOrigin(origins = "*")
 public class MediaController {
 
     private final MediaRepository mediaRepository;
     private final MediaService mediaService;
+    private final String avatarDir = "uploads/avatar";
 
     public MediaController(MediaRepository mediaRepository,MediaService mediaService) {
         this.mediaRepository = mediaRepository;
@@ -128,13 +129,23 @@ public class MediaController {
     }
 
     // serve the avatar url from the server
-    @GetMapping("/avatar/{path}")
+    @GetMapping("/avatar/{filename}")
     public ResponseEntity<Resource> getAvatar(
-            @PathVariable String path
+            @PathVariable String filename
     ) throws IOException {
-        System.out.println("Avatar requested with path: "+ path);
+        System.out.println("Avatar requested with path: "+ filename);
 
-        Path filePath = Paths.get(path).toAbsolutePath();
+
+        Path baseDir = Paths.get(avatarDir).toAbsolutePath().normalize();
+        Path filePath = baseDir.resolve(filename).normalize();
+
+        System.out.println("Filepath: " + filePath);
+
+        // prevent path traversal
+        if (!filePath.startsWith(baseDir)) {
+            throw new NotFoundException("Invalid path");
+        }
+
         Resource resource = new UrlResource(filePath.toUri());
 
         if (!resource.exists() || !resource.isReadable()) {
