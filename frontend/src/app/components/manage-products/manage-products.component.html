@@ -104,6 +104,9 @@
     <div class="card product-card-uniform h-100" (click)="edit(p)" style="cursor: pointer;">
       <div class="card-img-container">
         <app-image-carousel [images]="p.images || []"></app-image-carousel>
+        <div class="edit-overlay">
+          <span>Edit</span>
+        </div>
       </div>
       <div class="card-body">
         <h5 class="card-title text-truncate">{{p.name}}</h5>

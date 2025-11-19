@@ -40,7 +40,7 @@ export class ManageProductsComponent implements OnInit {
     selectedFiles: File[] = [];
     rejectedFiles: string[] = [];
     imagePreviews: ImagePreview[] = [];
-    deletedImageIds: string[] = []; // track images user removed during edit
+    deletedImageIds: string[] = [];
 
 
     constructor(
@@ -55,7 +55,7 @@ export class ManageProductsComponent implements OnInit {
             name: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(255)]],
             description: ['', [Validators.required]],
             price: [null, [Validators.required, Validators.min(0.01)]],
-            quantity: [1, [Validators.required, Validators.min(1)]]
+            quantity: [0, [Validators.required, Validators.min(0)]]
           });
       }
 
