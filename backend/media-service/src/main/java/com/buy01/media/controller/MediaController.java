@@ -169,7 +169,7 @@ public class MediaController {
     public ResponseEntity<AvatarResponseDTO> updateAvatar(
             @Valid @ModelAttribute AvatarUpdateRequest dto
     ) throws IOException {
-
+        System.out.println("PUT method for avatar called");
         AvatarResponseDTO response = mediaService.updateAvatar(dto.getNewAvatar(), dto.getOldAvatar());
 
         return ResponseEntity.ok(response);

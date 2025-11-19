@@ -61,13 +61,13 @@ public class MediaClient {
     }
 
     public AvatarResponseDTO updateAvatar(AvatarUpdateRequest avatarUpdateRequest) throws IOException, FileUploadException {
-        String url = mediaServiceBaseUrl + "/avatar";
+        String url = mediaServiceBaseUrl + "/internal/avatar";
         System.out.println("Request url: " + url);
         MultipartFile avatar = avatarUpdateRequest.getNewAvatar();
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("oldAvatarUrl", avatarUpdateRequest.getOldAvatar());
-        body.add("avatar", new ByteArrayResource(avatar.getBytes()) {
+        body.add("oldAvatar", avatarUpdateRequest.getOldAvatar());
+        body.add("newAvatar", new ByteArrayResource(avatar.getBytes()) {
             @Override
             public String getFilename() {
                 return avatar.getOriginalFilename();
