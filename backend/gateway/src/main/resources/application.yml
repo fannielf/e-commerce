@@ -4,6 +4,10 @@ spring:
 
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       max-in-memory-size: 15MB   # must cover total multipart + form overhead
       routes:
         - id: auth-service
@@ -43,9 +47,9 @@ jwt:
   secret: very-long-secret-key-string-with-at-least-32-chars
 
 eureka:
-#  instance:
-#    hostname: gateway
-#    prefer-ip-address: false
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: false
   client:
     service-url:
       defaultZone: http://discovery:8761/eureka/

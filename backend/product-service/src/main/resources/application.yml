@@ -30,9 +30,9 @@ server:
     enabled: false
 
 eureka:
-#  instance:
-#    hostname: product-service
-#    prefer-ip-address: false
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: false
   client:
     service-url:
       defaultZone: http://discovery:8761/eureka/
