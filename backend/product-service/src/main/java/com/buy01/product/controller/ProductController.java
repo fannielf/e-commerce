@@ -2,6 +2,7 @@ package com.buy01.product.controller;
 
 import com.buy01.product.model.Product;
 import com.buy01.product.service.ProductService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class ProductController {
 
     // add new product, only sellers
     @PostMapping
-    public ProductResponseDTO createProduct(
+    public ResponseEntity<?> createProduct(
             @RequestHeader("Authorization") String authHeader,
             @Valid @ModelAttribute ProductCreateDTO request) throws IOException {
         System.out.println("header: " + authHeader);
@@ -41,7 +42,9 @@ public class ProductController {
             request.setUserId(currentUserId);
         }
 
-       return productService.createProduct(request, role, currentUserId);
+        ProductResponseDTO newProduct = productService.createProduct(request, role, currentUserId);
+
+        return ResponseEntity.ok(newProduct);
     }
 
     // get all products
@@ -71,7 +74,7 @@ public class ProductController {
 
     // get a specific product by ID
     @GetMapping("/{productId}")
-    public ProductResponseDTO getProductById(
+    public ResponseEntity<?> getProductById(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable String productId) {
 
@@ -85,7 +88,7 @@ public class ProductController {
         List<String> images = productService.getProductImageIds(p.getProductId());
         if (images == null) images = Collections.emptyList();
 
-        return new ProductResponseDTO(
+        ProductResponseDTO product = new ProductResponseDTO(
                 p.getProductId(),
                 p.getName(),
                 p.getDescription(),
@@ -95,6 +98,8 @@ public class ProductController {
                 images,
                 currentUserId != null && currentUserId.equals(p.getUserId())
         );
+
+        return ResponseEntity.ok(product);
     }
 
 //    // get all products of the current logged-in user
@@ -154,9 +159,9 @@ public class ProductController {
                 .toList();
     }
 
-    // renew a specific product by ID
+    // update a specific product by ID
     @PutMapping("/{productId}")
-    public Object updateProduct(
+    public ResponseEntity<?> updateProduct(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId,
             @Valid @ModelAttribute ProductUpdateRequest request) throws IOException {
@@ -166,19 +171,21 @@ public class ProductController {
 
         ProductResponseDTO updated = productService.updateProduct(productId, request, currentUserId, role);
 
-            return updated;
+        return ResponseEntity.ok(updated);
     }
 
 
     // delete a specific product by ID
     @DeleteMapping("/{productId}")
-    public void deleteProduct(
+    public ResponseEntity<?> deleteProduct(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId
     ) {
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
         String role = securityUtils.getRole(currentUserId);
 
-        productService.deleteProduct(productId,  currentUserId, role);
+        productService.deleteProduct(productId, currentUserId, role);
+
+        return ResponseEntity.ok().build();
     }
 }
