@@ -54,7 +54,7 @@ export class ManageProductsComponent implements OnInit {
       this.productForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(255)]],
             description: ['', [Validators.required]],
-            price: [1, [Validators.required, Validators.min(1)]],
+            price: [null, [Validators.required, Validators.min(0.01)]],
             quantity: [1, [Validators.required, Validators.min(1)]]
           });
       }
