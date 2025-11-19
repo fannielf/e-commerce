@@ -57,6 +57,9 @@ services:
       - FKML_secret_network
     depends_on:
       - discovery
+      - product-service
+      - user-service
+      - media-service
 
   user-service:
     build: ./backend/user-service
