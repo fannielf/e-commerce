@@ -69,13 +69,20 @@ git clone https://01.gritlab.ax/git/kschauma/buy-01
 cd buy-01
 ```
 
-### 2. Build Backend Services
+### 2. Build Backend + Frontend services
 
-Each service has its own `Dockerfile`.
+No manual Maven or Angular build is required.
+Docker uses multi-stage builds to compile all services automatically.
 
 ```
 docker compose build
 ```
+
+This will:
+
+* build all Spring Boot services (using Maven inside Docker)
+* build the Angular frontend 
+* prepare images for MongoDB, Kafka, gateway, and discovery
 
 ### 3. Start the Entire Platform
 
