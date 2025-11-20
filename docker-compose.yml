@@ -36,6 +36,11 @@ services:
       - mongo_data:/data/db
     networks:
       - FKML_secret_network
+    healthcheck:
+      test: [ "CMD", "mongosh", "--username", "admin", "--password", "password", "--eval", "db.adminCommand('ping')" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
   # -------------------
   # Backend services
@@ -47,6 +52,11 @@ services:
       - "8761:8761"
     networks:
       - FKML_secret_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
   gateway:
     build: ./backend/gateway
@@ -56,43 +66,49 @@ services:
     networks:
       - FKML_secret_network
     depends_on:
-      - discovery
-      - product-service
-      - user-service
-      - media-service
+      discovery:
+        condition: service_healthy
 
   user-service:
     build: ./backend/user-service
     container_name: user-service
     environment:
-      SPRING_DATASOURCE_URL: mongodb://admin:password@buy01:27017
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@buy01:27017/buy01?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SERVICE_NAME: user-service
     expose:
       - "8080"
     networks:
       - FKML_secret_network
     depends_on:
-      - discovery
+      discovery:
+        condition: service_healthy
+      buy01:
+        condition: service_healthy
+
 
   product-service:
     build: ./backend/product-service
     container_name: product-service
     environment:
-      SPRING_DATASOURCE_URL: mongodb://admin:password@buy01:27017
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@buy01:27017/buy01?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SERVICE_NAME: product-service
     expose:
       - "8081"
     networks:
       - FKML_secret_network
     depends_on:
       - discovery
+      - kafka
 
   media-service:
     build: ./backend/media-service
     container_name: media-service
     environment:
-      SPRING_DATASOURCE_URL: mongodb://admin:password@buy01:27017
+      SPRING_DATA_MONGODB_URI: mongodb://admin:password@buy01:27017/buy01?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SERVICE_NAME: media-service
     expose:
       - "8082"
     networks:
@@ -100,7 +116,8 @@ services:
     volumes:
       - ./backend/media-service/uploads:/app/uploads
     depends_on:
-      - discovery
+      discovery:
+        condition: service_healthy
 
   # -------------------
   # Frontend
@@ -116,6 +133,7 @@ services:
       - FKML_secret_network
     depends_on:
       - gateway
+
 
 # -------------------
 # Networks & Volumes

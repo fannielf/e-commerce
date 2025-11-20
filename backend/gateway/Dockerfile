@@ -8,9 +8,4 @@ COPY target/gateway-0.0.1-SNAPSHOT.jar app.jar
 # Copy SSL
 COPY src/main/resources/ssl/keystore.p12 src/main/resources/ssl/keystore.p12
 
-# Add wait-for-eureka script
-COPY wait-for-eureka.sh wait-for-eureka.sh
-RUN chmod +x wait-for-eureka.sh
-
-# Use the script as entrypoint
-ENTRYPOINT ["./wait-for-eureka.sh"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
