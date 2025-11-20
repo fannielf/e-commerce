@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { User } from './user.service';
+import { BASE_URL } from '../constants/constants';
 import { AVATAR_BASE_URL } from '../constants/constants';
 
 interface AvatarResponse { avatarUrl: string; }
@@ -17,4 +19,15 @@ export class AvatarService {
     form.append('userId', userId);
     return this.http.post<AvatarResponse>(this.apiUrl, form);
   }
+
+  updateMyAvatar(file: File): Observable<User> {
+    const form = new FormData();
+    form.append('avatar', file); // field name expected by backend
+    return this.http.put<User>(`${BASE_URL}/api/users/me`, form);
+  }
+
+  buildAvatarUrl(filename: string | null | undefined): string {
+    return filename ? `${AVATAR_BASE_URL}/${filename}` : 'assets/default.jpg';
+  }
+
 }

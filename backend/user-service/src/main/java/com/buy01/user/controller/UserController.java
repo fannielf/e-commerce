@@ -98,8 +98,9 @@ public class UserController {
             @ModelAttribute @Valid SellerUpdateRequest request
     ) throws IOException {
         String currentUserId = securityUtils.getCurrentUserId(authHeader);
+        System.out.println("PUT for users/me called, changing avatar");
 
-        User user = userRepository.findUserById(currentUserId)
+        User user = userRepository.findUserByUserId(currentUserId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (user.getRole() != Role.SELLER && user.getRole() != Role.ADMIN) {

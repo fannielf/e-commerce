@@ -173,6 +173,7 @@ public class MediaService {
     }
 
     public AvatarResponseDTO updateAvatar(MultipartFile file, String oldAvatarUrl) {
+
         validateFile(file);
 
         // delete old avatar if exists
@@ -187,6 +188,7 @@ public class MediaService {
 
     // delete user avatar from server
     public void deleteAvatar(String filename) {
+        System.out.println("deleting old avatar");
         Path filePath = avatarPath.resolve(filename).toAbsolutePath();
         deleteFile(filePath.toString());
     }
@@ -220,6 +222,7 @@ public class MediaService {
 
     // delete file from server by path
     private void deleteFile(String filePathStr) {
+        System.out.println(filePathStr);
         Path filePath = Paths.get(filePathStr).toAbsolutePath();
         try {
             boolean deleted = Files.deleteIfExists(filePath);

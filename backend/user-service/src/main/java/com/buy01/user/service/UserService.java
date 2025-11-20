@@ -109,6 +109,7 @@ public class UserService {
                 mediaClient.updateAvatar(new AvatarUpdateRequest(oldAvatarUrl, avatar));
 
         if (avatarResponseDTO != null) {
+            System.out.println("avatarResponseDTO filled: " + avatarResponseDTO);
             return avatarResponseDTO.getAvatarUrl();
         } else {
             throw new InternalServerErrorException("Failed to update avatar");

@@ -45,6 +45,8 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 401 && !req.url.includes('/api/auth/login')) {
           errorMsg = 'Please log in to continue.';
           this.authService.logout();
+          } else if (error.status === 404) {
+          errorMsg = 'Resource not found';
         } else if (error.status === 403) {
           if (errorBody && typeof errorBody.error === 'string' && errorBody.error.includes('Invalid JWT token')) {
              errorMsg = 'Your session is invalid. Please log in again.';
