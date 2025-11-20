@@ -1,3 +1,4 @@
+<div class="pb-5">
 <div class="container mt-4 d-flex justify-content-center">
   <div class="card p-4" style="width: 700px;">
     <div class="row g-3">
@@ -87,19 +88,19 @@
   <p>{{error}}</p>
 </div>
 
-<div class="container mt-4" *ngIf="mode === 'update'">
+<div class="container mt-3" *ngIf="mode === 'update'">
   <button type="button" class="btn btn-success" (click)="switchToCreateMode()">
     Create a new listing
   </button>
 </div>
 
-<div class="container mt-5" *ngIf="loading">
+<div class="container mt-3" *ngIf="loading">
   <p>Loading your listings…</p>
 </div>
 
 <div class="container mt-5" *ngIf="!loading && sellerProducts.length">
   <h4>Your listings</h4>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-2">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mt-2">
     <div class="col" *ngFor="let p of sellerProducts">
     <div class="card product-card-uniform h-100" (click)="edit(p)" style="cursor: pointer;">
       <div class="card-img-container">
@@ -127,4 +128,5 @@
 
 <div class="container mt-4 text-muted" *ngIf="!loading && sellerProducts.length === 0">
   <p>No listings yet. Create your first product above.</p>
+</div>
 </div>
