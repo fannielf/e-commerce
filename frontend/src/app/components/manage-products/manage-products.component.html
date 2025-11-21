@@ -1,132 +1,133 @@
 <div class="pb-5">
-<div class="container mt-4 d-flex justify-content-center">
-  <div class="card p-4" style="width: 700px;">
-    <div class="row g-3">
-      <!-- Image Upload Area -->
-      <div class="col-md-5 d-flex flex-column align-items-center">
-        <!-- Main image preview -->
-        <div class="position-relative mb-2">
-          <img [src]="imagePreviews.length > 0 ? (imagePreviews[0].isNew ? imagePreviews[0].url : (imagePreviews[0].url | imageUrl)) : 'assets/product_image_placeholder.png'" class="img-fluid" alt="Product Image Preview" style="cursor: pointer; object-fit: cover; width: 250px; height: 250px;" (click)="fileInput.click()">
-          <button *ngIf="imagePreviews.length > 0 && imagePreviews[0].url !== 'assets/product_image_placeholder.png'" type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" style="line-height: 0.5; padding: .2rem .4rem; z-index: 10;" (click)="removeImagePreview(imagePreviews[0]); $event.stopPropagation()">
-            &times;
-          </button>
-          <div *ngIf="imagePreviews.length === 0" class="position-absolute top-0 start-0 p-2 text-gray" style="pointer-events: none;">
-            <i class="bi bi-images fs-1"></i>
-          </div>
-        </div>
-        <!-- existing images with delete buttons -->
-        <div *ngIf="imagePreviews.length > 1" class="d-flex flex-wrap justify-content-center">
-          <div *ngFor="let preview of imagePreviews.slice(1); let i = index" class="position-relative m-1">
-            <img [src]="preview.isNew ? preview.url : (preview.url | imageUrl)" class="img-thumbnail" alt="Product image {{i + 2}}" style="width: 60px; height: 60px; object-fit: cover;">
-            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" style="line-height: 0.5; padding: .2rem .4rem;" (click)="removeImagePreview(preview)">
+  <div class="container mt-5 d-flex justify-content-center">
+    <div class="card p-4" style="width: 700px; background-color: transparent;">
+      <div class="row g-3">
+        <!-- Image Upload Area -->
+        <div class="col-md-5 d-flex flex-column align-items-center">
+          <!-- Main image preview -->
+          <div class="position-relative mb-2">
+            <img [src]="imagePreviews.length > 0 ? (imagePreviews[0].isNew ? imagePreviews[0].url : (imagePreviews[0].url | imageUrl)) : 'assets/product_image_placeholder.png'" class="img-fluid" alt="Product Image Preview" style="cursor: pointer; object-fit: cover; width: 250px; height: 250px; border: 1px solid var(--border-color); border-radius: 8px;" (click)="fileInput.click()">
+            <button *ngIf="imagePreviews.length > 0 && imagePreviews[0].url !== 'assets/product_image_placeholder.png'" type="button" class="btn btn-danger btn-sm position-absolute" style="top: 0.5rem; right: 0.5rem; width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center; z-index: 10;" (click)="removeImagePreview(imagePreviews[0]); $event.stopPropagation()">
               &times;
             </button>
+            <div *ngIf="imagePreviews.length === 0" class="position-absolute top-0 start-0" style="pointer-events: none;">
+              <i class="bi bi-images fs-2" style="color: var(--dark-color); padding-left:10px"></i>
+            </div>
+          </div>
+          <!-- existing images with delete buttons -->
+          <div *ngIf="imagePreviews.length > 1" class="d-flex flex-wrap justify-content-center">
+            <div *ngFor="let preview of imagePreviews.slice(1); let i = index" class="position-relative m-1">
+              <img [src]="preview.isNew ? preview.url : (preview.url | imageUrl)" class="img-thumbnail" alt="Product image {{i + 2}}" style="width: 60px; height: 60px; object-fit: cover;">
+              <button type="button" class="btn btn-danger btn-sm position-absolute" style="top: 0.5rem; right: 0.5rem; width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center;" (click)="removeImagePreview(preview)">
+                &times;
+              </button>
+            </div>
+          </div>
+          <div class="d-flex flex-column align-items-center mt-2 px-2">
+          <small class="text-muted mt-1" style="font-size: 0.75rem;">Click main image to add new images (max 5).</small>
+          <small class="text-muted mt-1" style="font-size: 0.75rem;">Accepted formats: JPG, PNG, GIF, WEBP.</small>
           </div>
         </div>
-        <small class="text-muted mt-1">Click main image to add new images (max 5).</small>
-        <small class="text-muted mt-1" style="font-size: 0.75rem;">Accepted formats: JPG, PNG, GIF, WEBP.</small>
-      </div>
-      <div class="col-md-7">
-        <h3>{{ mode === 'create' ? 'Create Product' : 'Update Product' }}</h3>
-        <form [formGroup]="productForm" (ngSubmit)="submit()">
-          <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input id="name" class="form-control" formControlName="name" [class.is-invalid]="(productForm.get('name')?.invalid && (productForm.get('name')?.dirty || productForm.get('name')?.touched)) || formErrors['name']">
-            <div *ngIf="(productForm.get('name')?.invalid && (productForm.get('name')?.dirty || productForm.get('name')?.touched)) || formErrors['name']" class="invalid-feedback">
-              <div *ngIf="productForm.get('name')?.errors?.['required']">Name is required.</div>
-              <div *ngIf="productForm.get('name')?.errors?.['minlength']">Name must be at least 5 characters long.</div>
-              <div *ngIf="productForm.get('name')?.errors?.['maxlength']">Name cannot be more than 255 characters long.</div>
-              <div *ngIf="formErrors['name']">{{ formErrors['name'] }}</div>
+        <div class="col-md-7">
+          <h3>{{ mode === 'create' ? 'Create Product' : 'Update Product' }}</h3>
+          <form [formGroup]="productForm" (ngSubmit)="submit()">
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input id="name" class="form-control" formControlName="name" [class.is-invalid]="(productForm.get('name')?.invalid && (productForm.get('name')?.dirty || productForm.get('name')?.touched)) || formErrors['name']">
+              <div *ngIf="(productForm.get('name')?.invalid && (productForm.get('name')?.dirty || productForm.get('name')?.touched)) || formErrors['name']" class="invalid-feedback">
+                <div *ngIf="productForm.get('name')?.errors?.['required']">Name is required.</div>
+                <div *ngIf="productForm.get('name')?.errors?.['minlength']">Name must be at least 5 characters long.</div>
+                <div *ngIf="productForm.get('name')?.errors?.['maxlength']">Name cannot be more than 255 characters long.</div>
+                <div *ngIf="formErrors['name']">{{ formErrors['name'] }}</div>
+              </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea id="description" class="form-control" formControlName="description" rows="3" [class.is-invalid]="(productForm.get('description')?.invalid && (productForm.get('description')?.dirty || productForm.get('description')?.touched)) || formErrors['description']"></textarea>
-            <div *ngIf="(productForm.get('description')?.invalid && (productForm.get('description')?.dirty || productForm.get('description')?.touched)) || formErrors['description']" class="invalid-feedback">
-              <div *ngIf="productForm.get('description')?.errors?.['required']">Description is required.</div>
-              <div *ngIf="formErrors['description']">{{ formErrors['description'] }}</div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea id="description" class="form-control" formControlName="description" rows="3" [class.is-invalid]="(productForm.get('description')?.invalid && (productForm.get('description')?.dirty || productForm.get('description')?.touched)) || formErrors['description']"></textarea>
+              <div *ngIf="(productForm.get('description')?.invalid && (productForm.get('description')?.dirty || productForm.get('description')?.touched)) || formErrors['description']" class="invalid-feedback">
+                <div *ngIf="productForm.get('description')?.errors?.['required']">Description is required.</div>
+                <div *ngIf="formErrors['description']">{{ formErrors['description'] }}</div>
+              </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label for="price" class="form-label">Price (€)</label>
-            <input id="price" type="number" class="form-control" formControlName="price" step="0.01" [class.is-invalid]="(productForm.get('price')?.invalid && (productForm.get('price')?.dirty || productForm.get('price')?.touched)) || formErrors['price']">
-            <div *ngIf="(productForm.get('price')?.invalid && (productForm.get('price')?.dirty || productForm.get('price')?.touched)) || formErrors['price']" class="invalid-feedback">
-              <div *ngIf="productForm.get('price')?.errors?.['required']">Price is required.</div>
-              <div *ngIf="productForm.get('price')?.errors?.['min']">Price must be over 0.</div>
-              <div *ngIf="formErrors['price']">{{ formErrors['price'] }}</div>
+            <div class="mb-3">
+              <label for="price" class="form-label">Price (€)</label>
+              <input id="price" type="number" class="form-control" formControlName="price" step="0.01" [class.is-invalid]="(productForm.get('price')?.invalid && (productForm.get('price')?.dirty || productForm.get('price')?.touched)) || formErrors['price']">
+              <div *ngIf="(productForm.get('price')?.invalid && (productForm.get('price')?.dirty || productForm.get('price')?.touched)) || formErrors['price']" class="invalid-feedback">
+                <div *ngIf="productForm.get('price')?.errors?.['required']">Price is required.</div>
+                <div *ngIf="productForm.get('price')?.errors?.['min']">Price must be over 0.</div>
+                <div *ngIf="formErrors['price']">{{ formErrors['price'] }}</div>
+              </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label for="quantity" class="form-label">Quantity</label>
-            <input id="quantity" type="number" class="form-control" formControlName="quantity" [class.is-invalid]="(productForm.get('quantity')?.invalid && (productForm.get('quantity')?.dirty || productForm.get('quantity')?.touched)) || formErrors['quantity']">
-            <div *ngIf="(productForm.get('quantity')?.invalid && (productForm.get('quantity')?.dirty || productForm.get('quantity')?.touched)) || formErrors['quantity']" class="invalid-feedback">
-              <div *ngIf="productForm.get('quantity')?.errors?.['required']">Quantity is required.</div>
-              <div *ngIf="productForm.get('quantity')?.errors?.['min']">Quantity cannot be negative.</div>
-              <div *ngIf="formErrors['quantity']">{{ formErrors['quantity'] }}</div>
+            <div class="mb-3">
+              <label for="quantity" class="form-label">Quantity</label>
+              <input id="quantity" type="number" class="form-control" formControlName="quantity" [class.is-invalid]="(productForm.get('quantity')?.invalid && (productForm.get('quantity')?.dirty || productForm.get('quantity')?.touched)) || formErrors['quantity']">
+              <div *ngIf="(productForm.get('quantity')?.invalid && (productForm.get('quantity')?.dirty || productForm.get('quantity')?.touched)) || formErrors['quantity']" class="invalid-feedback">
+                <div *ngIf="productForm.get('quantity')?.errors?.['required']">Quantity is required.</div>
+                <div *ngIf="productForm.get('quantity')?.errors?.['min']">Quantity cannot be negative.</div>
+                <div *ngIf="formErrors['quantity']">{{ formErrors['quantity'] }}</div>
+              </div>
             </div>
-          </div>
 
-          <input id="images" type="file" class="d-none" multiple accept="image/*" (change)="onFileSelected($event)" #fileInput>
-          <div class="d-flex">
-            <button type="submit" class="btn btn-success" [disabled]="productForm.invalid">
-            {{ mode === 'create' ? 'Create Product' : 'Update Product' }}
-          </button>
-          <button *ngIf="mode === 'update'" type="button" class="btn btn-danger ms-2" (click)="onDelete()">
-            Delete Product
-          </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="container mt-4 text-danger" *ngIf="error">
-  <p>{{error}}</p>
-</div>
-
-<div class="container mt-3" *ngIf="mode === 'update'">
-  <button type="button" class="btn btn-success" (click)="switchToCreateMode()">
-    Create a new listing
-  </button>
-</div>
-
-<div class="container mt-3" *ngIf="loading">
-  <p>Loading your listings…</p>
-</div>
-
-<div class="container mt-5" *ngIf="!loading && sellerProducts.length">
-  <h4>Your listings</h4>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mt-2">
-    <div class="col" *ngFor="let p of sellerProducts">
-    <div class="card product-card-uniform h-100" (click)="edit(p)" style="cursor: pointer;">
-      <div class="card-img-container">
-        <app-image-carousel [images]="p.images || []"></app-image-carousel>
-        <div class="edit-overlay">
-          <span>Edit</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <h5 class="card-title text-truncate">{{p.name}}</h5>
-        <div class="card-text price-container">
-          <ng-container *ngIf="p.quantity > 0; else soldOutPrice">
-            <strong>€{{p.price}}</strong>
-          </ng-container>
-          <ng-template #soldOutPrice>
-            <strong class="original-price-strikethrough">€{{p.price}}</strong>
-            <span class="sold-out-label">Sold Out</span>
-          </ng-template>
+            <input id="images" type="file" class="d-none" multiple accept="image/*" (change)="onFileSelected($event)" #fileInput>
+            <div class="d-flex mt-4">
+              <button type="submit" class="btn" [disabled]="productForm.invalid">
+                {{ mode === 'create' ? 'Create Product' : 'Update Product' }}
+              </button>
+              <button *ngIf="mode === 'update'" type="button" class="btn btn-danger ms-2" (click)="onDelete()">
+                Delete Product
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
-  </div>
-</div>
 
-<div class="container mt-4 text-muted" *ngIf="!loading && sellerProducts.length === 0">
-  <p>No listings yet. Create your first product above.</p>
-</div>
+  <div class="container mt-4 text-danger" *ngIf="error">
+    <p>{{error}}</p>
+  </div>
+
+  <div class="container mt-3" *ngIf="loading">
+    <p>Loading your listings…</p>
+  </div>
+
+  <div class="container mt-5" *ngIf="!loading && sellerProducts.length">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Your listings</h2>
+      <button *ngIf="mode === 'update'" type="button" class="btn btn-success" (click)="switchToCreateMode()">
+        Create a new listing
+      </button>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mt-2">
+      <div class="col" *ngFor="let p of sellerProducts">
+        <div class="card product-card-uniform h-100" (click)="edit(p)" style="cursor: pointer;">
+          <div class="card-img-container">
+            <app-image-carousel [images]="p.images || []"></app-image-carousel>
+            <div class="edit-overlay">
+              <span>Edit</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title text-truncate">{{ p.name }}</h5>
+            <div class="card-text price-container">
+              <ng-container *ngIf="p.quantity > 0; else soldOutPrice">
+                {{ p.price | currency:'EUR' }}
+              </ng-container>
+              <ng-template #soldOutPrice>
+                <span class="original-price-strikethrough">{{ p.price | currency:'EUR' }}</span>
+                <span class="sold-out-label">Sold Out</span>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-4 text-muted" *ngIf="!loading && sellerProducts.length === 0">
+    <p>No listings yet. Create your first product above.</p>
+  </div>
 </div>

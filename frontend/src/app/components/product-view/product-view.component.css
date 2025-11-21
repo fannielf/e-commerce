@@ -6,8 +6,8 @@
 .main-image-container {
   height: 400px;
   width: 100%;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
+  background-color: #fff;
+  border: 1px solid var(--border-color);
   border-radius: .25rem;
   overflow: hidden;
 }
@@ -29,6 +29,6 @@
 
 .product-details .description {
   font-size: 1rem;
-  white-space: pre-wrap; /* Respects newlines in the description */
+  white-space: pre-wrap;
   margin: 1.5rem 0;
 }

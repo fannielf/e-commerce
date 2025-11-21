@@ -1,11 +1,11 @@
-
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: #f3f4f6;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: var(--background-color);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .header-right {
@@ -15,35 +15,35 @@ header {
 }
 
 .logo {
-  font-weight: bold;
-  font-size: 1.5rem;
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-family-headings);
+  font-weight: 700;
+  font-size: 1.9rem;
   text-decoration: none;
-  color: inherit;
+  color: var(--text-color);
+  padding-right: 4rem;
+}
+
+.logo-icon {
+  position: absolute;
+  height: 4.5rem; /* Adjusted size */
+  width: auto;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
 }
 
 .logo:hover {
   cursor: pointer;
-  opacity: 0.8;
 }
-
-.login-btn {
-  padding: 0.3rem 0.8rem;
-  border: 1px solid #333;
-  background-color: transparent;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.login-btn:hover {
-  background-color: #e5e7eb;
-}
-
 
 .profile-img {
-  width: 4rem;
-  height: 4rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
-  border: 1px solid gray;
+  border: 1px solid var(--border-color);
+  object-fit: cover;
 }
 
 .profile-container {

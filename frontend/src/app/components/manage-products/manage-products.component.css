@@ -1,4 +1,3 @@
-/* "Edit" overlay functionality */
 .product-card-uniform {
   position: relative;
   cursor: pointer;
@@ -19,8 +18,7 @@
   transition: opacity 0.3s ease;
   pointer-events: none; /* Allows clicks to pass through to the card */
   font-size: 1.2rem;
-  font-weight: bold;
-  font-family: Times New Roman, serif;
+  font-family: Montserrat, sans-serif;
 }
 
 .product-card-uniform:hover .edit-overlay {

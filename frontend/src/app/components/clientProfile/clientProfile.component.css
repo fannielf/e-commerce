@@ -5,10 +5,12 @@
     margin-left: 12.5rem;
 }
 .client-profile img {
-    border-radius: 50%;
-    width:  9.375rem;
-    height: 9.375rem;
-    margin-right: 1.25rem;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  margin-right: 2rem;
 }
 
 .client-profile p {
