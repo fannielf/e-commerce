@@ -10,8 +10,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 
@@ -54,6 +56,7 @@ public class MediaClient {
         );
 
         if (!response.getStatusCode().is2xxSuccessful()) {
+            System.out.println("Avatar download failed, response code: " + response.getStatusCode());
             throw new FileUploadException("Failed to upload avatar: " + response.getStatusCode());
         }
 
@@ -80,17 +83,21 @@ public class MediaClient {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<AvatarResponseDTO> response = restTemplate.exchange(
-                url,
-                HttpMethod.PUT,
-                requestEntity,
-                AvatarResponseDTO.class
-        );
+        try {
+            ResponseEntity<AvatarResponseDTO> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    AvatarResponseDTO.class
+            );
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new FileUploadException("Failed to update avatar: " + response.getStatusCode());
+            return response.getBody();
+
+        } catch (HttpClientErrorException e) {
+            throw new ResponseStatusException(e.getStatusCode(), e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
 
-        return response.getBody();
     }
 }
