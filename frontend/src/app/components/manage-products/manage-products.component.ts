@@ -53,9 +53,9 @@ export class ManageProductsComponent implements OnInit {
     ) {
       this.productForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(255)]],
-            description: ['', [Validators.required]],
+            description: ['', [Validators.required, Validators.maxLength(2000)]],
             price: [null, [Validators.required, Validators.min(0.01)]],
-            quantity: [0, [Validators.required, Validators.min(0)]]
+            quantity: [0, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern("^[0-9]*$")]]
           });
       }
 
@@ -168,6 +168,17 @@ export class ManageProductsComponent implements OnInit {
       submit() {
               this.error = null;
               this.formErrors = {};
+
+               // Trim string values before validation and submission
+               const nameControl = this.productForm.get('name');
+               if (nameControl && typeof nameControl.value === 'string') {
+                 nameControl.setValue(nameControl.value.trim());
+               }
+               const descriptionControl = this.productForm.get('description');
+               if (descriptionControl && typeof descriptionControl.value === 'string') {
+                 descriptionControl.setValue(descriptionControl.value.trim());
+               }
+
               if (this.productForm.invalid) {
                 return;
               }
