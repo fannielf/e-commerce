@@ -1,7 +1,7 @@
 <div class="client-profile">
   <img *ngIf="user; else loading" src="../assets/default.jpg" alt="Profile" class="profile-img" />
   <div *ngIf="user; else loading">
-    <p>{{ user.name }}</p>
+    <h1 class="h3 mb-0">{{ user.name }}</h1>
   </div>
 
   <ng-template #loading>

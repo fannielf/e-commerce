@@ -1,12 +1,94 @@
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+:root {
+  --primary-color: #ef9611;
+  --primary-hover-color: #e6850b;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --danger-hover-color: #c82333;
+  --light-color: #f8f9fa;
+  --dark-color: #393434;
+  --dark-hover-color: #4d4848;
+  --text-color: #393434;
+  --background-color: #fffcf6;
+  --border-color: rgba(57, 52, 52, 0.25);
+
+  --font-family-base: 'Montserrat', "Helvetica Neue", sans-serif;
+  --font-family-headings: 'Playfair Display', serif;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-headings);
+  font-weight: 500; /* Medium weight */
+}
+
+button, .btn {
+  display: inline-block;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: .50rem;
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+button:hover, .btn:hover, btn:active, button:active {
+  background-color: var(--primary-hover-color);
+  border-color: var(--primary-hover-color);
+  color: #fff;
+}
+
+.btn-success {
+  background-color: var(--dark-color);
+  border-color: var(--dark-color);
+}
+.btn-success:hover,
+.btn-success:active,
+.btn-success:focus {
+  background-color: var(--dark-hover-color) !important;
+  border-color: var(--dark-hover-color) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+  border-radius: .4rem;
+}
+.btn-danger:hover, .btn-danger:active {
+  background-color: var(--danger-hover-color);
+  border-color: var(--danger-hover-color);
+}
+
+.btn:disabled, .button:disabled, .btn-success:disabled {
+  background-color: transparent;
+  border-color: --dark-color;
+  color: --dark-color;
+}
 
 .product-card-uniform {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #fff;
-  border: 1px solid rgba(0,0,0,.125);
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
   border-radius: .25rem;
   overflow: hidden;
 }
@@ -15,7 +97,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   height: 250px;
   width: 100%;
   position: relative;
-  background-color: #f8f9fa;
+  background-color: var(--light-color);
 }
 
 .product-card-uniform .card-img-container img,
@@ -34,7 +116,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .product-card-uniform .card-title {
   font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
 }
 
 .product-card-uniform .card-text {
@@ -51,6 +133,6 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 .price-container .sold-out-label {
-  color: #dc3545;
+  color: var(--danger-color);
   font-weight: bold;
 }

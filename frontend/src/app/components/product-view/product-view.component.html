@@ -1,5 +1,5 @@
 <div class="container mt-4 d-flex justify-content-center">
-  <div *ngIf="product" class="card p-4 product-view-card">
+  <div *ngIf="product" class="card p-4 product-view-card" style="background-color: transparent;">
     <div class="row g-4">
       <!-- image column for your listings -->
       <div class="col-md-6">
@@ -25,7 +25,7 @@
             </ng-template>
           </div>
 
-          <p><strong>Available Quantity:</strong> {{ product.quantity }}</p>
+          <p>Qty: {{ product.quantity }}</p>
 
           <button *ngIf="product.isProductOwner && isLoggedIn" class="btn btn-success w-100" (click)="goToUpdateProduct(product.productId)">
             Manage Product

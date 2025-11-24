@@ -2,11 +2,11 @@
   <div *ngIf="user; else loading">
     <!-- user profile section with avatar and name -->
     <div class="d-flex flex-column flex-md-row align-items-center mb-4">
-      <div class="text-center mb-3 mb-md-0 me-md-3">
+      <div class="text-center mb-3 mb-md-0 me-md-4">
         <div class="avatar-wrapper" (click)="avatarInput.click()">
           <img
             [src]="profileImageUrl"
-            alt="Profile of {{ user?.name }}"
+            alt="Profile of {{ user.name }}"
             class="profile-img"
             aria-label="Edit avatar"
           />
