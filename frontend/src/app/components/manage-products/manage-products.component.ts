@@ -55,7 +55,7 @@ export class ManageProductsComponent implements OnInit {
             name: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(255)]],
             description: ['', [Validators.required, Validators.maxLength(2000)]],
             price: [null, [Validators.required, Validators.min(0.01)]],
-            quantity: [0, [Validators.required, Validators.min(0), Validators.max(100), Validators.pattern("^[0-9]*$")]]
+            quantity: [0, [Validators.required, Validators.min(0), Validators.max(1000), Validators.pattern("^[0-9]*$")]]
           });
       }
 
@@ -175,9 +175,11 @@ export class ManageProductsComponent implements OnInit {
                  nameControl.setValue(nameControl.value.trim());
                }
                const descriptionControl = this.productForm.get('description');
-               if (descriptionControl && typeof descriptionControl.value === 'string') {
-                 descriptionControl.setValue(descriptionControl.value.trim());
-               }
+                 if (descriptionControl && typeof descriptionControl.value === 'string') {
+                   // Replace multiple newlines with a single one, then trim.
+                   const cleanedDescription = descriptionControl.value.replace(/(\r\n|\r|\n){3,}/g, '\n\n').trim();
+                   descriptionControl.setValue(cleanedDescription);
+                  }
 
               if (this.productForm.invalid) {
                 return;
