@@ -68,7 +68,7 @@ export class ManageProductsComponent implements OnInit {
             this.productService.getProductById(this.productId).subscribe({
               next: (data: Product) => {
                 this.productForm.patchValue(data);
-                const images = data.images || [];
+                const images = (data.images || []).filter(img => img);
                 this.resetStagedChanges(images);
                 },
               error: (err: any) => {
