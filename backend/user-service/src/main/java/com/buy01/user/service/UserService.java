@@ -135,6 +135,7 @@ public class UserService {
 
     // Validate name length (add validation for only alphabets)
     private void validateName(String name) {
+        name = name.trim();
             if (name == null || name.isEmpty()) {
                 throw new IllegalArgumentException("Name cannot be null or empty");
             }
