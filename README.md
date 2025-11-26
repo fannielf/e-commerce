@@ -120,6 +120,18 @@ docker compose down
 * Use `docker compose up --build` when updating code.
 * Nginx serves the Angular frontend, handles HTTPS, and proxies API requests to the gateway.
 
+### Local HTTPS Setup
+
+1. Install the shared mkcert root CA so your browser trusts HTTPS:
+    * Windows: double-click `certs/rootCA.pem` → Install Certificate → Local Machine → Trusted Root Certification Authorities → Finish.
+    * macOS: drag `certs/rootCA.pem` into **System Keychain** in Keychain Access → Right-click → Get Info → Trust → Always Trust → Restart browser.
+    * Linux (Debian/Ubuntu):
+      ```bash
+      sudo cp certs/rootCA.pem /usr/local/share/ca-certificates/mkcert-rootCA.crt
+      sudo update-ca-certificates
+      ```
+2. Access the frontend at `https://localhost:4200`. The browser should show it as secure.
+
 ## Project Status
 
 Phase 1 focuses on getting the full stack running end-to-end and building the seller-side features.
