@@ -18,7 +18,9 @@ describe('AuthService', () => {
   const encodedMockToken = btoa(JSON.stringify(mockToken)); // simple fake token
 
   beforeEach(() => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate'], {
+      url: '/' // Configure the url property here
+    });
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -125,7 +127,7 @@ describe('AuthService', () => {
   it('should clear token on logout', () => {
     localStorage.setItem('token', 'XYZ');
 
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate'], { url: '/' });
+    routerSpy.url = '/';
 
     service.logout();
 
