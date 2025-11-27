@@ -125,7 +125,7 @@ describe('AuthService', () => {
   it('should clear token on logout', () => {
     localStorage.setItem('token', 'XYZ');
 
-    routerSpy.url = '/';
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate'], { url: '/' });
 
     service.logout();
 
