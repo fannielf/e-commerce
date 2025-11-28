@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'BRANCH', defaultValue: 'dev', description: 'Branch to build')
+        string(name: 'BRANCH', defaultValue: 'maris', description: 'Branch to build')
     }
 
     environment {
@@ -40,10 +40,10 @@ pipeline {
             steps {
                 echo "Building backend microservices"
                 sh '''
-                     mvn -f backend/discovery/pom.xml -B clean package -DskipTests=false
-                     mvn -f backend/gateway/pom.xml -B clean package -DskipTests=false
-                     mvn -f backend/user-service/pom.xml -B clean package -DskipTests=false
-                     mvn -f backend/product-service/pom.xml -B clean package -DskipTests=false
+                     mvn -f backend/discovery/pom.xml -B clean package -DskipTests=false && \
+                     mvn -f backend/gateway/pom.xml -B clean package -DskipTests=false && \
+                     mvn -f backend/user-service/pom.xml -B clean package -DskipTests=false && \
+                     mvn -f backend/product-service/pom.xml -B clean package -DskipTests=false && \
                      mvn -f backend/media-service/pom.xml -B clean package -DskipTests=false
                   '''
             }
@@ -53,10 +53,10 @@ pipeline {
             steps {
                 echo "Running backend JUnit tests"
                 sh '''
-                     mvn -f backend/discovery/pom.xml -B test
-                     mvn -f backend/gateway/pom.xml -B test
-                     mvn -f backend/user-service/pom.xml -B test
-                     mvn -f backend/product-service/pom.xml -B test
+                     mvn -f backend/discovery/pom.xml -B test && \
+                     mvn -f backend/gateway/pom.xml -B test && \
+                     mvn -f backend/user-service/pom.xml -B test && \
+                     mvn -f backend/product-service/pom.xml -B test && \
                      mvn -f backend/media-service/pom.xml -B test
                 '''
             }
