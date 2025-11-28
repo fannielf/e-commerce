@@ -3,7 +3,6 @@ pipeline {
 
      tools {
             maven 'maven'
-            nodejs 'node'
         }
 
     parameters {
@@ -73,17 +72,24 @@ pipeline {
         }
 
         stage('Build Frontend') {
-            steps {
-                echo "Building Angular frontend"
-                sh '''
-                    cd frontend
-                    npm ci
-                    npm run build --if-present
-                '''
-            }
+             agent {
+                 docker { image 'node:18-alpine' }
+             }
+             steps {
+                  echo "Building Angular frontend"
+                         // The working directory inside the container is the workspace
+                  sh '''
+                      cd frontend
+                      npm ci
+                      npm run build --if-present
+                   '''
+             }
         }
 
         stage('Run Frontend Tests') {
+            agent {
+                docker { image 'node:18-alpine' }
+            }
             steps {
                 echo "Running frontend tests (Karma/Jasmine)"
                 sh '''
