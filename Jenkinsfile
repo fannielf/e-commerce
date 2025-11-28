@@ -1,14 +1,9 @@
 pipeline {
-    agent {
-            dockerfile {
-                filename 'Dockerfile'
-                // Mount the host's Docker socket to run docker commands from within the container
-                args '-v /var/run/docker.sock:/var/run/docker.sock'
-           }
-    }
+    agent any
 
     tools {
             maven 'maven'
+            node 'node'
     }
 
     parameters {
