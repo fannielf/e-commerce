@@ -40,11 +40,12 @@ pipeline {
             steps {
                 echo "Building backend microservices"
                 sh '''
-                    find backend -name "mvnw" -exec chmod +x {} \\;
-                    ./backend/user-service/mvnw -f backend/user-service/pom.xml -B clean package -DskipTests=false
-                    ./backend/product-service/mvnw -f backend/product-service/pom.xml -B clean package -DskipTests=false
-                    ./backend/media-service/mvnw -f backend/media-service/pom.xml -B clean package -DskipTests=false
-                '''
+                     mvn -f backend/discovery/pom.xml -B clean package -DskipTests=false
+                     mvn -f backend/gateway/pom.xml -B clean package -DskipTests=false
+                     mvn -f backend/user-service/pom.xml -B clean package -DskipTests=false
+                     mvn -f backend/product-service/pom.xml -B clean package -DskipTests=false
+                     mvn -f backend/media-service/pom.xml -B clean package -DskipTests=false
+                  '''
             }
         }
 
@@ -52,9 +53,11 @@ pipeline {
             steps {
                 echo "Running backend JUnit tests"
                 sh '''
-                    ./backend/user-service/mvnw -f backend/user-service/pom.xml -B test
-                    ./backend/product-service/mvnw -f backend/product-service/pom.xml -B test
-                    ./backend/media-service/mvnw -f backend/media-service/pom.xml -B test
+                     mvn -f backend/discovery/pom.xml -B test
+                     mvn -f backend/gateway/pom.xml -B test
+                     mvn -f backend/user-service/pom.xml -B test
+                     mvn -f backend/product-service/pom.xml -B test
+                     mvn -f backend/media-service/pom.xml -B test
                 '''
             }
             post {
