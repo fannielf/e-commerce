@@ -1,10 +1,10 @@
 pipeline {
    agent {
-       docker {
-           image 'docker:24-dind'   // docker CLI + daemon
-           args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
+           docker {
+               image 'my-jenkins-agent:latest'
+               args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
+           }
        }
-   }
 
 
     /*tools {
