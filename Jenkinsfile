@@ -1,9 +1,14 @@
 pipeline {
-    agent any
+    agent {
+            docker {
+                image 'carlossg/jenkins-maven-node-docker'
+                args '-v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp' // Mount Docker socket to use docker-compose
+            }
+        }
 
-    tools {
+    /*tools {
             maven 'maven'
-    }
+    }*/
 
     parameters {
         string(name: 'BRANCH', defaultValue: 'maris', description: 'Branch to build')
