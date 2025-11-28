@@ -3,7 +3,6 @@ pipeline {
 
     tools {
             maven 'maven'
-            nodejs 'node'
     }
 
     parameters {
@@ -27,7 +26,8 @@ pipeline {
     }
 
     triggers {
-        pollSCM('@midnight')   // reduce load; change to cron or webhook for production
+        pollSCM('@midnight')
+        githubPush()
     }
 
     stages {
@@ -73,6 +73,12 @@ pipeline {
         }
 
         stage('Build Frontend') {
+             agent {
+                     docker {
+                         image 'node:20-bookworm'
+                         args '-u root'
+                     }
+                 }
              steps {
                   echo "Building Angular frontend"
                          // The working directory inside the container is the workspace
@@ -85,6 +91,12 @@ pipeline {
         }
 
         stage('Run Frontend Tests') {
+            agent {
+                    docker {
+                        image 'node:20-bookworm'
+                        args '-u root'
+                    }
+                }
             steps {
                 echo "Running frontend tests (Karma/Jasmine)"
                 sh '''
@@ -135,11 +147,15 @@ pipeline {
     post {
         success {
             echo "Pipeline succeeded"
-            emailext (
-                subject: "SUCCESS: Build & Deploy (${PROJECT_NAME})",
-                body: "Jenkins build and deployment succeeded for branch ${params.BRANCH}.",
-                to: "${NOTIFY_EMAIL}"
-            )
+            try {
+                emailext (
+                    subject: "SUCCESS: Build & Deploy (${PROJECT_NAME})",
+                    body: "Jenkins build and deployment succeeded for branch ${params.BRANCH}.",
+                    to: "${NOTIFY_EMAIL}"
+                )
+            } catch (e) {
+                echo "Email not configured: ${e}"
+            }
             script {
                 // optional: send slack if plugin configured
                 try {
@@ -160,11 +176,15 @@ pipeline {
                 # fallback: try to bring up compose without rebuild (uses existing images)
                 docker compose -f ${DOCKER_COMPOSE} up -d --no-build || true
             """
-            emailext (
-                subject: "FAILURE: Build FAILED (${PROJECT_NAME})",
-                body: "Jenkins build failed for branch ${params.BRANCH}. Automatic rollback attempted.",
-                to: "${NOTIFY_EMAIL}"
-            )
+            try {
+                emailext (
+                    subject: "ROLLBACK: Build FAILED (${PROJECT_NAME})",
+                    body: "Jenkins build failed for branch ${params.BRANCH}. Services rolled back to previous version.",
+                    to: "${NOTIFY_EMAIL}"
+                )
+            } catch (e) {
+                echo "Email not configured: ${e}"
+            }
             script {
                 try {
                     slackSend channel: env.SLACK_CHANNEL, color: 'danger', message: "FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER} (${params.BRANCH}) - rollback attempted"
