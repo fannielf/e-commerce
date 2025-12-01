@@ -83,14 +83,8 @@ public class ProductServiceTest {
     @Test
     void createProduct_forbiddenRole_throwsForbiddenException() {
         ProductCreateDTO request = mock(ProductCreateDTO.class);
-        when(request.getName()).thenReturn("Valid Name");
-        when(request.getDescription()).thenReturn("desc");
-        when(request.getPrice()).thenReturn(1.0);
-        when(request.getQuantity()).thenReturn(1);
-        when(request.getUserId()).thenReturn("");
-
         assertThrows(ForbiddenException.class, () ->
-                productService.createProduct(request, "BUYER", "some-user")
+                productService.createProduct(request, "CLIENT", "some-user")
         );
     }
 
@@ -143,4 +137,89 @@ public class ProductServiceTest {
         verify(productRepository).deleteById(productId);
         verify(productEventService).publishProductDeletedEvent(productId);
     }
+
+    // java
+    @Test
+    void createProduct_forbiddenRole_doesNotCallDownstreamClients() throws IOException {
+        ProductCreateDTO request = mock(ProductCreateDTO.class);
+        assertThrows(ForbiddenException.class, () ->
+                productService.createProduct(request, "CLIENT", "some-user")
+        );
+        verify(productRepository, never()).save(any());
+        verify(mediaClient, never()).postProductImages(anyString(), anyList());
+        verify(userClient, never()).getRoleIfUserExists(anyString());
+    }
+
+    @Test
+    void createProduct_mediaClientThrows_stillCreatesProductAndReturnsEmptyMediaList() throws IOException {
+        ProductCreateDTO request = mock(ProductCreateDTO.class);
+        when(request.getName()).thenReturn("Valid Name");
+        when(request.getDescription()).thenReturn("Desc here");
+        when(request.getPrice()).thenReturn(9.0);
+        when(request.getQuantity()).thenReturn(1);
+        when(request.getUserId()).thenReturn(""); // use currentUserId
+
+        // return a List<MultipartFile> instead of List<String>
+        var mockFile = new org.springframework.mock.web.MockMultipartFile(
+                "file", "orig.jpg", "image/jpeg", new byte[] {1}
+        );
+        when(request.getImagesList()).thenReturn(List.of(mockFile));
+
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+            Product p = invocation.getArgument(0);
+            return new TestProduct("prod-x", p.getName(), p.getDescription(), p.getPrice(), p.getQuantity(), p.getUserId());
+        });
+
+        when(mediaClient.postProductImages(anyString(), anyList())).thenThrow(new RuntimeException("upstream fail"));
+
+        ProductResponseDTO resp = productService.createProduct(request, "SELLER", "current-user");
+        assertNotNull(resp);
+        assertEquals("prod-x", resp.getProductId());
+        assertTrue(resp.getImages().isEmpty());
+    }
+
+    @Test
+    void getProductImageIds_returnsEmptyListWhenClientReturnsNull() {
+        when(mediaClient.getProductImageIds("p-1")).thenReturn(null);
+        assertTrue(productService.getProductImageIds("p-1").isEmpty());
+    }
+
+    @Test
+    void deleteProductsByUserId_deletesEachAndPublishesEvent() {
+        TestProduct p1 = new TestProduct("p1", "n", "d", 1.0, 1, "u1");
+        TestProduct p2 = new TestProduct("p2", "n2", "d2", 2.0, 2, "u1");
+        when(productRepository.findAllProductsByUserId("u1")).thenReturn(List.of(p1, p2));
+
+        productService.deleteProductsByUserId("u1");
+
+        verify(productRepository).delete(p1);
+        verify(productRepository).delete(p2);
+        verify(productEventService).publishProductDeletedEvent("p1");
+        verify(productEventService).publishProductDeletedEvent("p2");
+    }
+
+    @Test
+    void authProductOwner_nonOwnerNonAdmin_throwsForbiddenException() {
+        TestProduct p = new TestProduct("p1", "n", "d", 1.0, 1, "owner-1");
+        assertThrows(ForbiddenException.class, () -> productService.authProductOwner(p, "someone-else", "SELLER"));
+    }
+
+    @Test
+    void createProduct_nameTooShort_throwsIllegalArgumentException() {
+        ProductCreateDTO request = mock(ProductCreateDTO.class);
+        when(request.getName()).thenReturn("abc"); // only stub used by validation
+        assertThrows(IllegalArgumentException.class, () ->
+                productService.createProduct(request, "SELLER", "current-user")
+        );
+    }
+
+    @Test
+    void getAllProducts_returnsRepositoryList() {
+        TestProduct p = new TestProduct("p1", "n", "d", 1.0, 1, "u1");
+        when(productRepository.findAll()).thenReturn(List.of(p));
+        List<Product> all = productService.getAllProducts();
+        assertEquals(1, all.size());
+        assertEquals("p1", all.get(0).getProductId());
+    }
+
 }
