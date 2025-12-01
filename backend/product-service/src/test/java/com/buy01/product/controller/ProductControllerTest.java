@@ -125,16 +125,21 @@ public class ProductControllerTest {
     void testGetMyProducts() throws Exception {
         String authHeader = "Bearer fake-token";
         String userId = "user123";
+        String role  = "SELLER";
 
         // mock current user id retrieval
         when(securityUtils.getCurrentUserId(authHeader)).thenReturn(userId);
+        when(securityUtils.getRole(authHeader)).thenReturn(role);
 
         // mock products from service
         TestProduct p1 = new TestProduct("p1", "Product 1", "Desc 1", 10.0, 5, userId); // own product
         TestProduct p2 = new TestProduct("p2", "Product 2", "Desc 2", 20.0, 3, "otherUser"); // someone else's product
 
-        when(productService.getAllProducts()).thenReturn(List.of(p1, p2));
-        when(productService.getProductImageIds("p1")).thenReturn(List.of("img1", "img2"));
+        // Service mocks
+        when(productService.getAllProductsByUserId(userId, role, userId))
+                .thenReturn(List.of(
+                        new ProductResponseDTO("p1", "Product 1", "Desc 1", 10.0, 5, userId, null, true)
+                ));
 
         mockMvc.perform(get("/api/products/my-products")
                         .header("Authorization", authHeader)
@@ -142,13 +147,11 @@ public class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].productId").value("p1"))
-                .andExpect(jsonPath("$[0].images[0]").value("img1"))
-                .andExpect(jsonPath("$[0].images[1]").value("img2"))
                 .andExpect(jsonPath("$[0].isProductOwner").value(true));
 
         // verify service calls
-        verify(productService).getAllProducts();
-        verify(productService).getProductImageIds("p1");
+        verify(productService).getAllProductsByUserId(userId, role, userId);
+
     }
 
     // -- PUT /api/products/{productId} TESTS --
