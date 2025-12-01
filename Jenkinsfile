@@ -4,6 +4,11 @@ pipeline {
         string(name: 'BRANCH', defaultValue: 'maris', description: 'Branch to build')
     }
 
+    tools {
+        maven 'maven'
+        nodejs 'node'
+    }
+
     stages {
         stage('Check Tools') {
             steps {
