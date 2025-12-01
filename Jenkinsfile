@@ -31,6 +31,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 echo "Building backend microservices"
+                sh 'ls backend'
                 sh 'mvn -f backend/pom.xml clean package -DskipTests'
             }
         }
