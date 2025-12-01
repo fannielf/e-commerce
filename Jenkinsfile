@@ -25,10 +25,27 @@ pipeline {
         stage('Build Backend') {
             steps {
                 echo "Building backend microservices"
-                sh 'ls backend || true'
                 sh 'mvn -f backend/pom.xml clean package -DskipTests'
             }
         }
+
+        stage('Build Frontend') {
+            steps {
+                echo "Building frontend application"
+                dir('frontend') {
+                sh 'npm install'
+                sh 'npm run build'
+             }
+          }
+       }
+
+       stage('Build Docker Images') {
+            steps {
+                echo "Building Docker images"
+                sh 'docker compose -f docker-compose.dev.yml build'
+              }
+           }
+       }
     }
 
     post {
