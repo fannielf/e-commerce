@@ -57,6 +57,8 @@ public class ProductService {
         validateProductPrice(request.getPrice());
         // validate quantity
         validateProductQuantity(request.getQuantity());
+        // validate userId
+        validateUserId(request.getUserId());
 
         Product product = new Product();
         product.setName(request.getName().trim());
@@ -64,16 +66,9 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
 
-        if (!request.getUserId().isEmpty()){
-            validateUserId(request.getUserId());
-            productOwnerId = request.getUserId();
-        }
-
         if (request.getImagesList() != null && request.getImagesList().size() > 5) {
             throw new BadRequestException("You can upload up to 5 images.");
         }
-
-        product.setUserId(productOwnerId);
 
         Product savedProduct = productRepository.save(product);
         System.out.println("Saved product : " + savedProduct);
