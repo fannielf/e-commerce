@@ -150,7 +150,6 @@ public class MediaService {
         return avatarPath.resolve(filename).toAbsolutePath();
     }
 
-
     // saves user avatar to server and returns path to file
     public String saveUserAvatar(MultipartFile file) {
         validateFile(file);
