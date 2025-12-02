@@ -37,7 +37,8 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    @Autowired
+    //@Autowired
+    @MockBean
     private UserRepository userRepository;
 
     @MockBean
@@ -48,7 +49,7 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+        //userRepository.deleteAll();
     }
 
     // GET /api/users/me TESTS (for client and seller)
