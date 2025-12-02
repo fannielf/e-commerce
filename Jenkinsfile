@@ -30,7 +30,9 @@ pipeline {
         stage('Build Backend') {
             steps {
                 echo "Building backend microservices"
-                sh 'mvn -f backend/pom.xml clean package -DskipTests -Dspring-boot.repackage.skip=true'
+                dir('backend') {
+                    sh 'mvn clean package -DskipTests -Dspring-boot.repackage.skip=true'
+                }
             }
         }
 
@@ -49,13 +51,16 @@ pipeline {
                echo "Running user service and controller tests"
                dir('backend') {
                    sh 'mvn test -Dtest="com/buy01/user/**/*Test.java"'
-               }           }
+               }
+           }
        }
 
        stage('Test Product Service') {
             steps {
                 echo "Running product service tests"
-                sh 'mvn -f backend/pom.xml test -Dtest="com/buy01/product/**/*.java"'
+                dir('backend') {
+                    sh 'mvn test -Dtest="com/buy01/product/**/*Test.java"'
+                }
             }
        }
 
