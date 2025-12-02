@@ -46,6 +46,17 @@ pipeline {
           }
        }
 
+       stage('Test Backend Services') {
+           steps {
+               echo "Running all backend tests"
+               dir('app/backend') {
+                   // Run all tests in user and product packages
+                   sh 'mvn test -Dtest=com.buy01.user..*Test,com.buy01.product..*Test'
+               }
+           }
+       }
+
+
        stage('Test User Service and Controller') {
            steps {
                echo "Running user service and controller tests"
