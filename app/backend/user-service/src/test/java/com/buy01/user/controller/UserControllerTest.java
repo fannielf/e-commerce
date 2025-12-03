@@ -117,7 +117,9 @@ class UserControllerTest {
     @Test
     void getUserById_internal_returnsUserDTO() throws Exception {
         User user = new User("user123", "Test", "test@test.com", "pass", Role.CLIENT, null);
-        userRepository.save(user);
+        //userRepository.save(user); - cannot use this in the tests, as it tries to connect to MongoDB
+
+        when(userService.findById("user123")).thenReturn(java.util.Optional.of(user));
 
         mockMvc.perform(get("/api/users/internal/user/user123"))
                 .andExpect(status().isOk())
