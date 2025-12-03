@@ -22,7 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -69,7 +71,7 @@ class UserControllerTest {
     @Test
     void getCurrentUser_asClient_returnsUserResponseDTO() throws Exception {
         User clientUser = new User("client1", "Client", "client@test.com", "pass", Role.CLIENT, null);
-        userRepository.save(clientUser);
+        //userRepository.save(clientUser);
 
         // Stub security utils to simulate logged-in user
         when(securityUtils.getCurrentUserId(anyString())).thenReturn("client1");
@@ -87,7 +89,7 @@ class UserControllerTest {
     @Test
     void getCurrentUser_asSeller_returnsSellerResponseDTO() throws Exception {
         User sellerUser = new User("seller1", "Seller", "seller@test.com", "pass", Role.SELLER, null);
-        userRepository.save(sellerUser);
+        //userRepository.save(sellerUser);
 
         // Stub security utils
         when(securityUtils.getCurrentUserId(anyString())).thenReturn("seller1");
@@ -107,10 +109,11 @@ class UserControllerTest {
     @Test
     void updateCurrentUser_asSeller_updatesAvatar() throws Exception {
         User sellerUser = new User("seller1", "Seller", "seller@test.com", "pass", Role.SELLER, null);
-        userRepository.save(sellerUser);
+        //userRepository.save(sellerUser);
 
         when(securityUtils.getCurrentUserId(anyString())).thenReturn("seller1");
-        when(userService.updateUserAvatar(org.mockito.ArgumentMatchers.any(), anyString())).thenReturn("http://new-avatar.com/img.jpg");
+        when(userService.findById("seller1")).thenReturn(Optional.of(sellerUser));
+        when(userService.updateUserAvatar(any(), anyString())).thenReturn("http://new-avatar.com/img.jpg");
 
         MockMultipartFile avatarFile = new MockMultipartFile(
                 "avatar", "avatar.jpg", MediaType.IMAGE_JPEG_VALUE, "test-image".getBytes()
