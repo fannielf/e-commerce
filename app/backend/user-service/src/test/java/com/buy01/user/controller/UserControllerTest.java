@@ -10,6 +10,9 @@ import com.buy01.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,7 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,7 +32,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "eureka.client.enabled=false",
+        "spring.cloud.discovery.enabled=false",
+        "spring.data.mongodb.auto-index-creation=false",
+        "spring.data.mongodb.database=test",
+        "spring.data.mongodb.port=0",
+        "spring.data.mongodb.host=localhost"
+})
+@ImportAutoConfiguration(exclude = {
+        MongoAutoConfiguration.class,
+        MongoDataAutoConfiguration.class
+})
 @AutoConfigureMockMvc
 class UserControllerTest {
 
@@ -37,7 +53,7 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    @Autowired
+    @MockBean
     private UserRepository userRepository;
 
     @MockBean
@@ -48,14 +64,14 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+        //userRepository.deleteAll();
     }
 
     // GET /api/users/me TESTS (for client and seller)
     @Test
     void getCurrentUser_asClient_returnsUserResponseDTO() throws Exception {
         User clientUser = new User("client1", "Client", "client@test.com", "pass", Role.CLIENT, null);
-        userRepository.save(clientUser);
+        //userRepository.save(clientUser);
 
         // Stub security utils to simulate logged-in user
         when(securityUtils.getCurrentUserId(anyString())).thenReturn("client1");
@@ -73,7 +89,7 @@ class UserControllerTest {
     @Test
     void getCurrentUser_asSeller_returnsSellerResponseDTO() throws Exception {
         User sellerUser = new User("seller1", "Seller", "seller@test.com", "pass", Role.SELLER, null);
-        userRepository.save(sellerUser);
+        //userRepository.save(sellerUser);
 
         // Stub security utils
         when(securityUtils.getCurrentUserId(anyString())).thenReturn("seller1");
@@ -93,10 +109,10 @@ class UserControllerTest {
     @Test
     void updateCurrentUser_asSeller_updatesAvatar() throws Exception {
         User sellerUser = new User("seller1", "Seller", "seller@test.com", "pass", Role.SELLER, null);
-        userRepository.save(sellerUser);
+        //userRepository.save(sellerUser);
 
-        when(securityUtils.getCurrentUserId(anyString())).thenReturn("seller1");
-        when(userService.updateUserAvatar(org.mockito.ArgumentMatchers.any(), anyString())).thenReturn("http://new-avatar.com/img.jpg");
+        when(userService.findById("seller1")).thenReturn(Optional.of(sellerUser));
+        when(userService.updateUserAvatar(any(), anyString())).thenReturn("http://new-avatar.com/img.jpg");
 
         MockMultipartFile avatarFile = new MockMultipartFile(
                 "avatar", "avatar.jpg", MediaType.IMAGE_JPEG_VALUE, "test-image".getBytes()
@@ -114,7 +130,9 @@ class UserControllerTest {
     @Test
     void getUserById_internal_returnsUserDTO() throws Exception {
         User user = new User("user123", "Test", "test@test.com", "pass", Role.CLIENT, null);
-        userRepository.save(user);
+        //userRepository.save(user); - cannot use this in the tests, as it tries to connect to MongoDB
+
+        when(userService.findById("user123")).thenReturn(java.util.Optional.of(user));
 
         mockMvc.perform(get("/api/users/internal/user/user123"))
                 .andExpect(status().isOk())
