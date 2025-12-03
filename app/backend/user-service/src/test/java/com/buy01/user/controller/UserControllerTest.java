@@ -114,6 +114,7 @@ class UserControllerTest {
         when(securityUtils.getCurrentUserId(anyString())).thenReturn("seller1");
         when(securityUtils.getRole(anyString())).thenReturn("SELLER");
 
+        when(userService.findById("seller1")).thenReturn(Optional.of(sellerUser));
         when(userService.updateUserAvatar(any(), anyString())).thenReturn("http://new-avatar.com/img.jpg");
 
         MockMultipartFile avatarFile = new MockMultipartFile(
