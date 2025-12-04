@@ -112,6 +112,7 @@ pipeline {
                 echo "No workspace available; skipping cleanWs"
             }
           }
+        }
 
         success {
                 sh """
@@ -129,7 +130,5 @@ pipeline {
         }
 
     }
-
-  }
 
 }
