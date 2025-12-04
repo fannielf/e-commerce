@@ -115,18 +115,22 @@ pipeline {
         }
 
         success {
+            script {
                 sh """
                 curl -X POST -H 'Content-type: application/json' \
                 --data '{"text": "Build SUCCESS ✅"}' \
                 "${SLACK_WEBHOOK}"
                 """
+            }
         }
         failure {
+            script {
                 sh """
                 curl -X POST -H 'Content-type: application/json' \
                 --data '{"text": "Build FAILED ❌"}' \
                 "${SLACK_WEBHOOK}"
                 """
+            }
         }
 
     }
