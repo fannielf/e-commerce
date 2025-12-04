@@ -113,26 +113,26 @@ pipeline {
             }
           }
           slackSend(
-              tokenCredentialId: 'slack-webhook'
+              tokenCredentialId: 'slack-webhook',
               color: '#439FE0',
-              message: "Job completed",
+              message: "Job completed"
             ))
        }
 
         success {
              slackSend(
-                  tokenCredentialId: 'slack-webhook'
+                  tokenCredentialId: 'slack-webhook',
                  channel: '#jenkins',
                  color: 'good',
-                 message: "Job '${env.JOB_NAME}' succeeded!",
+                 message: "Job '${env.JOB_NAME}' succeeded!"
                )
         }
         failure {
              slackSend(
-                  tokenCredentialId: 'slack-webhook'
+                  tokenCredentialId: 'slack-webhook',
                  channel: '#jenkins',
                  color: 'danger',
-                 message: "Job '${env.JOB_NAME}' failed!",
+                 message: "Job '${env.JOB_NAME}' failed!"
                )
         }
 
