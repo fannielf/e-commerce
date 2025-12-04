@@ -112,22 +112,27 @@ pipeline {
                 echo "No workspace available; skipping cleanWs"
             }
           }
+          slackSend(
+              tokenCredentialId: 'slack-webhook'
+              color: '#439FE0',
+              message: "Job completed",
+            ))
        }
 
         success {
              slackSend(
+                  tokenCredentialId: 'slack-webhook'
                  channel: '#jenkins',
                  color: 'good',
                  message: "Job '${env.JOB_NAME}' succeeded!",
-                 tokenCredentialId: 'slack-webhook'
                )
         }
         failure {
              slackSend(
+                  tokenCredentialId: 'slack-webhook'
                  channel: '#jenkins',
                  color: 'danger',
                  message: "Job '${env.JOB_NAME}' failed!",
-                 tokenCredentialId: 'slack-webhook'
                )
         }
 
