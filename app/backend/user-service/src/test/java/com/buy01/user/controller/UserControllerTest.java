@@ -117,6 +117,8 @@ class UserControllerTest {
         when(userRepository.findUserByUserId("seller1")).thenReturn(Optional.of(sellerUser));
         when(userService.updateUserAvatar(any(), anyString())).thenReturn("http://new-avatar.com/img.jpg");
 
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
         MockMultipartFile avatarFile = new MockMultipartFile(
                 "avatar", "avatar.jpg", MediaType.IMAGE_JPEG_VALUE, "test-image".getBytes()
         );
@@ -137,7 +139,7 @@ class UserControllerTest {
 
         when(userService.findById("user123")).thenReturn(Optional.of(user));
 
-        mockMvc.perform(get("api/users/internal/user/user123"))
+        mockMvc.perform(get("/api/users/internal/user/user123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user123"))
                 .andExpect(jsonPath("$.role").value("CLIENT"));
