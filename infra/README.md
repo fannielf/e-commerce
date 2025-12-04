@@ -39,16 +39,17 @@ buy-01-git/
 
 ## 3. Build the Jenkins Image
 
-Navigate to the `infra/` folder:
+Navigate to the jenkins folder inside the `infra/` folder:
 
 ```sh
 cd infra
+cd jenkins
 ```
 
 Build the custom Jenkins image:
 
 ```sh
-docker build -t buy01-jenkins .
+docker build -t jenkins .
 ```
 
 This image includes **Docker CLI**, **Compose plugin**, **Maven**, and **Node**.
@@ -57,7 +58,7 @@ This image includes **Docker CLI**, **Compose plugin**, **Maven**, and **Node**.
 
 ## 4. Start Jenkins
 
-Still inside the `infra/` directory:
+Still inside the `infra/jenkins/` directory:
 
 ```sh
 docker compose up -d
@@ -119,14 +120,16 @@ If you see output, Docker is working.
 Create a job:
 
 1. Dashboard → **New Item**
-2. Select **Multibranch Pipeline**
+2. Select **Pipeline**
 3. Set:
+    * **Triggers** → `Poll SCM` with `H/5 * * * *` (every 5 minutes) or H/2 * * * * (every 2 minutes) as a schedule. 
 
-    * **Repository URL** → your GitHub repo
-   
-4. Choose branch sources (e.g., `dev`, personal or all branches)
-
-Jenkins will automatically detect your `Jenkinsfile`.
+    * **Pipeline → Definition** → `Pipeline script from SCM`
+    * **SCM** → `Git`
+    * **Repository URL** → your repo URL (`https://github.com/Linnie43/buy-01-git`)
+    * **Branches to build** → `*/dev` or your desired branch
+    * **Script Path** → `Jenkinsfile`
+    * Save the job.
 
 ---
 
@@ -176,8 +179,6 @@ docker compose restart
 ```sh
 docker compose down
 ```
-
-Data persists in the `jenkins_home` Docker volume.
 
 ---
 
