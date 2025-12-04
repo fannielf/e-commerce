@@ -115,11 +115,21 @@ pipeline {
        }
 
         success {
-                 slackSend(channel: '#jenkins', color: 'good', message: 'Build SUCCESS')
-               }
+             slackSend(
+                 channel: '#jenkins',
+                 color: 'good',
+                 message: "Job '${env.JOB_NAME}' succeeded!",
+                 tokenCredentialId: 'slack-webhook'
+               )
+        }
         failure {
-                 slackSend(channel: '#jenkins', color: 'danger', message: 'Build FAILED')
-               }
+             slackSend(
+                 channel: '#jenkins',
+                 color: 'danger',
+                 message: "Job '${env.JOB_NAME}' failed!",
+                 tokenCredentialId: 'slack-webhook'
+               )
+        }
 
     }
 
