@@ -128,7 +128,7 @@ class UserControllerTest {
                         .with(request -> { request.setMethod("PUT"); return request; })
                         .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.avatarUrl").value("http://new-avatar.com/img.jpg"));
+                .andExpect(jsonPath("$.avatar").value("http://new-avatar.com/img.jpg"));
     }
 
     // GET api/users/internal/user/{userId} TESTS
@@ -137,7 +137,7 @@ class UserControllerTest {
         User user = new User("user123", "Test", "test@test.com", "pass", Role.CLIENT, null);
         //userRepository.save(user); - cannot use this in the tests, as it tries to connect to MongoDB
 
-        when(userService.findById("user123")).thenReturn(Optional.of(user));
+        when(userRepository.findById("user123")).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/users/internal/user/user123"))
                 .andExpect(status().isOk())
