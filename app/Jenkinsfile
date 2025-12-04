@@ -115,22 +115,18 @@ pipeline {
         }
 
         success {
-            node {
                 sh """
                 curl -X POST -H 'Content-type: application/json' \
                 --data '{"text": "Build SUCCESS ✅"}' \
                 "${SLACK_WEBHOOK}"
                 """
-            }
         }
         failure {
-            node {
                 sh """
                 curl -X POST -H 'Content-type: application/json' \
                 --data '{"text": "Build FAILED ❌"}' \
                 "${SLACK_WEBHOOK}"
                 """
-            }
         }
 
     }
