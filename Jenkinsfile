@@ -9,11 +9,6 @@ pipeline {
         string(name: 'BRANCH', defaultValue: 'maris', description: 'Branch to build')
     }
 
-    tools {
-        maven 'maven'
-        nodejs 'NodeJS-20'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -38,7 +33,7 @@ pipeline {
                 dir('frontend') {
                 sh 'npm install'
                 sh 'npm run build'
-                withEnv(["CHROME_BIN=/usr/bin/google-chrome-stable"]) {
+                withEnv(["CHROME_BIN=/usr/bin/chromium"]) {
                 sh 'npm test -- --watch=false --browsers=ChromeHeadless'
                 }
              }
