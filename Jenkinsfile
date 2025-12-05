@@ -92,8 +92,8 @@ pipeline {
                    steps {
                        script {
                            try {
-                               sh 'docker compose -f infra/docker-compose.yml down'
-                               sh 'docker compose -f infra/docker-compose.yml up -d --build'
+                               sh 'docker compose -f docker-compose.dev.yml down'
+                               sh 'docker compose -f docker-compose.dev.yml up -d --build'
                            } catch (Exception e) {
                                echo "Deployment failed — keeping previous version"
                            }
