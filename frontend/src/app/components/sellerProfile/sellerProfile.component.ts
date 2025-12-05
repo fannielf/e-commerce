@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
@@ -8,6 +8,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 import { ImageCarouselComponent } from '../shared/image-carousel/image-carousel.component';
 import { AVATAR_BASE_URL } from '../../constants/constants';
+import { WINDOW } from '../../window.token';
 
 @Component({
   selector: 'app-sellerProfile',
@@ -17,6 +18,7 @@ import { AVATAR_BASE_URL } from '../../constants/constants';
   styleUrl: './sellerProfile.component.css'
 })
 export class SellerProfileComponent implements OnInit {
+  private window = inject(WINDOW); // <-- inject token here
   user: User | null = null;
   isLoggedIn = false;
   profileImageUrl: string | null = null;
@@ -25,7 +27,7 @@ export class SellerProfileComponent implements OnInit {
     private authService: AuthService,
     private userService: UserService,
     private avatarService: AvatarService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -62,7 +64,7 @@ export class SellerProfileComponent implements OnInit {
         const filename = updated.avatar;
         this.profileImageUrl = this.avatarService.buildAvatarUrl(filename);
         if (this.user) this.user.avatar = filename;
-        window.location.reload();
+        this.window.location.reload();
         console.debug('[SellerProfile] Avatar updated:', filename);
       },
       error: err => {
