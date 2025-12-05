@@ -15,6 +15,14 @@ pipeline {
     }
 
     stages {
+        stage('Check Workspace') {
+            steps {
+                sh 'pwd'
+                sh 'ls -R'
+            }
+        }
+
+
         stage('Check Tools') {
             steps {
                 sh 'docker --version || true'
