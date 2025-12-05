@@ -15,9 +15,6 @@ pipeline {
     }
 
     stages {
-
-
-        // getting the project code from the repository
         stage('Checkout') {
             steps {
                 echo "Checking out branch: ${params.BRANCH}"
@@ -81,11 +78,12 @@ pipeline {
                                        sh 'docker compose -f docker-compose.dev.yml up -d --build'
                                    } catch (Exception e) {
                                        echo "Deployment failed — keeping previous version"
+                                       sh 'docker compose -f docker-compose.dev.yml up -d'
                                    }
                             }
                         }
                    }
-               }
+        }
 
     }
 
