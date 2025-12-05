@@ -1,9 +1,9 @@
 pipeline {
     agent any
 
-//     environment {
-//             SLACK_WEBHOOK = credentials('slack-webhook')
-//         }
+    environment {
+            SLACK_WEBHOOK = credentials('slack-webhook')
+        }
 
     parameters {
         string(name: 'BRANCH', defaultValue: 'maris', description: 'Branch to build')
@@ -37,8 +37,7 @@ pipeline {
                     sh 'npm test -- --watch=false --browsers=ChromeHeadlessCI'
                 }
              }
-          }
-       }
+        }
 
        stage('Test User Service') {
            steps {
@@ -68,32 +67,31 @@ pipeline {
        }
 
         stage('Deploy') {
-                   steps {
-                        dir("$WORKSPACE") {
-                            script {
-                                   try {
-                                       sh 'docker compose -f docker-compose.dev.yml down'
-                                       sh 'docker compose -f docker-compose.dev.yml up -d --build'
-                                   } catch (Exception e) {
-                                       echo "Deployment failed — keeping previous version"
-                                       sh 'docker compose -f docker-compose.dev.yml up -d'
-                                   }
-                            }
-                        }
-                   }
+            steps {
+                dir("$WORKSPACE") {
+                    script {
+                           try {
+                               sh 'docker compose -f docker-compose.dev.yml down'
+                               sh 'docker compose -f docker-compose.dev.yml up -d --build'
+                           } catch (Exception e) {
+                               echo "Deployment failed — keeping previous version"
+                               sh 'docker compose -f docker-compose.dev.yml up -d'
+                           }
+                    }
+                }
+            }
         }
-
     }
 
     post {
         always {
             script {
-            if (env.WORKSPACE) {
-                cleanWs notFailBuild: true //clean the workspace after build
-            } else {
-                echo "No workspace available; skipping cleanWs"
+                if (env.WORKSPACE) {
+                    cleanWs notFailBuild: true //clean the workspace after build
+                } else {
+                    echo "No workspace available; skipping cleanWs"
+                }
             }
-          }
         }
 
         success {
@@ -106,7 +104,5 @@ pipeline {
                 sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
             }
         }
-
     }
-
 }
