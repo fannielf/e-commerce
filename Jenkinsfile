@@ -15,13 +15,14 @@ pipeline {
     }
 
     stages {
-        stage('Check Workspace') {
+
+        stage('Check Docker Compose') {
             steps {
-                sh 'ls -R'
+                dir("$WORKSPACE") {
+                    sh 'ls -l docker-compose.dev.yml'
+                }
             }
         }
-
-
 
         stage('Check Tools') {
             steps {
@@ -98,14 +99,16 @@ pipeline {
 
         stage('Deploy') {
                    steps {
-                       script {
-                           try {
-                               sh 'docker compose -f docker-compose.dev.yml down'
-                               sh 'docker compose -f docker-compose.dev.yml up -d --build'
-                           } catch (Exception e) {
-                               echo "Deployment failed — keeping previous version"
-                           }
-                       }
+                        dir("$WORKSPACE") {
+                            script {
+                                   try {
+                                       sh 'docker compose -f docker-compose.dev.yml down'
+                                       sh 'docker compose -f docker-compose.dev.yml up -d --build'
+                                   } catch (Exception e) {
+                                       echo "Deployment failed — keeping previous version"
+                                   }
+                            }
+                        }
                    }
                }
 
