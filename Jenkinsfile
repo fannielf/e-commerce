@@ -85,23 +85,32 @@ pipeline {
 
     post {
         always {
-            script {
-                if (env.WORKSPACE) {
-                    cleanWs notFailBuild: true //clean the workspace after build
-                } else {
-                    echo "No workspace available; skipping cleanWs"
+            agent any
+            steps {
+                script {
+                    if (env.WORKSPACE) {
+                        cleanWs notFailBuild: true //clean the workspace after build
+                    } else {
+                        echo "No workspace available; skipping cleanWs"
+                    }
                 }
             }
         }
 
         success {
-            script {
-                sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build SUCCESS ✅"}' ${env.SLACK_WEBHOOK}"""
+            agent any
+            steps {
+                script {
+                    sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build SUCCESS ✅"}' ${env.SLACK_WEBHOOK}"""
+                }
             }
         }
         failure {
-            script {
-                sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
+            agent any
+            steps {
+                script {
+                    sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
+                }
             }
         }
     }
