@@ -62,7 +62,7 @@ pipeline {
 
        stage('Test Media Service') {
             steps {
-                echo "Running media sevice tests"
+                echo "Running media service tests"
                 dir('backend/media-service') {
                     sh 'mvn test'
                 }
