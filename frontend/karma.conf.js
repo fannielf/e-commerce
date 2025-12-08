@@ -34,8 +34,8 @@ module.exports = function (config) {
     singleRun: true,
     autoWatch: false,
     restartOnFileChange: false,
-    customLaunchers: {
-      ChromiumHeadlessCI: {
+    /*customLaunchers: {
+      ChromiumHeadless: {
           base: 'ChromiumHeadless',
           flags: [
             '--no-sandbox',
@@ -45,6 +45,6 @@ module.exports = function (config) {
             '--remote-debugging-port=9222'
           ]
       }
-    }
+    }*/
   });
 };
