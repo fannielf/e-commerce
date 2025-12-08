@@ -6,7 +6,7 @@ pipeline {
         }
 
     parameters {
-        string(name: 'BRANCH', defaultValue: 'maris', description: 'Branch to build')
+        string(name: 'BRANCH', defaultValue: 'deployment-test', description: 'Branch to build')
     }
 
     tools {
