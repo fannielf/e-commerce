@@ -63,7 +63,7 @@ services:
     build: backend/gateway
     image: gateway:${IMAGE_TAG}
     ports:
-      - "8080:8080"
+      - "8443:8443"
     depends_on:
       discovery:
         condition: service_healthy
@@ -71,7 +71,7 @@ services:
     networks:
       - FKML_secret_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:8443/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -79,6 +79,27 @@ services:
   user-service:
     build: backend/user-service
     image: user-service:${IMAGE_TAG}
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      discovery:
+        condition: service_healthy
+      gateway:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - FKML_secret_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  product-service:
+    build: backend/product-service
+    image: product-service:${IMAGE_TAG}
     environment:
       SPRING_PROFILES_ACTIVE: dev
     ports:
@@ -97,9 +118,9 @@ services:
       timeout: 5s
       retries: 5
 
-  product-service:
-    build: backend/product-service
-    image: product-service:${IMAGE_TAG}
+  media-service:
+    build: backend/media-service
+    image: media-service:${IMAGE_TAG}
     environment:
       SPRING_PROFILES_ACTIVE: dev
     ports:
@@ -114,27 +135,6 @@ services:
       - FKML_secret_network
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  media-service:
-    build: backend/media-service
-    image: media-service:${IMAGE_TAG}
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-    ports:
-      - "8083:8083"
-    depends_on:
-      discovery:
-        condition: service_healthy
-      gateway:
-        condition: service_started
-    restart: unless-stopped
-    networks:
-      - FKML_secret_network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 5
