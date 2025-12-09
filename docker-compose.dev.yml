@@ -161,3 +161,6 @@ services:
 networks:
   FKML_secret_network:
     driver: bridge
+
+volumes:
+  mongo_data:
