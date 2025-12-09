@@ -81,7 +81,7 @@ pipeline {
                            echo "Building Docker images with tag: ${VERSION}"
                            // We build explicitly first to ensure the images exist with the specific tag
                            withEnv(["IMAGE_TAG=${VERSION}"]) {
-                               sh 'docker compose -f docker-compose.dev.yml build'
+                               sh 'sudo docker compose -f docker-compose.dev.yml build'
                            }
                        }
                    }
@@ -97,7 +97,7 @@ pipeline {
                                     // 1. Deploy the NEW version
                                     // We do NOT run 'down' here to avoid downtime during the switch
                                     withEnv(["IMAGE_TAG=${VERSION}"]) {
-                                        sh 'docker compose -f docker-compose.dev.yml up -d'
+                                        sh 'sudo docker compose -f docker-compose.dev.yml up -d'
                                     }
 
                                     // 2. Health Check / Verification
@@ -107,7 +107,7 @@ pipeline {
                                     // Simple Check: Are the containers running?
                                     // This looks for any container in the stack that has "Exit" (crashed)
                                     sh """
-                                        if docker compose -f docker-compose.dev.yml ps | grep "Exit"; then
+                                        if sudo docker compose -f docker-compose.dev.yml ps | grep "Exit"; then
                                             echo "Detected crashed containers!"
                                             exit 1
                                         fi
@@ -118,12 +118,12 @@ pipeline {
                                     // 3. Promote to Stable (The Magic Step)
                                     // Since it worked, we retag these specific images as 'stable'
                                     // This ensures next time we rollback, we go back to THIS state.
-                                    sh "docker tag frontend:${VERSION} frontend:${STABLE_TAG}"
-                                    sh "docker tag user-service:${VERSION} user-service:${STABLE_TAG}"
-                                    sh "docker tag product-service:${VERSION} product-service:${STABLE_TAG}"
-                                    sh "docker tag media-service:${VERSION} media-service:${STABLE_TAG}"
-                                    sh "docker tag gateway:${VERSION} gateway:${STABLE_TAG}"
-                                    sh "docker tag discovery:${VERSION} discovery:${STABLE_TAG}"
+                                    sh "sudo docker tag frontend:${VERSION} frontend:${STABLE_TAG}"
+                                    sh "sudo docker tag user-service:${VERSION} user-service:${STABLE_TAG}"
+                                    sh "sudo docker tag product-service:${VERSION} product-service:${STABLE_TAG}"
+                                    sh "sudo docker tag media-service:${VERSION} media-service:${STABLE_TAG}"
+                                    sh "sudo docker tag gateway:${VERSION} gateway:${STABLE_TAG}"
+                                    sh "sudo docker tag discovery:${VERSION} discovery:${STABLE_TAG}"
 
 
                                 } catch (Exception e) {
@@ -133,7 +133,7 @@ pipeline {
                                     // We redeploy using the 'stable' tag
                                     try {
                                         withEnv(["IMAGE_TAG=${STABLE_TAG}"]) {
-                                            sh 'docker compose -f docker-compose.dev.yml up -d'
+                                            sh 'sudo docker compose -f docker-compose.dev.yml up -d'
                                         }
                                         echo "Rolled back to previous stable version."
                                     } catch (Exception rollbackErr) {
