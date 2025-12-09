@@ -35,6 +35,7 @@ public class GatewaySecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
                 .authorizeExchange(auth -> auth
+                        .pathMatchers("/actuator/health").permitAll()
                         // public endpoints
                         .pathMatchers("/api/auth/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/products/**").permitAll()

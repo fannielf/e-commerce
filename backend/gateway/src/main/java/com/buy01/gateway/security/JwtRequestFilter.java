@@ -23,7 +23,8 @@ public class JwtRequestFilter implements WebFilter {
 
     private static final List<String> EXCLUDE_URLS = List.of(
             "/api/auth/login",
-            "/api/auth/signup"
+            "/api/auth/signup",
+            "/actuator/health"
     );
 
     @Override
