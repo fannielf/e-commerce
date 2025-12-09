@@ -1,3 +1,5 @@
+process.env.CHROME_BIN = process.env.CHROMIUM_BIN || '/usr/bin/chromium';
+
 module.exports = function (config) {
   config.set({
     basePath: '',
