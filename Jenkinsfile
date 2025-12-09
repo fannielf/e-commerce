@@ -85,7 +85,7 @@ pipeline {
                            }
                        }
                    }
-               }
+       }
 
         stage('Deploy & Verify') {
                     steps {
@@ -146,12 +146,18 @@ pipeline {
                             }
                         }
                     }
-                }
-            }
+        }
+    }
 
     post {
         always {
-            cleanWs notFailBuild: true //clean the workspace after build
+            script {
+                if (env.WORKSPACE) {
+                    cleanWs notFailBuild: true //clean the workspace after build
+                } else {
+                    echo "No workspace available; skipping cleanWs"
+                }
+          }
         }
 
         success {
