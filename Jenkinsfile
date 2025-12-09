@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        // Use a Docker agent to provide the Docker daemon
-        docker {
-            image 'my-dind:latest'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
             SLACK_WEBHOOK = credentials('slack-webhook')
