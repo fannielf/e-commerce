@@ -149,24 +149,31 @@ pipeline {
                 }
             }
 
-    post {
-        always {
-            script {
-                cleanWs notFailBuild: true //clean the workspace after build
-          }
-        }
+   post {
+       always {
+           script {
+               dir("${env.WORKSPACE}") {
+                   cleanWs notFailBuild: true
+               }
+           }
+       }
 
-        success {
-            script {
-                sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build SUCCESS ✅"}' ${env.SLACK_WEBHOOK}"""
-            }
-        }
-        failure {
-            script {
-                sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
-            }
-        }
+       success {
+           script {
+               dir("${env.WORKSPACE}") {
+                   sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build SUCCESS ✅"}' ${env.SLACK_WEBHOOK}"""
+               }
+           }
+       }
 
-    }
+       failure {
+           script {
+               dir("${env.WORKSPACE}") {
+                   sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
+               }
+           }
+       }
+   }
+
 
 }
