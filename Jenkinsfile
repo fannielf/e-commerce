@@ -3,7 +3,7 @@ pipeline {
         // Use a Docker agent to provide the Docker daemon
         docker {
             image 'my-dind:latest'
-            args '--privileged'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
 
