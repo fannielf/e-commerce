@@ -11,7 +11,7 @@ pipeline {
 
     tools {
         maven 'maven'
-        nodejs '20.19.6'
+        nodejs 'NodeJS-20'
     }
 
     stages {
