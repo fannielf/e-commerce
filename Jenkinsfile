@@ -93,22 +93,18 @@ pipeline {
 
     post {
         always {
-            script {
-            if (env.WORKSPACE) {
+            node('master') {
                 cleanWs notFailBuild: true //clean the workspace after build
-            } else {
-                echo "No workspace available; skipping cleanWs"
-            }
           }
         }
 
         success {
-            script {
+            node('master') {
                 sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build SUCCESS ✅"}' ${env.SLACK_WEBHOOK}"""
             }
         }
         failure {
-            script {
+            node('master') {
                 sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
             }
         }
