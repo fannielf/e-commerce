@@ -189,3 +189,19 @@ docker compose down -v
 ```
 
 ---
+
+## 12. Additional Plugins/Configurations in Jenkins
+
+* **Docker Pipeline** plugin for Docker support in pipelines.
+* **Pipeline Stage View** for better visualization.
+* **NodeJS** plugin if you need Node.js management. First install plugin then add the version from the tool configuration.
+* **Maven** plugin for Maven integration. Already exists but have to add the version from the tool configuration.
+* **Slack Notification** plugin for Slack notifications.
+
+## 13. Adding Slack Notifications
+1. Install the **Slack Notification** plugin in Jenkins.
+2. Go to **Manage Jenkins → Credentials**.
+3. Press on **System** → **Global credentials (unrestricted)** → **Add Credentials**.
+4. Select **Secret text** as the kind.
+5. Write your slack webhook URL in the **Secret** field. You will get it from your Slack workspace by creating an Incoming Webhook app.
+6. Give it an ID `slack-webhook`(the same as you have in your Jenkinsfile), and save

@@ -162,11 +162,11 @@ pipeline {
 
         success {
             echo "Build succeeded!"
-            //sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build SUCCESS ✅"}' ${env.SLACK_WEBHOOK}"""
+            sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build SUCCESS ✅"}' ${env.SLACK_WEBHOOK}"""
         }
         failure {
             echo "Build failed!"
-            //sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
+            sh """curl -X POST -H 'Content-type: application/json' --data '{"text": "Build FAILED ❌"}' ${env.SLACK_WEBHOOK}"""
         }
 
     }
