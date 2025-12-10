@@ -8,20 +8,9 @@ RUN npm install
 
 # Copy source code and build
 COPY . .
-RUN npm run build:prod
-
-# Stage 2: Serve with NGINX
-FROM nginx:alpine
-COPY --from=build /app/dist/buy01/browser /usr/share/nginx/html
-
-# Copy SSL certs
-COPY certs /etc/nginx/ssl/
-
-# Custom NGINX config for HTTPS
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 4200
 EXPOSE 4200
 
-# Start NGINX
-CMD ["nginx", "-g", "daemon off;"]
+# Run Angular dev server with HTTPS
+CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "4200", "--ssl", "true", "--ssl-cert", "certs/localhost.pem", "--ssl-key", "certs/localhost-key.pem"]
