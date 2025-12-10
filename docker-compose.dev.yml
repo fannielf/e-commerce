@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   # -------------------
@@ -89,7 +87,7 @@ services:
         condition: service_healthy
       gateway:
         condition: service_started
-    restart: unless-stopped
+    restart: on-failure
     networks:
       - FKML_secret_network
     healthcheck:
