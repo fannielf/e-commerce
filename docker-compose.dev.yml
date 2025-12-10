@@ -81,7 +81,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATA_MONGODB_URI: mongodb://admin:password@buy01:27017/buy01?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SERVICE_NAME: product-service
+      SERVICE_NAME: user-service
     expose:
       - "8080"
     depends_on:
@@ -119,7 +119,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATA_MONGODB_URI: mongodb://admin:password@buy01:27017/buy01?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SERVICE_NAME: product-service
+      SERVICE_NAME: media-service
     expose:
       - "8082"
     depends_on:
