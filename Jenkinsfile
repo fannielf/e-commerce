@@ -15,7 +15,7 @@ pipeline {
     tools {
         maven 'maven'
         nodejs 'NodeJS-20'
-        sonarScanner 'SonarScanner'
+        sonar 'SonarScanner'
     }
 
     stages {
@@ -23,8 +23,7 @@ pipeline {
             steps {
                 echo "Checking out branch: ${params.BRANCH}"
                 git branch: "${params.BRANCH}",
-                    url: 'https://01.gritlab.ax/git/fvesanen/mr-jenk',
-                    credentialsId: 'gitea-token'
+                    url: 'https://github.com/fannielf/e-commerce'
             }
         }
 
@@ -93,43 +92,64 @@ pipeline {
        }
 
        stage('SonarQube Analysis') {
-           steps {
-               withSonarQubeEnv("${SONARQUBE_ENV}") {
-                   parallel(
-                       'Discovery': {
-                           dir('backend/discovery') {
-                               sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-discovery -Dsonar.projectName=mr-jenk-discovery'
-                           }
-                       },
-                       'Gateway': {
-                           dir('backend/gateway') {
-                               sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-gateway -Dsonar.projectName=mr-jenk-gateway'
-                           }
-                       },
-                       'User Service': {
-                           dir('backend/user-service') {
-                               sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-user-service -Dsonar.projectName=mr-jenk-user-service'
-                           }
-                       },
-                       'Product Service': {
-                           dir('backend/product-service') {
-                               sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-product-service -Dsonar.projectName=mr-jenk-product-service'
-                           }
-                       },
-                       'Media Service': {
-                           dir('backend/media-service') {
-                               sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-media-service -Dsonar.projectName=mr-jenk-media-service'
-                           }
-                       },
-                       'Frontend': {
-                           dir('frontend') {
-                               sh 'sonar-scanner -Dsonar.projectKey=mr-jenk-frontend -Dsonar.projectName=mr-jenk-frontend -Dsonar.sources=src'
+                   parallel {
+                       stage('Discovery') {
+                           steps {
+                               withSonarQubeEnv("${SONARQUBE_ENV}") {
+                                   dir('backend/discovery') {
+                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-discovery -Dsonar.projectName=mr-jenk-discovery'
+                                   }
+                               }
                            }
                        }
-                   )
+                       stage('Gateway') {
+                           steps {
+                               withSonarQubeEnv("${SONARQUBE_ENV}") {
+                                   dir('backend/gateway') {
+                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-gateway -Dsonar.projectName=mr-jenk-gateway'
+                                   }
+                               }
+                           }
+                       }
+                       stage('User Service') {
+                           steps {
+                               withSonarQubeEnv("${SONARQUBE_ENV}") {
+                                   dir('backend/user-service') {
+                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-user-service -Dsonar.projectName=mr-jenk-user-service'
+                                   }
+                               }
+                           }
+                       }
+                       stage('Product Service') {
+                           steps {
+                               withSonarQubeEnv("${SONARQUBE_ENV}") {
+                                   dir('backend/product-service') {
+                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-product-service -Dsonar.projectName=mr-jenk-product-service'
+                                   }
+                               }
+                           }
+                       }
+                       stage('Media Service') {
+                           steps {
+                               withSonarQubeEnv("${SONARQUBE_ENV}") {
+                                   dir('backend/media-service') {
+                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-media-service -Dsonar.projectName=mr-jenk-media-service'
+                                   }
+                               }
+                           }
+                       }
+                       stage('Frontend') {
+                           steps {
+                               withSonarQubeEnv("${SONARQUBE_ENV}") {
+                                   dir('frontend') {
+                                       sh 'sonar-scanner -Dsonar.projectKey=mr-jenk-frontend -Dsonar.projectName=mr-jenk-frontend -Dsonar.sources=src'
+                                   }
+                               }
+                           }
+                       }
+                   }
                }
-           }
-       }
+
 
        stage('Quality Gate') {
            steps {
