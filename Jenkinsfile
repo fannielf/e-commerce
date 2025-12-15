@@ -8,7 +8,7 @@ pipeline {
         }
 
     parameters {
-        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+        string(name: 'BRANCH', defaultValue: 'fanni', description: 'Branch to build')
     }
 
     tools {
@@ -50,14 +50,41 @@ pipeline {
             steps {
                 echo "Building frontend application"
                 dir('frontend') {
-                sh 'npm install'
-                sh 'npm install --save-dev karma-chrome-launcher karma-junit-reporter'
-                sh 'npm run build'
-                withEnv(["CHROMIUM_BIN=/usr/bin/chromium", "CHROME_BIN=/usr/bin/chromium"]) {
-                sh 'npm test'
+                    sh 'npm install'
+                    sh 'npm run build'
                 }
              }
           }
+       }
+
+       stage('Test Frontend') {
+              steps {
+                echo "Running frontend tests"
+                dir('frontend') {
+                    sh 'npm install --save-dev karma-chrome-launcher karma-junit-reporter'
+                     withEnv(["CHROMIUM_BIN=/usr/bin/chromium", "CHROME_BIN=/usr/bin/chromium"]) {
+                          sh 'npm test'
+                     }
+                }
+              }
+       }
+
+       stage('SonarQube Analysis') {
+           steps {
+               echo "Running SonarQube analysis"
+                withSonarQubeEnv('SonarQube') {
+                    sh 'sonar-scanner'
+                }
+           }
+       }
+
+       stage('Quality Gate') {
+           steps {
+               echo "Checking SonarQube Quality Gate"
+               timeout(time: 5, unit: 'MINUTES') {
+                   waitForQualityGate abortPipeline: true
+               }
+           }
        }
 
        stage('Test User Service') {
