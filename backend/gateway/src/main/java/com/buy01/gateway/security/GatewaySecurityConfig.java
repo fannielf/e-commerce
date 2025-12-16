@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.http.HttpMethod;
 import java.util.List;
 
-
 @Configuration
 @EnableMethodSecurity
 public class GatewaySecurityConfig {
@@ -42,13 +41,13 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/api/media/**").permitAll()
 
                         // User endpoints
-                        .pathMatchers("/api/users/me").hasAnyRole("CLIENT", "SELLER")
-                        .pathMatchers("/api/users/**").hasRole("ADMIN") // includes /users and /users/{id}
+                        .pathMatchers("/api/users/me").hasAnyRole(Roles.CLIENT, Roles.SELLER)
+                        .pathMatchers("/api/users/**").hasRole(Roles.ADMIN) // includes /users and /users/{id}
 
                         // Product endpoints
-                        .pathMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
-                        .pathMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
-                        .pathMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
+                        .pathMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole(Roles.SELLER, Roles.ADMIN)
+                        .pathMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole(Roles.SELLER, Roles.ADMIN)
+                        .pathMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole(Roles.SELLER, Roles.ADMIN)
 
                         .anyExchange().authenticated()
                 )
