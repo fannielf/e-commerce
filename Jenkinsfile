@@ -5,7 +5,7 @@ pipeline {
             SLACK_WEBHOOK = credentials('slack-webhook')
             VERSION = "v${env.BUILD_NUMBER}"
             STABLE_TAG = "stable"
-            SONARQUBE_ENV = "sonarqube"
+            SONAR_SCANNER_HOME = tool 'SonarScanner'
         }
 
     parameters {
@@ -52,13 +52,47 @@ pipeline {
                 echo "Building frontend application"
                 dir('frontend') {
                     sh 'npm install'
-                    sh 'npm install --save-dev karma-chrome-launcher karma-junit-reporter'
                     sh 'npm run build'
-                    withEnv(["CHROMIUM_BIN=/usr/bin/chromium", "CHROME_BIN=/usr/bin/chromium"]) {
-                        sh 'npm test'
                 }
-             }
-          }
+            }
+       }
+
+       stage('SonarQube Analysis') {
+           steps {
+               echo "Running SonarQube analysis"
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                    ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectKey=ecommerce-microservices \
+                    -Dsonar.sources=backend,frontend \
+                    -Dsonar.exclusions=**/node_modules/**,**/vendor/**,**/dist/**,**/target/** \
+                    -Dsonar.java.binaries=backend/**/target/classes \
+                    -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info \
+                    -Dsonar.host.url=http://host.docker.internal:9000
+                    """
+                }
+           }
+       }
+
+       stage('Quality Gate') {
+           steps {
+               echo "Checking SonarQube Quality Gate"
+               timeout(time: 5, unit: 'MINUTES') {
+                   waitForQualityGate abortPipeline: true
+               }
+           }
+       }
+
+       stage('Test Frontend') {
+            steps {
+                echo "Running frontend tests"
+                dir('frontend') {
+                    sh 'npm install --save-dev karma-chrome-launcher karma-junit-reporter'
+                     withEnv(["CHROMIUM_BIN=/usr/bin/chromium", "CHROME_BIN=/usr/bin/chromium"]) {
+                          sh 'npm test'
+                     }
+                }
+            }
        }
 
        stage('Test User Service') {
@@ -84,78 +118,8 @@ pipeline {
                 echo "Running media service tests"
                 dir('backend/media-service') {
                     sh 'mvn test'
-                    sh 'pwd'
-                    sh 'ls target/surefire-reports'
                 }
             }
-       }
-
-       stage('SonarQube Analysis') {
-                   parallel {
-                       stage('Discovery') {
-                           steps {
-                               withSonarQubeEnv("${SONARQUBE_ENV}") {
-                                   dir('backend/discovery') {
-                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-discovery -Dsonar.projectName=mr-jenk-discovery'
-                                   }
-                               }
-                           }
-                       }
-                       stage('Gateway') {
-                           steps {
-                               withSonarQubeEnv("${SONARQUBE_ENV}") {
-                                   dir('backend/gateway') {
-                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-gateway -Dsonar.projectName=mr-jenk-gateway'
-                                   }
-                               }
-                           }
-                       }
-                       stage('User Service') {
-                           steps {
-                               withSonarQubeEnv("${SONARQUBE_ENV}") {
-                                   dir('backend/user-service') {
-                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-user-service -Dsonar.projectName=mr-jenk-user-service'
-                                   }
-                               }
-                           }
-                       }
-                       stage('Product Service') {
-                           steps {
-                               withSonarQubeEnv("${SONARQUBE_ENV}") {
-                                   dir('backend/product-service') {
-                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-product-service -Dsonar.projectName=mr-jenk-product-service'
-                                   }
-                               }
-                           }
-                       }
-                       stage('Media Service') {
-                           steps {
-                               withSonarQubeEnv("${SONARQUBE_ENV}") {
-                                   dir('backend/media-service') {
-                                       sh 'mvn sonar:sonar -Dsonar.projectKey=mr-jenk-media-service -Dsonar.projectName=mr-jenk-media-service'
-                                   }
-                               }
-                           }
-                       }
-                       stage('Frontend') {
-                           steps {
-                               withSonarQubeEnv("${SONARQUBE_ENV}") {
-                                   dir('frontend') {
-                                       sh 'sonar-scanner -Dsonar.projectKey=mr-jenk-frontend -Dsonar.projectName=mr-jenk-frontend -Dsonar.sources=src'
-                                   }
-                               }
-                           }
-                       }
-                   }
-               }
-
-
-       stage('Quality Gate') {
-           steps {
-               timeout(time: 1, unit: 'MINUTES') { // doesn't wait forever
-                   waitForQualityGate abortPipeline: true
-               }
-           }
        }
 
        stage('Build Images') {
@@ -169,6 +133,7 @@ pipeline {
                        }
                    }
        }
+
         stage('Deploy & Verify') {
                     steps {
                         dir("$WORKSPACE") {
@@ -231,8 +196,8 @@ pipeline {
                                             """
                                     }
 
-                                    // Fail the build so we get a notification
-                                    error "Deployment Failed - Rolled back."
+                                    // Fail the build
+                                    error "Deployment Failed"
                                 }
                             }
                         }
@@ -256,7 +221,7 @@ pipeline {
                 } else {
                     echo "No workspace available; skipping cleanWs"
                 }
-          }
+            }
         }
 
         success {
@@ -277,5 +242,4 @@ pipeline {
             """
         }
     }
-
 }
