@@ -9,7 +9,7 @@ pipeline {
         }
 
     parameters {
-        string(name: 'BRANCH', defaultValue: 'maris', description: 'Branch to build')
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
     }
 
     tools {
