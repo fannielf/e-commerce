@@ -18,7 +18,7 @@ module.exports = function (config) {
     },
     reporters: ['progress', 'junit'],
     coverageReporter: {
-      dir: require('path').join(__dirname, 'coverage'),
+      dir: require('node:path').join(__dirname, 'coverage'),
       subdir: '.',
       reporters: [
         { type: 'lcovonly' },
