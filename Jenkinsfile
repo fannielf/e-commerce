@@ -101,14 +101,7 @@ pipeline {
                echo "Running SonarQube analysis"
                 withSonarQubeEnv('SonarQube') {
                     sh """
-                    ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                    -Dsonar.projectKey=ecommerce-microservices \
-                    -Dsonar.sources=backend,frontend \
-                    -Dsonar.exclusions=**/node_modules/**,**/vendor/**,**/dist/**,**/target/** \
-                    -Dsonar.cpd.exclusions=**/dto/**,**/JwtUtil.java \
-                    -Dsonar.java.binaries=backend/**/target/classes \
-                    -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info \
-                    -Dsonar.host.url=http://host.docker.internal:9000
+                    ${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=sonar-project.properties
                     """
                 }
            }
