@@ -98,28 +98,12 @@ pipeline {
 
        stage('SonarQube Analysis') {
            steps {
-                script {
-                    echo "Running SonarQube analysis"
-
-                    // Determine if this is a PR build
-                    def isPR = env.CHANGE_ID != null
-                    def sonarCmd = "${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=sonar-project.properties"
-
-                    if (isPR) {
-                        echo "Detected Pull Request #${env.CHANGE_ID} from branch ${env.CHANGE_BRANCH} targeting ${env.CHANGE_TARGET}"
-                        sonarCmd += " -Dsonar.pullrequest.key=${env.CHANGE_ID}"
-                        sonarCmd += " -Dsonar.pullrequest.branch=${env.CHANGE_BRANCH}"
-                        sonarCmd += " -Dsonar.pullrequest.base=${env.CHANGE_TARGET}"
-                    } else {
-                        echo "Building branch ${params.BRANCH}"
-                        sonarCmd += " -Dsonar.branch.name=${params.BRANCH}"
-                    }
-
-                    withSonarQubeEnv('SonarQube') {
-                        sh sonarCmd
-                    }
+               echo "Running SonarQube analysis"
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                    ${SONAR_SCANNER_HOME}/bin/sonar-scanner -Dproject.settings=sonar-project.properties
+                    """
                 }
-
            }
        }
 
