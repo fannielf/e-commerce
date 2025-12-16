@@ -42,7 +42,7 @@ public class GatewaySecurityConfig {
 
                         // User endpoints
                         .pathMatchers("/api/users/me").hasAnyRole(Roles.CLIENT, Roles.SELLER)
-                        .pathMatchers("/api/users/**").hasRole(Roles.ADMIN) // includes /users and /users/{id}
+                        .pathMatchers("/api/users/**").hasRole(Roles.ADMIN)
 
                         // Product endpoints
                         .pathMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole(Roles.SELLER, Roles.ADMIN)
