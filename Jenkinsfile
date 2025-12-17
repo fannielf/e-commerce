@@ -22,7 +22,7 @@ pipeline {
             steps {
                 echo "Checking out branch: ${params.BRANCH}"
                 git branch: "${params.BRANCH}",
-                    url: 'https://github.com/fannielf/e-commerce'
+                    url: 'https://github.com/Linnie43/buy-01-git'
             }
         }
 
