@@ -122,7 +122,7 @@ pipeline {
                            echo "Building Docker images with tag: ${VERSION}"
                            // We build explicitly first to ensure the images exist with the specific tag
                            withEnv(["IMAGE_TAG=${VERSION}"]) {
-                               sh 'docker compose -f docker-compose.dev.yml build'
+                               sh 'docker compose -f docker-compose.yml build'
                            }
                        }
                    }
@@ -138,7 +138,7 @@ pipeline {
                                     // Deploy the NEW version
                                     // We do NOT run 'down' here to avoid downtime during the switch
                                     withEnv(["IMAGE_TAG=${VERSION}"]) {
-                                        sh 'docker compose -f docker-compose.dev.yml up -d'
+                                        sh 'docker compose -f docker-compose.yml up -d'
 
                                         // Health Check / Verification
                                         echo "Waiting for services to stabilize..."
@@ -146,7 +146,7 @@ pipeline {
 
                                         // This looks for any container in the stack that has "Exit" (crashed)
                                         sh """
-                                            if docker compose -f docker-compose.dev.yml ps | grep "Exit"; then
+                                            if docker compose -f docker-compose.yml ps | grep "Exit"; then
                                                 echo "Detected crashed containers!"
                                                 exit 1
                                             fi
@@ -171,7 +171,7 @@ pipeline {
                                     // We redeploy using the 'stable' tag
                                     try {
                                         withEnv(["IMAGE_TAG=${STABLE_TAG}"]) {
-                                            sh 'docker compose -f docker-compose.dev.yml up -d'
+                                            sh 'docker compose -f docker-compose.yml up -d'
                                         }
                                         echo "Rolled back to previous stable version."
                                         // Slack notification for successful rollback

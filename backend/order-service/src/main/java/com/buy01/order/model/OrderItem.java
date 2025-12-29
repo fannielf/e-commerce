@@ -6,16 +6,17 @@ public class OrderItem {
     private String productName;
     private int  quantity;
     private double price;
+    private String sellerId;
 
-    //Constructor
-    public OrderItem(String productId, String productName, int quantity, double price) {
+    public OrderItem() {}
+
+    public OrderItem(String productId, String productName, int quantity, double price, String sellerId) {
         this.productId = productId;
         this.productName = productName;
         this.quantity = quantity;
         this.price = price;
+        this.sellerId = sellerId;
     }
-
-    public OrderItem() {}
 
     public String getProductId() {return this.productId;}
     public void setProductId(String productId) {this.productId = productId;}
@@ -28,5 +29,8 @@ public class OrderItem {
 
     public double getPrice() {return this.price;}
     public void setPrice(double price) {this.price = price;}
+
+    public String getSellerId() {return this.sellerId;}
+    public void setSellerId(String sellerId) {this.sellerId = sellerId;}
 
 }
