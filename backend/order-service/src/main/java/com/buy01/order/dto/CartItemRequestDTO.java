@@ -7,7 +7,7 @@ public class CartItemRequestDTO {
     @NotBlank
     private String productId;
     @Min(1)
-    private Integer quantity;
+    private int quantity;
 
     public CartItemRequestDTO() {}
     public CartItemRequestDTO(String productId, Integer quantity) {

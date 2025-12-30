@@ -1,6 +1,7 @@
 package com.buy01.order.dto;
 
 import com.buy01.order.model.OrderStatus;
+import com.buy01.order.model.ShippingAddress;
 
 import java.util.Date;
 import java.util.List;
@@ -10,14 +11,16 @@ public class OrderResponseDTO {
     private List<ItemDTO> items;
     private double totalPrice;
     private OrderStatus status;
+    private ShippingAddress shippingAddress;
     private Date createdAt;
 
     public OrderResponseDTO() {}
-    public OrderResponseDTO(String orderId, List<ItemDTO> items, double totalPrice, OrderStatus status, Date createdAt) {
+    public OrderResponseDTO(String orderId, List<ItemDTO> items, double totalPrice, OrderStatus status, ShippingAddress shippingAddress, Date createdAt) {
         this.orderId = orderId;
         this.items = items;
         this.totalPrice = totalPrice;
         this.status = status;
+        this.shippingAddress = shippingAddress;
         this.createdAt = createdAt;
     }
 
@@ -32,6 +35,9 @@ public class OrderResponseDTO {
 
     public OrderStatus getStatus() {return status;}
     public void setStatus(OrderStatus status) {this.status = status;}
+
+    public ShippingAddress getShippingAddress() {return shippingAddress;}
+    public void setShippingAddress(ShippingAddress shippingAddress) {this.shippingAddress = shippingAddress;}
 
     public Date getCreatedAt() {return createdAt;}
     public void setCreatedAt(Date createdAt) {this.createdAt = createdAt;}

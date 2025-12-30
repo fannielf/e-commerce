@@ -48,9 +48,9 @@ public class OrderController {
             ) {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        // GET ALL ORDERS FOR THE CURRENT USER
+        // CHECK ROLE: SELLER ORDERS OR CLIENT ORDERS
 
-        // SELLER ORDERS OR CLIENT ORDERS
+        // GET ALL ORDERS FOR THE CURRENT USER
 
         return null;
     }

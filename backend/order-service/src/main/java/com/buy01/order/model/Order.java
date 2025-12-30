@@ -16,27 +16,30 @@ public class Order {
     private List<OrderItem> items;
     private double totalPrice;
     private OrderStatus status;
+    private ShippingAddress shippingAddress;
     private Date createdAt;
     private Date updatedAt;
 
     // constructor - both constructors are needed, empty one for Spring Data and one with parameters for creating objects
     public Order() {}
-    public Order(String userId, List<OrderItem> items, double totalPrice, OrderStatus status) {
+    public Order(String userId, List<OrderItem> items, double totalPrice, OrderStatus status, ShippingAddress shippingAddress) {
         this.userId = userId;
         this.items = items;
         this.totalPrice = totalPrice;
         this.status = status;
+        this.shippingAddress = shippingAddress;
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
 
     // Testing purpose constructor
-    protected Order(String id, String userId, List<OrderItem> items, double totalPrice, OrderStatus status) {
+    protected Order(String id, String userId, List<OrderItem> items, double totalPrice, OrderStatus status, ShippingAddress shippingAddress) {
         this.id = id;
         this.userId = userId;
         this.items = items;
         this.totalPrice = totalPrice;
         this.status = status;
+        this.shippingAddress = shippingAddress;
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
@@ -55,6 +58,9 @@ public class Order {
 
     public OrderStatus getStatus() {return status;}
     public void setStatus(OrderStatus status) {this.status = status;}
+
+    public ShippingAddress getShippingAddress() {return shippingAddress;}
+    public void setShippingAddress(ShippingAddress shippingAddress) {this.shippingAddress = shippingAddress;}
 
     public Date getCreatedAt() {return createdAt;}
     public void setCreatedAt(Date createdAt) {this.createdAt = createdAt;}

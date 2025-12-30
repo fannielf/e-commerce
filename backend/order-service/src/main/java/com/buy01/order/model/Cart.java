@@ -13,24 +13,27 @@ public class Cart {
     private String userId;
     private List<OrderItem> items;
     private double totalPrice;
+    private CartStatus cartStatus;
     private Date createTime;
     private Date updateTime;
 
     public Cart(){}
 
-    public Cart(String userId, List<OrderItem> items, double totalPrice) {
+    public Cart(String userId, List<OrderItem> items, double totalPrice, CartStatus cartStatus) {
         this.userId = userId;
         this.items = items;
         this.totalPrice = totalPrice;
+        this.cartStatus = cartStatus;
         this.createTime = new Date();
         this.updateTime = new Date();
     }
 
-    private Cart(String id, String userId, List<OrderItem> items, double totalPrice) {
+    private Cart(String id, String userId, List<OrderItem> items, double totalPrice,  CartStatus cartStatus) {
         this.id = id;
         this.userId = userId;
         this.items = items;
         this.totalPrice = totalPrice;
+        this.cartStatus = cartStatus;
         this.createTime = new Date();
         this.updateTime = new Date();
     }
@@ -46,10 +49,12 @@ public class Cart {
     public double getTotalPrice() {return totalPrice;}
     public void setTotalPrice(double totalPrice) {this.totalPrice = totalPrice;}
 
+    public CartStatus getCartStatus() {return cartStatus;}
+    public void setCartStatus(CartStatus cartStatus) {this.cartStatus = cartStatus;}
+
     public Date getCreateTime() {return createTime;}
     public void setCreateTime(Date createTime) {this.createTime = createTime;}
 
     public Date getUpdateTime() {return updateTime;}
     public void setUpdateTime(Date updateTime) {this.updateTime = updateTime;}
-
 }
