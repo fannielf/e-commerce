@@ -12,35 +12,26 @@ export class CartService {
 
   private apiUrl = `${BASE_URL}/api/cart`;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
-
-  private getAuthHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
-    let headers = new HttpHeaders();
-    if (token) {
-    headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-      return headers;
-    }
+  constructor(private http: HttpClient) {}
 
 //HTTP QUERIES FOR CART OPERATIONS
   addToCart(newItem: CartItemRequestDTO): Observable<CartResponseDTO> {
-    return this.http.post<CartResponseDTO>(this.apiUrl, newItem, { headers: this.getAuthHeaders() });
+    return this.http.post<CartResponseDTO>(this.apiUrl, newItem);
   }
 
   getCart(): Observable<CartResponseDTO> {
-      return this.http.get<CartResponseDTO>(this.apiUrl, { headers: this.getAuthHeaders() });
+      return this.http.get<CartResponseDTO>(this.apiUrl);
     }
 
   updateCartItem(productId: string, update: CartItemUpdateDTO): Observable<CartResponseDTO> {
-    return this.http.put<CartResponseDTO>(`${this.apiUrl}/${productId}`, update, { headers: this.getAuthHeaders() });
+    return this.http.put<CartResponseDTO>(`${this.apiUrl}/${productId}`, update);
   }
 
-  deleteItem(productId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${productId}`, { headers: this.getAuthHeaders() });
+  deleteItemById(productId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${productId}`);
   }
 
-  clearCart(): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/all`, { headers: this.getAuthHeaders() });
+  deleteCart(): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/all`);
   }
 }
