@@ -306,7 +306,7 @@ public class ProductService {
 
     private void validateUserId(String userId) {
         // call UserClient to verify that the id exists.
-        String role = userClient.getRoleIfUserExists(userId);
+        Role role = userClient.getRoleIfUserExists(userId);
         if (role == null || !role.equals(Role.ADMIN) && !role.equals(Role.SELLER)) {
             throw new BadRequestException();
         }

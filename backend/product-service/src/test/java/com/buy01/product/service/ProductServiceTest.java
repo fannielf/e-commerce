@@ -65,7 +65,7 @@ public class ProductServiceTest {
         when(request.getUserId()).thenReturn("current-user-1"); // Use the actual user ID
         when(request.getImagesList()).thenReturn(null);
 
-        when(userClient.getRoleIfUserExists("current-user-1")).thenReturn("SELLER"); // Mock user role check
+        when(userClient.getRoleIfUserExists("current-user-1")).thenReturn(Role.SELLER); // Mock user role check
 
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
             Product p = invocation.getArgument(0);
@@ -160,7 +160,7 @@ public class ProductServiceTest {
         );
         when(request.getImagesList()).thenReturn(List.of(mockFile));
 
-        when(userClient.getRoleIfUserExists("current-user")).thenReturn("SELLER");
+        when(userClient.getRoleIfUserExists("current-user")).thenReturn(Role.SELLER);
 
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
             Product p = invocation.getArgument(0);
