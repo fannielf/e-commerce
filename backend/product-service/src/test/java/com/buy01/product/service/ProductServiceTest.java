@@ -4,6 +4,7 @@ import com.buy01.product.client.MediaClient;
 import com.buy01.product.client.UserClient;
 import com.buy01.product.dto.ProductCreateDTO;
 import com.buy01.product.dto.ProductResponseDTO;
+import com.buy01.product.dto.ProductUpdateDTO;
 import com.buy01.product.dto.ProductUpdateRequest;
 import com.buy01.product.exception.ForbiddenException;
 import com.buy01.product.exception.NotFoundException;
@@ -14,6 +15,7 @@ import com.buy01.product.security.AuthDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -121,6 +123,18 @@ public class ProductServiceTest {
         assertEquals("New Name", resp.getName());
         assertEquals(10.0, resp.getPrice());
         assertTrue(Boolean.TRUE.equals(resp.getIsProductOwner()));
+
+        ArgumentCaptor<ProductUpdateDTO> captor =
+                ArgumentCaptor.forClass(ProductUpdateDTO.class);
+
+        verify(productEventService).publishProductUpdatedEvent(captor.capture());
+
+        ProductUpdateDTO sent = captor.getValue();
+        assertEquals(productId, sent.getProductId());
+        assertEquals("New Name", sent.getName());
+        assertEquals(10.0, sent.getPrice());
+        assertEquals(3, sent.getQuantity());
+
     }
 
     @Test
