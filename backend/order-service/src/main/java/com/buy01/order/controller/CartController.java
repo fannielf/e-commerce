@@ -46,7 +46,21 @@ public class CartController {
                 newItem.getQuantity()
         );
 
-        return ResponseEntity.ok(updatedCart);
+        List<ItemDTO> itemsDto = updatedCart.getItems().stream()
+                .map(item -> new ItemDTO(
+                        item.getProductId(),
+                        item.getProductName(),
+                        item.getQuantity(),
+                        item.getPrice(),
+                        item.getPrice() * item.getQuantity()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(new CartResponseDTO(
+                updatedCart.getId(),
+                itemsDto,
+                itemsDto.stream().mapToDouble(ItemDTO::getTotal).sum()
+        ));
     }
 
     @GetMapping
