@@ -193,7 +193,6 @@ public class ProductService {
         productEventService.publishProductUpdatedEvent(new ProductUpdateDTO(
                 updatedProduct.getProductId(),
                 updatedProduct.getName(),
-                updatedProduct.getDescription(),
                 updatedProduct.getPrice(),
                 updatedProduct.getQuantity()
         ));
@@ -227,7 +226,6 @@ public class ProductService {
         productEventService.publishProductUpdatedEvent(new ProductUpdateDTO(
                 product.getProductId(),
                 product.getName(),
-                product.getDescription(),
                 product.getPrice(),
                 product.getQuantity()
         ));

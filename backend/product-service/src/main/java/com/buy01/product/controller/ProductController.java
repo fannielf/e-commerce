@@ -25,7 +25,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final SecurityUtils securityUtils;
-    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
 
     public ProductController(ProductService productService, SecurityUtils securityUtils) {
