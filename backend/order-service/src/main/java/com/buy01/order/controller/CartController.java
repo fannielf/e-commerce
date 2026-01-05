@@ -50,7 +50,7 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getActiveCart(
+    public ResponseEntity<?> getCurrentCart(
             @RequestHeader("Authorization") String authHeader
             ) throws BadRequestException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
@@ -59,7 +59,7 @@ public class CartController {
             throw new BadRequestException("Current user is not a CLIENT");
         }
 
-        Cart cart = cartService.getActiveCart(currentUser.getCurrentUserId());
+        Cart cart = cartService.getCurrentCart(currentUser.getCurrentUserId());
         List<ItemDTO> itemsDto = cart.getItems().stream()
                 .map(item -> new ItemDTO(
                         item.getProductId(),

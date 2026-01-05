@@ -1,3 +1,12 @@
+package com.buy01.order.client;
+
+import com.buy01.order.dto.ProductDTO;
+import com.buy01.order.exception.NotFoundException;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
 @Service
 public class ProductClient {
 

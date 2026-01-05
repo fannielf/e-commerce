@@ -101,4 +101,11 @@ public class GlobalExceptionHandler {
         body.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, String>> handleConflict(ConflictException ex) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
 }

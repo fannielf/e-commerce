@@ -96,7 +96,7 @@ pipeline {
             }
        }
 
-       /*stage('SonarQube Analysis') {
+       stage('SonarQube Analysis') {
            steps {
                echo "Running SonarQube analysis"
                 withSonarQubeEnv('SonarQube') {
@@ -115,7 +115,7 @@ pipeline {
                }
            }
        }
-       */
+
 
        stage('Build Images') {
                    steps {

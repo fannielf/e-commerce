@@ -4,6 +4,8 @@ public class ProductDTO {
     private String productId;
     private String name;
     private double price;
+    private String productOwnerId;
+
 
     // Getters and setters
     public String getProductId() {
@@ -28,5 +30,12 @@ public class ProductDTO {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getProductOwnerId() {
+        return productOwnerId;
+    }
+    public void setProductOwnerId(String productOwnerId) {
+        this.productOwnerId = productOwnerId;
     }
 }
