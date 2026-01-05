@@ -32,7 +32,7 @@
           </button>
 
           <button *ngIf="!product.isProductOwner && isLoggedIn" class="btn btn-success w-100" [disabled]="product.quantity === 0">
-            Buy
+            Add to Cart
           </button>
 
           <p *ngIf="!isLoggedIn" class="text-muted mt-2 text-center">Please log in to buy this product.</p>

@@ -51,6 +51,11 @@ header {
   align-items: center;
 }
 
+.cart-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
 .cart-link {
   display: flex;
   align-items: center;

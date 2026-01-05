@@ -1,0 +1,20 @@
+<div *ngIf="cart && cart.items.length > 0; else emptyCart">
+  <h2>My Cart</h2>
+  <table>
+    <tr *ngFor="let item of cart.items">
+      <td>{{ item.productName }}</td>
+      <td>
+        <input type="number" [value]="item.quantity" (change)="updateQuantity(item, $any($event.target).value)">
+      </td>
+      <td>{{ item.price | currency:'EUR' }}</td>
+      <td>{{ item.total | currency:'EUR' }}</td>
+      <td><button (click)="removeItem(item)">Remove</button></td>
+    </tr>
+  </table>
+  <p>Total: {{ getTotalPrice() | currency:'EUR' }}</p>
+</div>
+
+<ng-template #emptyCart>
+  <p>Your cart is empty.</p>
+</ng-template>
+

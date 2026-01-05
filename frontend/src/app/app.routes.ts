@@ -10,6 +10,7 @@ import { ManageProductsComponent } from './components/manage-products/manage-pro
 import { NotFoundComponent } from './components/not-found/not-found.component';
 import { productOwnerGuard } from './guards/product-owner.guard';
 import { SessionGuard } from './guards/session.guard';
+import { CartComponent } from './components/cart/cart.component';
 
 export const routes: Routes = [
   { path: '', component: DashboardComponent },
