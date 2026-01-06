@@ -79,15 +79,15 @@ public class OrderController {
     }
 
 
-    // WHO CAN DELETE ORDERS?? ADMIN ONLY??
-    @DeleteMapping("/{id}")
+    // Client can delete their own orders with status "CREATED", ADMIN can delete any order
+    @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteProduct(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String id
+            @PathVariable String orderId
     ) {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //orderService.deleteOrder(id, currentUser);
+        orderService.deleteOrderById(orderId, currentUser);
 
         return ResponseEntity.ok().build();
     }

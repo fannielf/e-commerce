@@ -113,7 +113,26 @@ public class OrderService {
         return mapToDTO(orderRepository.save(existingOrder));
     }
 
-    // Helper method to convert OrderItem to ItemDTO
+    public void deleteOrderById(String orderId, AuthDetails currentUser) {
+        Order existingOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with orderId: " + orderId));
+
+        boolean isAdmin = currentUser.getRole().equals(Role.ADMIN);
+        boolean isOwnerAndCreated = existingOrder.getUserId().equals(currentUser.getCurrentUserId())
+                && existingOrder.getStatus().equals(OrderStatus.CREATED);
+
+        if (!isAdmin && !isOwnerAndCreated) {
+            throw new ForbiddenException(
+                    "Only ADMIN can delete orders that have been confirmed. Order status is " + existingOrder.getStatus()
+                    + ". Access denied for userId: " + currentUser.getCurrentUserId()
+            );
+        }
+        orderRepository.delete(existingOrder);
+    }
+
+    // Helper methods
+
+    // convert OrderItem to ItemDTO
     private ItemDTO toItemDTO(OrderItem item) {
         return new ItemDTO(
                 item.getProductId(),
@@ -125,7 +144,7 @@ public class OrderService {
         );
     }
 
-    // Helper method to map Order to OrderResponseDTO
+    // map Order to OrderResponseDTO
     private OrderResponseDTO mapToDTO(Order order) {
         return new OrderResponseDTO(
                 order.getId(),
@@ -139,7 +158,7 @@ public class OrderService {
         );
     }
 
-    // Helper method to filter order items for a specific seller
+    // filter order items for a specific seller
     private Order filterOrderForSeller(Order order, AuthDetails currentUser) {
         if (!currentUser.getRole().equals(Role.SELLER)) {
             throw new ForbiddenException("Access denied to order with orderId: " + order.getId() + " for userId: " + currentUser.getCurrentUserId());
