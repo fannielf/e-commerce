@@ -29,11 +29,12 @@ public class Order {
 
     // constructor - both constructors are needed, empty one for Spring Data and one with parameters for creating objects
     public Order() {}
-    public Order(String userId, List<OrderItem> items, double totalPrice, OrderStatus status, ShippingAddress shippingAddress) {
+    public Order(String userId, List<OrderItem> items, ShippingAddress shippingAddress) {
         this.userId = userId;
         this.items = items;
-        this.totalPrice = totalPrice;
-        this.status = status;
+        this.totalPrice = items.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();        this.status = OrderStatus.CREATED;
         this.shippingAddress = shippingAddress;
         this.paid = false;
         this.createdAt = new Date();

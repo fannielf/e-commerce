@@ -1,14 +1,19 @@
 package com.buy01.order.service;
 
 import com.buy01.order.dto.ItemDTO;
+import com.buy01.order.dto.OrderCreateDTO;
 import com.buy01.order.dto.OrderResponseDTO;
 import com.buy01.order.exception.ForbiddenException;
 import com.buy01.order.exception.NotFoundException;
+import com.buy01.order.model.Cart;
 import com.buy01.order.model.Order;
 import com.buy01.order.model.OrderItem;
 import com.buy01.order.model.Role;
+import com.buy01.order.repository.CartRepository;
 import com.buy01.order.repository.OrderRepository;
 import com.buy01.order.security.AuthDetails;
+import io.jsonwebtoken.io.IOException;
+import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +25,12 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, CartRepository cartRepository) {
         this.orderRepository = orderRepository;
+        this.cartRepository = cartRepository;
     }
 
     public List<OrderResponseDTO> getClientOrders(AuthDetails currentUser) {
@@ -52,6 +59,31 @@ public class OrderService {
                     || currentUser.getRole().equals(Role.ADMIN))
                     ? mapToDTO(order) // normal mapping for client and admin
                     : mapToDTO(filterOrderForSeller(order, currentUser)); // seller gets only filtered items
+    }
+
+    public OrderResponseDTO createOrder(OrderCreateDTO orderCreateDTO, AuthDetails currentUser) throws IOException {
+
+        if (!currentUser.getRole().equals(Role.CLIENT)) {
+            throw new BadRequestException("Current user is not a CLIENT and cannot place orders");
+        }
+
+        Cart cart = cartRepository.findByUserId(currentUser.getCurrentUserId());
+        if (cart == null || cart.getItems().isEmpty()) {
+            throw new BadRequestException("Cart is empty. Cannot create order.");
+        }
+
+        Order order = orderRepository.save(
+                new Order(
+                        currentUser.getCurrentUserId(),
+                        cart.getItems(),
+                        orderCreateDTO.getShippingAddress()
+                )
+        );
+
+        // Clear the cart after order is placed
+        cartRepository.delete(cart);
+
+        return mapToDTO(order);
     }
 
     // Helper method to convert OrderItem to ItemDTO

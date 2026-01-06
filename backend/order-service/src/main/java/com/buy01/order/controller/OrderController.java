@@ -1,5 +1,6 @@
 package com.buy01.order.controller;
 
+import com.buy01.order.dto.OrderCreateDTO;
 import com.buy01.order.model.Role;
 import com.buy01.order.security.AuthDetails;
 import com.buy01.order.service.OrderService;
@@ -28,18 +29,14 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<?> createOrder(
-            @RequestHeader("Authorization") String authHeader) throws IOException {
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @ModelAttribute OrderCreateDTO orderDto) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        if (!currentUser.getRole().equals("CLIENT")) {
-            throw new BadRequestException("Current user is not a CLIENT");
-        }
+        OrderResponseDTO order = orderService.createOrder(orderDto, currentUser);
 
-        // ORDER CREATION LOGIC
-        // fetch cart for userId and transform to order
-
-        return ResponseEntity.ok("new order created");
+        return ResponseEntity.ok(order);
     }
 
     // get all orders for the current user (client or seller)
