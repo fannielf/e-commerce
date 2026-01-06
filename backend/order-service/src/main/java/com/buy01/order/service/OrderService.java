@@ -3,12 +3,10 @@ package com.buy01.order.service;
 import com.buy01.order.dto.ItemDTO;
 import com.buy01.order.dto.OrderCreateDTO;
 import com.buy01.order.dto.OrderResponseDTO;
+import com.buy01.order.dto.OrderUpdateRequest;
 import com.buy01.order.exception.ForbiddenException;
 import com.buy01.order.exception.NotFoundException;
-import com.buy01.order.model.Cart;
-import com.buy01.order.model.Order;
-import com.buy01.order.model.OrderItem;
-import com.buy01.order.model.Role;
+import com.buy01.order.model.*;
 import com.buy01.order.repository.CartRepository;
 import com.buy01.order.repository.OrderRepository;
 import com.buy01.order.security.AuthDetails;
@@ -17,6 +15,7 @@ import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 // Service layer is responsible for business logic, validation, verification and data manipulation.
@@ -84,6 +83,34 @@ public class OrderService {
         cartRepository.delete(cart);
 
         return mapToDTO(order);
+    }
+
+    public OrderResponseDTO updateOrder(String orderId, OrderUpdateRequest orderUpdate, AuthDetails currentUser) throws IOException {
+        Order existingOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found with orderId: " + orderId));
+
+        if (!existingOrder.getUserId().equals(currentUser.getCurrentUserId())
+                && !currentUser.getRole().equals(Role.ADMIN)) {
+            throw new ForbiddenException("Access denied to update order with orderId: " + orderId + " for userId: " + currentUser.getCurrentUserId());
+        }
+
+        if (orderUpdate.getStatus() == null) {
+            throw new BadRequestException("Order status cannot be null");
+        }
+
+        if (!existingOrder.getStatus().canTransitionTo(orderUpdate.getStatus())) {
+            throw new BadRequestException(
+                    "Order has status " + existingOrder.getStatus() +
+                    " and cannot be updated to " + orderUpdate.getStatus()
+            );
+        }
+
+        existingOrder.setStatus(orderUpdate.getStatus());
+        existingOrder.setUpdatedAt(new Date());
+
+        // WHAT ELSE CAN BE UPDATED??
+
+        return mapToDTO(orderRepository.save(existingOrder));
     }
 
     // Helper method to convert OrderItem to ItemDTO

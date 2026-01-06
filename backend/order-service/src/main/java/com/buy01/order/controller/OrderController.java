@@ -28,15 +28,12 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createOrder(
+    public ResponseEntity<OrderResponseDTO> createOrder(
             @RequestHeader("Authorization") String authHeader,
             @Valid @ModelAttribute OrderCreateDTO orderDto) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
-
-        OrderResponseDTO order = orderService.createOrder(orderDto, currentUser);
-
-        return ResponseEntity.ok(order);
+        return ResponseEntity.ok(orderService.createOrder(orderDto, currentUser));
     }
 
     // get all orders for the current user (client or seller)
@@ -60,42 +57,29 @@ public class OrderController {
 
 
     // get a specific order details
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getOrderById(
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDTO> getOrderById(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String id) {
+            @PathVariable String orderId) {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //Order order = orderService.getOrderById(id);
-
-        OrderResponseDTO o = new OrderResponseDTO(
-//                order.getId(),
-//                order.getUserId(),
-//                order.getItems(),
-//                order.getTotalPrice(),
-//                order.getStatus(),
-//                order.getCreatedAt(),
-//                order.getUpdatedAt()
-        );
-
-        return ResponseEntity.ok(o);
+        return ResponseEntity.ok(orderService.getOrderById(orderId, currentUser));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateOrder(
+    @PutMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDTO> updateOrder(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String id,
+            @PathVariable String orderId,
             @Valid @ModelAttribute OrderUpdateRequest request) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //OrderResponseDTO updated = orderService.updateOrder(id, request, currentUser);
-
-        return ResponseEntity.ok("updated");
+        return ResponseEntity.ok(orderService.updateOrder(orderId, request, currentUser));
     }
 
 
+    // WHO CAN DELETE ORDERS?? ADMIN ONLY??
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProduct(
             @RequestHeader("Authorization") String authHeader,
