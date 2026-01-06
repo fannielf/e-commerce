@@ -1,5 +1,6 @@
 package com.buy01.order.controller;
 
+import com.buy01.order.model.Role;
 import com.buy01.order.security.AuthDetails;
 import com.buy01.order.service.OrderService;
 import org.apache.coyote.BadRequestException;
@@ -43,16 +44,21 @@ public class OrderController {
 
     // get all orders for the current user (client or seller)
     @GetMapping
-    public List<OrderResponseDTO> getOwnOrders(
+    public ResponseEntity<?> getOwnOrders(
             @RequestHeader("Authorization") String authHeader
-            ) {
+            ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
+        List<OrderResponseDTO> orders;
 
-        // CHECK ROLE: SELLER ORDERS OR CLIENT ORDERS
+        if (currentUser.getRole().equals(Role.CLIENT)) {
+            orders = orderService.getClientOrders(currentUser);
+        } else if (currentUser.getRole().equals(Role.SELLER)) {
+            orders = orderService.getSellerOrders(currentUser);
+        } else {
+            return ResponseEntity.badRequest().body("Invalid role for fetching own orders");
+        }
 
-        // GET ALL ORDERS FOR THE CURRENT USER
-
-        return null;
+        return ResponseEntity.ok(orders);
     }
 
 
