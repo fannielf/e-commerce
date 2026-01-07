@@ -129,9 +129,8 @@ public class CartService {
                     if (productUpdate.getProductName() != null) {
                         orderItem.setProductName(productUpdate.getProductName());
                     }
-                    if (productUpdate.getProductPrice() != null) {
-                        orderItem.setPrice(productUpdate.getProductPrice());
-                    }
+                    orderItem.setPrice(productUpdate.getProductPrice());
+
                     break;
                 }
             }

@@ -26,6 +26,7 @@ public class ProductClient {
     public ProductUpdateDTO getProductById(String productId) {
         try {
             String url = productServiceBaseUrl + "/internal/" + productId;
+            log.info("Get product by id {}", url);
             return restTemplate.getForObject(url, ProductUpdateDTO.class);
 
         } catch (HttpClientErrorException e) {
