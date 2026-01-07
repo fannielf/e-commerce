@@ -6,14 +6,16 @@ public class ItemDTO {
     private int quantity;
     private double price;
     private double subtotal;
+    private String sellerId;
 
     public ItemDTO() {}
-    public ItemDTO(String productId, String name, int quantity, double price, double subtotal) {
+    public ItemDTO(String productId, String name, int quantity, double price, double subtotal, String sellerId) {
         this.productId = productId;
         this.name = name;
         this.quantity = quantity;
         this.price = price;
         this.subtotal = subtotal;
+        this.sellerId = sellerId;
     }
 
     public String getProductId() {return this.productId;}
@@ -30,4 +32,7 @@ public class ItemDTO {
 
     public double getSubtotal() {return this.subtotal;}
     public void setSubtotal(double subtotal) {this.subtotal = subtotal;}
+
+    public String getSellerId() {return this.sellerId;}
+    public void setSellerId(String sellerId) {this.sellerId = sellerId;}
 }

@@ -1,13 +1,15 @@
 package com.buy01.user.dto;
 
+import com.buy01.user.model.Role;
+
 // for internal id and role checks
 public class UserDTO {
     private String id;
-    private String role;
+    private Role role;
 
     public UserDTO() {}
 
-    public UserDTO(String id, String role) {
+    public UserDTO(String id, Role role) {
         this.id = id;
         this.role = role;
     }
@@ -16,7 +18,7 @@ public class UserDTO {
         return id;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 }
