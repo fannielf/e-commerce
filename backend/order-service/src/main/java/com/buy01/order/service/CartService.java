@@ -42,15 +42,13 @@ public class CartService {
         if (cart == null) {
             throw new NotFoundException("Cart not found");
         }
-        Optional<OrderItem> item = cart.getItems().stream()
-                .filter(i -> i.getProductId().equals(id))
-                .findFirst();
+        boolean removed = cart.getItems().removeIf(item -> item.getProductId().equals(id));
 
-        if (item.isEmpty()) {
-            throw new NotFoundException("Item not found");
+        if (!removed) {
+            throw new NotFoundException("Item not found in cart");
         }
 
-        cartRepository.deleteItemByProductId(id);
+        cartRepository.save(cart);
     }
 
     public void deleteCart(AuthDetails currentUser) throws IOException {
@@ -63,7 +61,7 @@ public class CartService {
 
     // kafka logic for updating product info
     public void updateCartProducts(ProductUpdateDTO productUpdate) {
-        List<Cart> carts = cartRepository.findByProductId(productUpdate.getProductId());
+        List<Cart> carts = cartRepository.findByItemsProductId(productUpdate.getProductId());
 
         for (Cart cart : carts) {
             if (cart.getCartStatus().equals(CartStatus.CHECKOUT)) {
