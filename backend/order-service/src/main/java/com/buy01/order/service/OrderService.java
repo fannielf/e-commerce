@@ -1,9 +1,6 @@
 package com.buy01.order.service;
 
-import com.buy01.order.dto.ItemDTO;
-import com.buy01.order.dto.OrderCreateDTO;
-import com.buy01.order.dto.OrderResponseDTO;
-import com.buy01.order.dto.OrderUpdateRequest;
+import com.buy01.order.dto.*;
 import com.buy01.order.exception.ForbiddenException;
 import com.buy01.order.exception.NotFoundException;
 import com.buy01.order.model.*;
@@ -13,10 +10,16 @@ import com.buy01.order.security.AuthDetails;
 import io.jsonwebtoken.io.IOException;
 import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 // Service layer is responsible for business logic, validation, verification and data manipulation.
 // It chooses how to handle data and interacts with the repository layer.
@@ -32,21 +35,35 @@ public class OrderService {
         this.cartRepository = cartRepository;
     }
 
-    public List<OrderResponseDTO> getClientOrders(AuthDetails currentUser) {
+    public OrderDashboardDTO getClientOrders(AuthDetails currentUser) {
         List<Order> orders = orderRepository.findOrdersByUserId(currentUser.getCurrentUserId());
 
-        return orders.stream()
+        List<OrderResponseDTO> ordersDto = orders.stream()
                 .map(this::mapToDTO)
                 .toList();
+        List<ItemDTO> topItems = orderRepository.findTopItemsByUserId(currentUser.getCurrentUserId(), 3);
+        double totalSum = orders.stream()
+                .mapToDouble(Order::getTotalPrice)
+                .sum();
+
+
+        return new OrderDashboardDTO(ordersDto, topItems, totalSum);
     }
 
-    public List<OrderResponseDTO> getSellerOrders(AuthDetails currentUser) {
+    public OrderDashboardDTO getSellerOrders(AuthDetails currentUser) {
         List<Order> orders = orderRepository.findByItemsSellerId(currentUser.getCurrentUserId());
 
-        return orders.stream()
+        List<OrderResponseDTO> sellerOrders = orders.stream()
                 .map(order -> filterOrderForSeller(order, currentUser)) // filter items for the current seller
                 .map(this::mapToDTO)
                 .toList();
+
+        List<ItemDTO> topItems = orderRepository.findTopItemsBySellerId(currentUser.getCurrentUserId(), 3);
+        double totalSum = sellerOrders.stream()
+                .mapToDouble(OrderResponseDTO::getTotalPrice)
+                .sum();
+
+        return new OrderDashboardDTO(sellerOrders, topItems, totalSum);
 
 }
 
@@ -182,6 +199,5 @@ public class OrderService {
         order.setTotalPrice(sellerTotal);
         return order;
     }
-
 
 }
