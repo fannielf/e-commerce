@@ -43,7 +43,11 @@
             />
           </div>
 
-          <button *ngIf="!product.isProductOwner && isLoggedIn" class="btn btn-success w-100" [disabled]="product.quantity === 0">
+          <button *ngIf="!product.isProductOwner && isLoggedIn"
+                  class="btn btn-success w-100"
+                  [disabled]="product.quantity === 0"
+                  (click)="addToCart()"
+          >
             Add to Cart
           </button>
 
