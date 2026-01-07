@@ -1,5 +1,7 @@
 package com.buy01.order.controller;
 
+import com.buy01.order.dto.OrderCreateDTO;
+import com.buy01.order.model.Role;
 import com.buy01.order.security.AuthDetails;
 import com.buy01.order.service.OrderService;
 import org.apache.coyote.BadRequestException;
@@ -26,81 +28,66 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createOrder(
-            @RequestHeader("Authorization") String authHeader) throws IOException {
+    public ResponseEntity<OrderResponseDTO> createOrder(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @ModelAttribute OrderCreateDTO orderDto) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
-
-        if (!currentUser.getRole().equals("CLIENT")) {
-            throw new BadRequestException("Current user is not a CLIENT");
-        }
-
-        // ORDER CREATION LOGIC
-        // fetch cart for userId and transform to order
-
-        return ResponseEntity.ok("new order created");
+        return ResponseEntity.ok(orderService.createOrder(orderDto, currentUser));
     }
 
     // get all orders for the current user (client or seller)
     @GetMapping
-    public List<OrderResponseDTO> getOwnOrders(
+    public ResponseEntity<List<OrderResponseDTO>> getOwnOrders(
             @RequestHeader("Authorization") String authHeader
-            ) {
+            ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
+        List<OrderResponseDTO> orders;
 
-        // CHECK ROLE: SELLER ORDERS OR CLIENT ORDERS
+        if (currentUser.getRole().equals(Role.CLIENT)) {
+            orders = orderService.getClientOrders(currentUser);
+        } else if (currentUser.getRole().equals(Role.SELLER)) {
+            orders = orderService.getSellerOrders(currentUser);
+        } else {
+            throw new BadRequestException("Invalid role" + currentUser.getRole().toString() + " for fetching own orders");
+        }
 
-        // GET ALL ORDERS FOR THE CURRENT USER
-
-        return null;
+        return ResponseEntity.ok(orders);
     }
 
 
     // get a specific order details
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getOrderById(
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDTO> getOrderById(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String id) {
+            @PathVariable String orderId) {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //Order order = orderService.getOrderById(id);
-
-        OrderResponseDTO o = new OrderResponseDTO(
-//                order.getId(),
-//                order.getUserId(),
-//                order.getItems(),
-//                order.getTotalPrice(),
-//                order.getStatus(),
-//                order.getCreatedAt(),
-//                order.getUpdatedAt()
-        );
-
-        return ResponseEntity.ok(o);
+        return ResponseEntity.ok(orderService.getOrderById(orderId, currentUser));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateOrder(
+    @PutMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDTO> updateOrder(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String id,
+            @PathVariable String orderId,
             @Valid @ModelAttribute OrderUpdateRequest request) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //OrderResponseDTO updated = orderService.updateOrder(id, request, currentUser);
-
-        return ResponseEntity.ok("updated");
+        return ResponseEntity.ok(orderService.updateOrder(orderId, request, currentUser));
     }
 
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(
+    // Client can delete their own orders with status "CREATED", ADMIN can delete any order
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> deleteProduct(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String id
+            @PathVariable String orderId
     ) {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //orderService.deleteOrder(id, currentUser);
+        orderService.deleteOrderById(orderId, currentUser);
 
         return ResponseEntity.ok().build();
     }

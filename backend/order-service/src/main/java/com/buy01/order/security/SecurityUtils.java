@@ -1,6 +1,7 @@
 package com.buy01.order.security;
 
 import com.buy01.order.exception.ForbiddenException;
+import com.buy01.order.model.Role;
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 
@@ -16,14 +17,19 @@ public class SecurityUtils {
     public AuthDetails getAuthDetails(String authHeader) {
 
         String userId;
-        String role;
+        Role role;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
                 Claims claims = jwtUtil.extractClaims(token);
                 userId = claims.getSubject();
-                role = claims.get("role", String.class);
+                String roleStr = claims.get("role", String.class);
+                try {
+                    role = Role.valueOf(roleStr); // maps String to enum
+                } catch (IllegalArgumentException e) {
+                    throw new ForbiddenException("Invalid role in JWT: " + roleStr, e);
+                }
             } catch (Exception e) {
                 throw new ForbiddenException("Invalid JWT token", e);
             }
