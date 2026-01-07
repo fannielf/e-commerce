@@ -1,33 +1,42 @@
 package com.buy01.order.model;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
 
+@CompoundIndex(def = "{ 'items.sellerId': 1 }")
 @Document(collection = "orders")
 public class Order {
     @Id
     private String id;
     @NotBlank
     private String userId;
+    @NotEmpty
     private List<OrderItem> items;
     private double totalPrice;
     private OrderStatus status;
     private ShippingAddress shippingAddress;
+    private boolean paid;
+    private Date deliveryDate;
+    private String trackingNumber;
     private Date createdAt;
     private Date updatedAt;
 
     // constructor - both constructors are needed, empty one for Spring Data and one with parameters for creating objects
     public Order() {}
-    public Order(String userId, List<OrderItem> items, double totalPrice, OrderStatus status, ShippingAddress shippingAddress) {
+    public Order(String userId, List<OrderItem> items, ShippingAddress shippingAddress) {
         this.userId = userId;
         this.items = items;
-        this.totalPrice = totalPrice;
-        this.status = status;
+        this.totalPrice = items.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();        this.status = OrderStatus.CREATED;
         this.shippingAddress = shippingAddress;
+        this.paid = false;
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
@@ -40,6 +49,7 @@ public class Order {
         this.totalPrice = totalPrice;
         this.status = status;
         this.shippingAddress = shippingAddress;
+        this.paid = false;
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
@@ -61,6 +71,15 @@ public class Order {
 
     public ShippingAddress getShippingAddress() {return shippingAddress;}
     public void setShippingAddress(ShippingAddress shippingAddress) {this.shippingAddress = shippingAddress;}
+
+    public boolean isPaid() {return paid;}
+    public void setPaid(boolean paid) {this.paid = paid;}
+
+    public Date getDeliveryDate() {return deliveryDate;}
+    public void setDeliveryDate(Date deliveryDate) {this.deliveryDate = deliveryDate;}
+
+    public String getTrackingNumber() {return trackingNumber;}
+    public void setTrackingNumber(String trackingNumber) {this.trackingNumber = trackingNumber;}
 
     public Date getCreatedAt() {return createdAt;}
     public void setCreatedAt(Date createdAt) {this.createdAt = createdAt;}

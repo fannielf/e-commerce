@@ -63,7 +63,8 @@ public class CartController {
                         item.getProductName(),
                         item.getQuantity(),
                         item.getPrice(),
-                        item.getPrice() * item.getQuantity()
+                        item.getPrice() * item.getQuantity(),
+                        item.getSellerId()
                 ))
                 .toList();
 

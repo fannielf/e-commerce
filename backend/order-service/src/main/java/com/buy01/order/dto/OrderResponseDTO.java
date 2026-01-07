@@ -12,7 +12,11 @@ public class OrderResponseDTO {
     private double totalPrice;
     private OrderStatus status;
     private ShippingAddress shippingAddress;
+    private boolean paid;
+    private Date deliveryDate;
+    private String trackingNumber;
     private Date createdAt;
+    private Date updatedAt;
 
     public OrderResponseDTO() {}
     public OrderResponseDTO(String orderId, List<ItemDTO> items, double totalPrice, OrderStatus status, ShippingAddress shippingAddress, Date createdAt) {
