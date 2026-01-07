@@ -40,7 +40,7 @@ public class CartService {
 
     public Cart getCurrentCart(AuthDetails currentUser) throws BadRequestException {
 
-        if (!currentUser.getRole().equals("CLIENT")) {
+        if (!currentUser.getRole().equals(Role.CLIENT)) {
             throw new BadRequestException("Current user is not a CLIENT");
         }
 
