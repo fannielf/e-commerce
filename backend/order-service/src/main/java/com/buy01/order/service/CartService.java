@@ -12,6 +12,8 @@ import com.buy01.order.model.Role;
 import com.buy01.order.repository.CartRepository;
 import com.buy01.order.security.AuthDetails;
 import org.apache.coyote.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.buy01.order.client.ProductClient;
@@ -30,6 +32,8 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
     private final OrderService orderService;
+    private static final Logger log = LoggerFactory.getLogger(CartService.class);
+
 
     @Autowired
     public CartService(CartRepository cartRepository, ProductClient productClient, OrderService orderService) {
@@ -59,10 +63,9 @@ public class CartService {
             throw new BadRequestException("Current user is not a CLIENT");
         }
 
-        if (newItem.getQuantity() <= 0) throw new ConflictException("Product is out of stock");
-
         ProductUpdateDTO product = productClient.getProductById(newItem.getProductId()); // fetch product details from product service
         if (product == null) throw new NotFoundException("Product not found");
+        if (product.getQuantity() <= 0) throw new ConflictException("Product is out of stock");
 
         OrderItem itemAdded = new OrderItem(product.getProductId(), product.getProductName(), newItem.getQuantity(), product.getProductPrice(), product.getSellerId()); // create new order item
         Cart cart = getCurrentCart(currentUser); // get or create active cart for user
@@ -82,6 +85,7 @@ public class CartService {
 
         cart.setTotalPrice(calculateTotal(cart.getItems()));  // renew total price
         cart.setUpdateTime(new Date());            // refresh update time
+        log.info("Cart before saving: {}", cart);
         return mapToDTO(cartRepository.save(cart));  // save and return updated cart
 
     }
@@ -141,6 +145,8 @@ public class CartService {
     }
 
     public CartResponseDTO mapToDTO(Cart cart) {
+
+        log.info("mapToDTO cart = {}", cart);
 
         return new CartResponseDTO(
                 cart.getId(),

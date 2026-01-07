@@ -1,5 +1,6 @@
 package com.buy01.order.service;
 
+import com.buy01.order.client.ProductClient;
 import com.buy01.order.dto.ItemDTO;
 import com.buy01.order.dto.OrderCreateDTO;
 import com.buy01.order.dto.OrderResponseDTO;
@@ -12,6 +13,8 @@ import com.buy01.order.repository.OrderRepository;
 import com.buy01.order.security.AuthDetails;
 import io.jsonwebtoken.io.IOException;
 import jakarta.ws.rs.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
 
     @Autowired
     public OrderService(OrderRepository orderRepository, CartRepository cartRepository) {
@@ -140,6 +145,7 @@ public class OrderService {
 
     // convert OrderItem to ItemDTO
     public ItemDTO toItemDTO(OrderItem item) {
+        log.info("Item: {}", item);
         return new ItemDTO(
                 item.getProductId(),
                 item.getProductName(),
