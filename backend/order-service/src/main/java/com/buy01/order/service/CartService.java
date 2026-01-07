@@ -1,6 +1,8 @@
 package com.buy01.order.service;
 
-import com.buy01.order.dto.*;
+import com.buy01.order.dto.CartItemRequestDTO;
+import com.buy01.order.dto.CartResponseDTO;
+import com.buy01.order.dto.ProductUpdateDTO;
 import com.buy01.order.exception.ConflictException;
 import com.buy01.order.exception.NotFoundException;
 import com.buy01.order.model.Cart;
@@ -95,15 +97,12 @@ public class CartService {
         if (cart == null) {
             throw new NotFoundException("Cart not found");
         }
-        Optional<OrderItem> item = cart.getItems().stream()
-                .filter(i -> i.getProductId().equals(id))
-                .findFirst();
+        boolean removed = cart.getItems().removeIf(item -> item.getProductId().equals(id));
 
-        if (item.isEmpty()) {
-            throw new NotFoundException("Item not found");
+        if (!removed) {
+            throw new NotFoundException("Item not found in cart");
         }
 
-        cart.getItems().removeIf(i -> i.getProductId().equals(id));
         cart.setTotalPrice(calculateTotal(cart.getItems()));
         cartRepository.save(cart);
     }
@@ -116,24 +115,13 @@ public class CartService {
         cartRepository.deleteById(cart.getId());
     }
 
-    public CartResponseDTO mapToDTO(Cart cart) {
-
-        return new CartResponseDTO(
-                cart.getId(),
-                cart.getItems().stream()
-                        .map(orderService::toItemDTO)
-                        .toList(),
-                calculateTotal(cart.getItems())
-        );
-    }
-
-    // kafka logic for updating product info when product details change (in all carts containing the product)
-    /*public void updateCartProducts(ProductUpdateDTO productUpdate) {
-        List<Cart> carts = cartRepository.findByProductId(productUpdate.getProductId());
+    // kafka logic for updating product info
+    public void updateCartProducts(ProductUpdateDTO productUpdate) {
+        List<Cart> carts = cartRepository.findByItemsProductId(productUpdate.getProductId());
 
         for (Cart cart : carts) {
             if (cart.getCartStatus().equals(CartStatus.CHECKOUT)) {
-                break; // or continue?
+                break;
             }
 
             for (OrderItem orderItem : cart.getItems()) {
@@ -153,9 +141,18 @@ public class CartService {
 
     }
 
+    public CartResponseDTO mapToDTO(Cart cart) {
+
+        return new CartResponseDTO(
+                cart.getId(),
+                cart.getItems().stream()
+                        .map(orderService::toItemDTO)
+                        .toList(),
+                calculateTotal(cart.getItems())
+        );
+    }
+
     //kafka logic for deleting products that are no longer available
 
     //fetch products from product service (needs productClient)
-
-     */
 }

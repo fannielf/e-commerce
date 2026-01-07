@@ -7,9 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface CartRepository extends MongoRepository<Cart, String> {
-    List<Cart> findByProductId(String productId);
-    OrderItem deleteItemByProductId(String productId);
-
     Cart findByUserId(String userId);
+    List<Cart> findByItemsProductId(String productId);
 }
 
