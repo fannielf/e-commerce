@@ -71,19 +71,20 @@ public class CartService {
         OrderItem itemAdded = new OrderItem(product.getProductId(), product.getProductName(), newItem.getQuantity(), product.getProductPrice(), product.getSellerId()); // create new order item
         Cart cart = getCurrentCart(currentUser); // get or create active cart for user
 
-        int exists = 0;
+        boolean exists = false;
         for (OrderItem item : cart.getItems()) { // iterate through existing items
             if (item.getProductId().equals(itemAdded.getProductId())) { // check if item already exists in cart
-                exists = item.getQuantity();
-                item.setQuantity(itemAdded.getQuantity()); // update quantity
+                item.setQuantity(item.getQuantity() + itemAdded.getQuantity()); // update quantity
+                exists = true;
                 break;
             }
         }
 
-        if (exists > 0) { // if item does not exist in cart
+        if (!exists) { // if item does not exist in cart
             cart.getItems().add(itemAdded); // add new item to cart
         }
-        productClient.updateQuantity(newItem.getProductId(), newItem.getQuantity()-exists);
+        // update product quantity in product service
+        productClient.updateQuantity(newItem.getProductId(), newItem.getQuantity());
 
         cart.setTotalPrice(calculateTotal(cart.getItems()));  // renew total price
         cart.setUpdateTime(new Date());            // refresh update time

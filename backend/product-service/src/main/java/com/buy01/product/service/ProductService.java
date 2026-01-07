@@ -214,7 +214,7 @@ public class ProductService {
     public void updateProductQuantity(String productId, int requestedQuantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException(productId));
-        int newQuantity = product.getQuantity() + requestedQuantity;
+        int newQuantity = product.getQuantity() - requestedQuantity;
         if (newQuantity < 0) {
             throw new ConflictException("Insufficient product quantity, remaining quantity" + product.getQuantity());
         }
@@ -222,13 +222,13 @@ public class ProductService {
         product.setUpdateTime(new Date());
         productRepository.save(product);
 
-        // send productUpdate via Kafka
-        productEventService.publishProductUpdatedEvent(new ProductUpdateDTO(
-                product.getProductId(),
-                product.getName(),
-                product.getPrice(),
-                product.getQuantity()
-        ));
+//        // send productUpdate via Kafka
+//        productEventService.publishProductUpdatedEvent(new ProductUpdateDTO(
+//                product.getProductId(),
+//                product.getName(),
+//                product.getPrice(),
+//                product.getQuantity()
+//        ));
     }
 
     // Deleting product, accessible only by ADMIN or product owner
