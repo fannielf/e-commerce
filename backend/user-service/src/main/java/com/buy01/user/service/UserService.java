@@ -173,7 +173,7 @@ public class UserService {
             log.info("avatarResponseDTO filled: {}",  avatarResponseDTO);
             return avatarResponseDTO.getAvatarUrl();
         } else {
-            throw new InternalServerErrorException("Failed to update avatar");
+            throw new IllegalStateException("Failed to update avatar, return value was null");
         }
     }
 

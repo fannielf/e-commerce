@@ -1,7 +1,10 @@
 package com.buy01.product.client;
 
+import com.buy01.product.controller.ProductController;
 import com.buy01.product.dto.MediaResponseDTO;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +26,8 @@ public class MediaClient {
 
     private final RestTemplate restTemplate;
     private final String mediaServiceBaseUrl;
+    private static final Logger log = LoggerFactory.getLogger(MediaClient.class);
+
 
     public MediaClient() {
         this.restTemplate = new RestTemplate();
@@ -31,26 +37,30 @@ public class MediaClient {
 
     public List<String> getProductImageIds(String productId) {
         String url = mediaServiceBaseUrl + "/internal/images/productId/" + productId;
-        System.out.println("Request url: " + url);
 
-        ResponseEntity<List<MediaResponseDTO>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null, // no headers needed for internal calls
-                new ParameterizedTypeReference<List<MediaResponseDTO>>() {}
-        );
+        try {
+            ResponseEntity<List<MediaResponseDTO>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null, // no headers needed for internal calls
+                    new ParameterizedTypeReference<List<MediaResponseDTO>>() {
+                    }
+            );
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to get images: " + response.getStatusCode());
-        }
-        List<MediaResponseDTO> mediaResponses = response.getBody();
-        if (mediaResponses == null) {
+            List<MediaResponseDTO> mediaResponses = response.getBody();
+
+            return mediaResponses == null ? List.of() :
+                    mediaResponses.stream()
+                    .map(MediaResponseDTO::getId)
+                    .toList();
+
+        } catch (HttpClientErrorException.NotFound e) {
+            log.info("No images found for product ID {}: {}", productId, e.getMessage());
             return List.of();
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("Error fetching product images: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new ResponseStatusException(e.getStatusCode(), e.getResponseBodyAsString(), e);
         }
-
-        return mediaResponses.stream()
-                .map(MediaResponseDTO::getId)
-                .collect(Collectors.toList());
     }
 
     public List<String> postProductImages(String productId, List<MultipartFile> images) throws IOException {
@@ -142,23 +152,5 @@ public class MediaClient {
             throw new ResponseStatusException(e.getStatusCode(), e.getResponseBodyAsString(), e);
         }
     }
-
-//    public void deleteImage(String imageId) {
-//        String url = mediaServiceBaseUrl + "/internal/images/" + imageId;
-//        System.out.println("Request url: " + url);
-//
-//        ResponseEntity<Void> response = restTemplate.exchange(
-//                url,
-//                HttpMethod.DELETE,
-//                null, // no headers needed for internal calls
-//                Void.class
-//        );
-//
-//        if (!response.getStatusCode().is2xxSuccessful()) {
-//            throw new RuntimeException("Failed to delete image: " + response.getStatusCode());
-//        }
-//
-//        System.out.println("Deleted image with id: " + imageId);
-//    }
 
 }
