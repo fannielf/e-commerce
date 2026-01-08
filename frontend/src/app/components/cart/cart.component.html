@@ -18,8 +18,9 @@
           class="form-control"
           style="width: 80px"
           min="1"
-          [(ngModel)]="item.quantity"
-          (input)="updateQuantity(item, $any($event.target).value)"
+          [value]="item.quantity"
+          (change)="updateQuantity(item, $any($event.target).value)"
+          [disabled]="item.updating"
         />
       </div>
 

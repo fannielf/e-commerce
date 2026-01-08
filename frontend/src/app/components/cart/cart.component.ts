@@ -34,30 +34,32 @@ export class CartComponent implements OnInit {
     });
   }
 
-  updateQuantity(item: ItemDTO, newQtyStr: string): void {
-    const originalQty = item.quantity;
-    const newQty = parseInt(newQtyStr, 10);
+  updateQuantity(item: ItemDTO, rawValue: string): void {
+    const newQty = Number(rawValue);
 
     if (isNaN(newQty) || newQty <= 0) {
-          item.quantity = originalQty;
-          this.snackBar.open('Quantity must be a positive number.', 'Close', { duration: 3000 });
           return;
         }
-      item.quantity = newQty;
+    if (newQty === item.quantity) {
+        return;
+      }
+
+    item.updating = true;
 
     this.cartService.updateCartItem(item.productId, { quantity: newQty }).subscribe({
       next: (res: CartResponseDTO) => {
         this.cart = res;
 
         // update local item quantity to reflect server state
-         const updatedItem = this.cart.items.find(i => i.productId === item.productId);
-              if (updatedItem) {
-                item.quantity = updatedItem.quantity;
-              }
+         const updatedItem = res.items.find(i => i.productId === item.productId);
+         if (updatedItem) {
+             item.quantity = updatedItem.quantity;
+         }
+
+         item.updating = false;
       },
-      error: (err: unknown) => {
-        console.error('Cannot update quantity:', err);
-        item.quantity = originalQty;
+      error: () => {
+        item.updating = false;
         this.snackBar.open(
           'Cannot add more than available quantity!',
           'Close',

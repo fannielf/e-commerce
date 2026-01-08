@@ -5,6 +5,7 @@ export interface ItemDTO {
   quantity: number;
   price: number;
   total: number;
+  updating?: boolean;
 }
 
 // GET request to retrieve cart details
