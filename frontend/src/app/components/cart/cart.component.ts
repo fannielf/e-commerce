@@ -4,18 +4,20 @@ import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { CartResponseDTO, ItemDTO } from '../../models/cart.model';
 import { CommonModule } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.css']
 })
 export class CartComponent implements OnInit {
   cart: CartResponseDTO | null = null;
 
-  constructor(private cartService: CartService, private authService: AuthService) {}
+  constructor(private cartService: CartService, private authService: AuthService, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
