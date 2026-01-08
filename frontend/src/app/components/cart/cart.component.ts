@@ -47,9 +47,9 @@ export class CartComponent implements OnInit {
     });
   }
 
-   getTotalPrice(): number {
+   /*getTotalPrice(): number {
      return this.cart?.items.reduce((sum, i) => sum + (i.price * i.quantity), 0) ?? 0;
-   }
+   }*/
 
 
 }
