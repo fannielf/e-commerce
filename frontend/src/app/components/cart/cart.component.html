@@ -19,7 +19,7 @@
           style="width: 80px"
           [value]="item.quantity"
           min="1"
-          [max]="item.quantity"
+          [(ngModel)]="item.quantity"
           (change)="updateQuantity(item, $any($event.target).value)"
         />
       </div>

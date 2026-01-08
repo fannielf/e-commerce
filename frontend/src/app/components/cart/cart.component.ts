@@ -34,9 +34,19 @@ export class CartComponent implements OnInit {
 
   updateQuantity(item: ItemDTO, newQty: number): void {
     if (newQty <= 0) return;
-    this.cartService.updateCartItem(item.productId, { quantity: newQty}).subscribe({
-      next: () => this.loadCart(),
-      error: (err: unknown) => console.error('Error updating item quantity:', err)
+
+    this.cartService.updateCartItem(item.productId, { quantity: newQty }).subscribe({
+      next: (res: CartResponseDTO) => {
+        this.cart = res;
+      },
+      error: (err: unknown) => {
+        console.error('Cannot update quantity:', err);
+        this.snackBar.open(
+          'Cannot add more than available quantity!',
+          'Close',
+          { duration: 3000, panelClass: ['snack-bar-error'] }
+        );
+      }
     });
   }
 
