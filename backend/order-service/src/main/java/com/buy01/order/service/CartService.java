@@ -1,6 +1,7 @@
 package com.buy01.order.service;
 
 import com.buy01.order.dto.CartItemRequestDTO;
+import com.buy01.order.dto.CartItemUpdateDTO;
 import com.buy01.order.dto.CartResponseDTO;
 import com.buy01.order.dto.ProductUpdateDTO;
 import com.buy01.order.exception.ConflictException;
@@ -42,7 +43,7 @@ public class CartService {
         this.orderService = orderService;
     }
 
-    public Cart getCurrentCart(AuthDetails currentUser) throws BadRequestException {
+    public Cart getCurrentCart(AuthDetails currentUser) throws IOException {
 
         if (!currentUser.getRole().equals(Role.CLIENT)) {
             throw new BadRequestException("Current user is not a CLIENT");
@@ -84,7 +85,7 @@ public class CartService {
             cart.getItems().add(itemAdded); // add new item to cart
         }
         // update product quantity in product service
-        productClient.updateQuantity(newItem.getProductId(), newItem.getQuantity());
+        productClient.updateQuantity(newItem.getProductId(), -newItem.getQuantity());
 
         cart.setTotalPrice(calculateTotal(cart.getItems()));  // renew total price
         cart.setUpdateTime(new Date());            // refresh update time
@@ -93,17 +94,30 @@ public class CartService {
 
     }
 
-    private double calculateTotal(List<OrderItem> items) { // calculate total price of items in cart
-        return items.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity())
-                .sum();
+    public CartResponseDTO updateCart(AuthDetails currentUser, String productId, CartItemUpdateDTO newQuantity) throws IOException {
+        Cart cart = getCurrentCart(currentUser);
+
+        Optional<OrderItem> itemToUpdate = cart.getItems().stream()
+                .filter(item -> item.getProductId().equals(productId)).findFirst();
+
+        if (itemToUpdate.isEmpty()) {
+            throw new NotFoundException("Item not found in cart");
+        }
+
+        int quantityDifference = newQuantity.getQuantity() - itemToUpdate.get().getQuantity();
+
+        // update product quantity in product service
+        productClient.updateQuantity(itemToUpdate.get().getProductId(), -quantityDifference);
+
+        itemToUpdate.get().setQuantity(newQuantity.getQuantity());
+        cart.setTotalPrice(calculateTotal(cart.getItems()));
+        cart.setUpdateTime(new Date());
+
+        return mapToDTO(cartRepository.save(cart));
     }
 
-    public void deleteItemById(String id, AuthDetails currentUser) {
-        Cart cart = cartRepository.findByUserId(currentUser.getCurrentUserId());
-        if (cart == null) {
-            throw new NotFoundException("Cart not found");
-        }
+    public void deleteItemById(String id, AuthDetails currentUser) throws IOException{
+        Cart cart = getCurrentCart(currentUser);
 
         Optional<OrderItem> itemToRemove = cart.getItems().stream()
                 .filter(item -> item.getProductId().equals(id))
@@ -112,19 +126,43 @@ public class CartService {
         if (itemToRemove.isEmpty()) {
             throw new NotFoundException("Item not found in cart");
         }
+        int quantity = itemToRemove.get().getQuantity();
 
         cart.getItems().remove(itemToRemove.get());
         cart.setTotalPrice(calculateTotal(cart.getItems()));
         cartRepository.save(cart);
+
+        // return item to the stock in product service
+        productClient.updateQuantity(id, quantity);
     }
 
-    public void deleteCart(AuthDetails currentUser) throws IOException {
+    public void deleteCart(AuthDetails currentUser) {
         Cart cart = cartRepository.findByUserId(currentUser.getCurrentUserId());
         if (cart == null) {
             throw new NotFoundException("Cart not found");
         }
         cartRepository.deleteById(cart.getId());
     }
+
+    // Helper methods
+
+    private double calculateTotal(List<OrderItem> items) { // calculate total price of items in cart
+        return items.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+    }
+
+    public CartResponseDTO mapToDTO(Cart cart) {
+
+        return new CartResponseDTO(
+                cart.getId(),
+                cart.getItems().stream()
+                        .map(orderService::toItemDTO)
+                        .toList(),
+                calculateTotal(cart.getItems())
+        );
+    }
+
 
     // kafka logic for updating product info
     public void updateCartProducts(ProductUpdateDTO productUpdate) {
@@ -149,17 +187,6 @@ public class CartService {
 
         cartRepository.saveAll(carts);
 
-    }
-
-    public CartResponseDTO mapToDTO(Cart cart) {
-
-        return new CartResponseDTO(
-                cart.getId(),
-                cart.getItems().stream()
-                        .map(orderService::toItemDTO)
-                        .toList(),
-                calculateTotal(cart.getItems())
-        );
     }
 
     //kafka logic for deleting products that are no longer available

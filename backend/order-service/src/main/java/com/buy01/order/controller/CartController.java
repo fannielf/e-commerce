@@ -56,24 +56,22 @@ public class CartController {
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<?> updateCart(
+    public ResponseEntity<CartResponseDTO> updateCart(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId,
             @Valid @ModelAttribute CartItemUpdateDTO itemUpdate) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //LOGIC FOR UPDATING AMOUNT FOR ONE ITEM
-
-        return ResponseEntity.ok("quantity updated");
+        return ResponseEntity.ok(cartService.updateCart(currentUser, productId, itemUpdate));
     }
 
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<?> deleteProduct(
+    public ResponseEntity<Void> deleteProduct(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId
-    ) {
+    ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
         cartService.deleteItemById(productId, currentUser);
@@ -82,7 +80,9 @@ public class CartController {
     }
 
     @DeleteMapping("/all")
-    public ResponseEntity<?> deleteCart(@RequestHeader("Authorization") String authHeader) throws IOException {
+    public ResponseEntity<Void> deleteCart(
+            @RequestHeader("Authorization") String authHeader
+    ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
         cartService.deleteCart(currentUser);
