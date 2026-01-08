@@ -35,15 +35,18 @@ export class CartComponent implements OnInit {
   }
 
   updateQuantity(item: ItemDTO, rawValue: string): void {
+    const originalQty = item.quantity;
     const newQty = Number(rawValue);
 
     if (isNaN(newQty) || newQty <= 0) {
-          return;
+        setTimeout(() => item.quantity = originalQty, 0);
+        return;
         }
     if (newQty === item.quantity) {
         return;
       }
 
+    item.quantity = newQty;
     item.updating = true;
 
     this.cartService.updateCartItem(item.productId, { quantity: newQty }).subscribe({
@@ -59,6 +62,7 @@ export class CartComponent implements OnInit {
          item.updating = false;
       },
       error: () => {
+        item.quantity = originalQty;
         item.updating = false;
         this.snackBar.open(
           'Cannot add more than available quantity!',
