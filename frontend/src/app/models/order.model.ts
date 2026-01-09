@@ -1,17 +1,4 @@
-export interface Order {
-  orderId: string;
-  items: Item[];
-  totalPrice: number;
-  status: Status;
-  shippingAddress: ShippingAddress;
-  paid: boolean;
-  deliveryDate: Date | null;
-  trackingNumber: string | null;
-  createdAt: Date;
-  updatedAt: Date | null;
-}
-
-export interface Item {
+export interface ItemDTO {
   productId: string;
   productName: string;
   quantity: number;
@@ -19,6 +6,18 @@ export interface Item {
   subtotal: number;
   sellerId: string;
 }
+
+export interface OrderResponseDTO {
+  orderId: string;
+  items: ItemDTO[];
+  totalPrice: number;
+  status: Status;
+  shippingAddress: ShippingAddress;
+  paid: boolean;
+  deliveryDate: Date | null;
+  trackingNumber: string | null;
+  createdAt: Date;
+  updatedAt: Date | null; }
 
 export interface ShippingAddress {
   fullName: string;
@@ -28,6 +27,12 @@ export interface ShippingAddress {
   country: string;
 }
 
+export interface OrderDashboardDTO {
+  orders: OrderResponseDTO[];
+  topItems: ItemDTO[];
+  total: number;
+}
+
 export enum Status {
   CREATED = 'CREATED',
   CONFIRMED = 'CONFIRMED',
@@ -35,3 +40,5 @@ export enum Status {
   DELIVERED = 'DELIVERED',
   CANCELED = 'CANCELED'
 }
+
+export const OrderStatusList = Object.values(Status);

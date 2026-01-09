@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Order, Status } from '../models/order.model';
+import { OrderResponseDTO, Status } from '../models/order.model';
 import { ORDER_BASE_URL } from '../constants/constants';
+import { OrderDashboardDTO } from '../models/order.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  private mapOrder(item: any): Order {
+  private mapOrder(item: any): OrderResponseDTO {
     return {
       orderId: item.orderId,
       items: item.items.map((item: any) => ({
@@ -41,10 +42,18 @@ export class OrderService {
     };
   }
 
-  getOrderById(orderId: string): Observable<Order> {
+  getSalesDashboard(): Observable<OrderDashboardDTO> {
+
+    return this.http.get<OrderDashboardDTO>(this.apiUrl);
+  }
+
+  getOrders(): Observable<OrderDashboardDTO> {
+    return this.http.get<OrderDashboardDTO>(this.apiUrl);
+  }
+
+  getOrderById(orderId: string): Observable<OrderResponseDTO> {
     return this.http.get<any>(`${this.apiUrl}/${orderId}`).pipe(
       map(order => this.mapOrder(order))
     );
   }
-
 }

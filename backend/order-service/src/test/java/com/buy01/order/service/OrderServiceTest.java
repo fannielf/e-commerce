@@ -1,6 +1,7 @@
 package com.buy01.order.service;
 
 import com.buy01.order.dto.OrderCreateDTO;
+import com.buy01.order.dto.OrderDashboardDTO;
 import com.buy01.order.dto.OrderResponseDTO;
 import com.buy01.order.dto.OrderUpdateRequest;
 import com.buy01.order.exception.ForbiddenException;
@@ -69,10 +70,10 @@ public class OrderServiceTest {
                 new TestOrder("order2", "user1", List.of(), 200.0, SHIPPED, null)
         ));
 
-        List<OrderResponseDTO> orders = orderService.getClientOrders(currentUser);
+        OrderDashboardDTO orderDashboard = orderService.getClientOrders(currentUser);
 
-        assertEquals(2, orders.size(), "Expected 2 orders for the client");
-        OrderResponseDTO order = orders.get(0);
+        assertEquals(2, orderDashboard.getOrders().size(), "Expected 2 orders for the client");
+        OrderResponseDTO order = orderDashboard.getOrders().get(0);
         assertEquals("order1", order.getOrderId(), "Order ID should match");
         assertEquals(100.0, order.getTotalPrice(), "Total price should match");
         assertEquals(OrderStatus.CREATED, order.getStatus(), "Order Status should match");
@@ -96,17 +97,17 @@ public class OrderServiceTest {
                 ), 60.0, SHIPPED, null)
         ));
 
-        List<OrderResponseDTO> orders = orderService.getSellerOrders(currentUser);
+        OrderDashboardDTO orderDashboard = orderService.getSellerOrders(currentUser);
 
-        assertEquals(2, orders.size(), "Expected 2 orders for the seller");
+        assertEquals(2, orderDashboard.getOrders().size(), "Expected 2 orders for the seller");
 
-        OrderResponseDTO order1 = orders.get(0);
+        OrderResponseDTO order1 = orderDashboard.getOrders().get(0);
         assertEquals("order1", order1.getOrderId(), "Order ID should match");
         assertEquals(130.0, order1.getTotalPrice(), "Total price should match");
         assertEquals(OrderStatus.CREATED, order1.getStatus(), "Order Status should match");
         assertEquals(1, order1.getItems().size(), "Order items size should match for seller");
 
-        OrderResponseDTO order2 = orders.get(1);
+        OrderResponseDTO order2 = orderDashboard.getOrders().get(1);
         assertEquals("order2", order2.getOrderId(), "Order ID should match");
         assertEquals(60.0, order2.getTotalPrice(), "Total price should match");
         assertEquals(SHIPPED, order2.getStatus(), "Order Status should match");

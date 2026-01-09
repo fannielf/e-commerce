@@ -1,6 +1,7 @@
 package com.buy01.order.controller;
 
 import com.buy01.order.dto.OrderCreateDTO;
+import com.buy01.order.dto.OrderDashboardDTO;
 import com.buy01.order.model.Role;
 import com.buy01.order.security.AuthDetails;
 import com.buy01.order.service.OrderService;
@@ -42,21 +43,21 @@ public class OrderController {
 
     // get all orders for the current user (client or seller)
     @GetMapping
-    public ResponseEntity<List<OrderResponseDTO>> getOwnOrders(
+    public ResponseEntity<OrderDashboardDTO> getOwnOrders(
             @RequestHeader("Authorization") String authHeader
             ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
-        List<OrderResponseDTO> orders;
+        OrderDashboardDTO orderDash;
 
         if (currentUser.getRole().equals(Role.CLIENT)) {
-            orders = orderService.getClientOrders(currentUser);
+            orderDash = orderService.getClientOrders(currentUser);
         } else if (currentUser.getRole().equals(Role.SELLER)) {
-            orders = orderService.getSellerOrders(currentUser);
+            orderDash = orderService.getSellerOrders(currentUser);
         } else {
             throw new BadRequestException("Invalid role" + currentUser.getRole().toString() + " for fetching own orders");
         }
 
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.ok(orderDash);
     }
 
 

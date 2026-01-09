@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { OrderService } from '../../services/order.service';
-import { Order } from '../../models/order.model';
+import { OrderResponseDTO } from '../../models/order.model';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -13,7 +13,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrl: './order-view.component.css'
 })
 export class OrderViewComponent implements OnInit {
-  order: Order | null = null;
+  order: OrderResponseDTO | null = null;
   isLoggedIn = false;
 
   constructor(
@@ -28,7 +28,7 @@ export class OrderViewComponent implements OnInit {
       const orderId = this.route.snapshot.paramMap.get('id');
         if (orderId) {
           this.orderService.getOrderById(orderId).subscribe({
-            next: (data: Order) => {
+            next: (data: OrderResponseDTO) => {
               this.order = data;
               console.log('Order details:', this.order);
             },
