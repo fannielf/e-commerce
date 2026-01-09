@@ -19,7 +19,8 @@
           (click)="updateQuantity(item, item.quantity - 1)"
           [disabled]="item.quantity <= 1 || item.updating"
         >
-          −
+          <span *ngIf="!item.updating">−</span>
+          <span *ngIf="item.updating" class="spinner-border spinner-border-sm"></span>
         </button>
 
         <input
@@ -35,7 +36,8 @@
           (click)="updateQuantity(item, item.quantity + 1)"
           [disabled]="item.updating"
         >
-          +
+          <span *ngIf="!item.updating">+</span>
+          <span *ngIf="item.updating" class="spinner-border spinner-border-sm"></span>
         </button>
       </div>
 

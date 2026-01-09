@@ -35,15 +35,16 @@ export class CartComponent implements OnInit {
   }
 
   updateQuantity(item: ItemDTO, newQty: number): void {
-    if (newQty <= 0 || newQty === item.quantity) {
+    if (newQty <= 0 || item.updating) { // prevent unnecessary API calls
       return;
     }
 
-    item.updating = true;
+    item.updating = true; // setting loading state to prevent double-clicks
 
+    // sending the absolute qty we want to set for the item
     this.cartService.updateCartItem(item.productId, { quantity: newQty }).subscribe({
       next: (res: CartResponseDTO) => {
-        this.cart = res;
+        this.cart = res; // update the whole cart with a fresh data
 
         const updatedItem = res.items.find(i => i.productId === item.productId);
         if (updatedItem) {
@@ -60,6 +61,7 @@ export class CartComponent implements OnInit {
                 'Close',
                 { duration: 3000, panelClass: ['snack-bar-error'] }
               );
+            this.loadCart(); // reload cart to reflect actual state - necessary or not?
             }
           });
         }
