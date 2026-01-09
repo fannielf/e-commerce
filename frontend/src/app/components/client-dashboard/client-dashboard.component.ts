@@ -1,37 +1,76 @@
 import { Component, OnInit } from '@angular/core';
-import { OrderService } from '../../services/order.service';
-import { OrderDashboardDTO, ItemDTO, OrderResponseDTO } from '../../models/order.model';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { OrderService } from '../../services/order.service';
+import { OrderDashboardDTO } from '../../models/order.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-client-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './client-dashboard.component.html',
   styleUrls: ['./client-dashboard.component.css']
 })
 export class ClientDashboardComponent implements OnInit {
   isLoading = true;
-  errorMessage: string | null = null;
-  totalSpent = 0;
-  mostBoughtItems: ItemDTO[] = [];
-  orders: OrderResponseDTO[] = [];
+  errorMessage = '';
+  dashboardData: OrderDashboardDTO | null = null;
+  filteredOrders: any[] = [];
 
-  constructor(private orderService: OrderService) {}
+  // Filter properties
+  statusFilter = '';
+  dateFilter = '';
+  orderStatuses = ['CREATED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELED'];
+
+  constructor(private orderService: OrderService, private router: Router) {}
 
   ngOnInit(): void {
     this.orderService.getOrders().subscribe({
-      next: (dashboardData: OrderDashboardDTO) => {
-        this.totalSpent = dashboardData.total;
-        this.mostBoughtItems = dashboardData.topItems;
-        this.orders = dashboardData.orders;
+      next: (data: OrderDashboardDTO) => {
+        this.dashboardData = data;
+        this.applyFilters(); // Apply filters on initial load
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         this.errorMessage = 'Failed to load dashboard data. Please try again later.';
-        this.isLoading = false;
         console.error(err);
+        this.isLoading = false;
       }
     });
+  }
+
+  applyFilters(): void {
+    if (!this.dashboardData?.orders) {
+      this.filteredOrders = [];
+      return;
+    }
+
+    let orders = [...this.dashboardData.orders];
+
+    // Filter by status
+    if (this.statusFilter) {
+      orders = orders.filter(order => order.status === this.statusFilter);
+    }
+
+    // Filter by date
+    if (this.dateFilter) {
+      orders = orders.filter(order => {
+        const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+        return orderDate === this.dateFilter;
+      });
+    }
+
+    this.filteredOrders = orders;
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
+    this.dateFilter = '';
+    this.applyFilters();
+  }
+
+  goToProduct(productId: string): void {
+    this.router.navigate(['/products', productId]);
   }
 }

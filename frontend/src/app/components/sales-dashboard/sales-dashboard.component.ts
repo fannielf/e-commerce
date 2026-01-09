@@ -1,25 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../services/order.service';
-import { ItemDTO, OrderResponseDTO } from '../../models/order.model'; // Import ItemDTO
+import { ItemDTO, OrderResponseDTO } from '../../models/order.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sales-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './sales-dashboard.component.html',
   styleUrl: './sales-dashboard.component.css'
 })
 export class SalesDashboardComponent implements OnInit {
   orders: OrderResponseDTO[] = [];
-  topSellingItems: ItemDTO[] = []; // To store top selling items
+  filteredOrders: OrderResponseDTO[] = [];
+  topSellingItems: ItemDTO[] = [];
   totalSales = 0;
   totalOrders = 0;
-  totalUnitsSold = 0; // To store total units sold
+  totalUnitsSold = 0;
   isLoading = true;
   errorMessage: string | null = null;
 
-  constructor(private orderService: OrderService) {}
+  // Filter properties
+  statusFilter = '';
+  dateFilter = '';
+  orderStatuses = ['CREATED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELED'];
+
+  constructor(private orderService: OrderService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadSalesData();
@@ -36,10 +44,10 @@ export class SalesDashboardComponent implements OnInit {
         this.totalOrders = dashboardData.orders.length;
         this.topSellingItems = dashboardData.topItems;
 
-        // Calculate total units sold by summing quantities from all items in all orders
         this.totalUnitsSold = dashboardData.orders.reduce((total, order) =>
           total + order.items.reduce((subTotal, item) => subTotal + item.quantity, 0), 0);
 
+        this.applyFilters(); // Apply filters on initial load
         this.isLoading = false;
       },
       error: (err) => {
@@ -48,5 +56,34 @@ export class SalesDashboardComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  applyFilters(): void {
+    let orders = [...this.orders];
+
+    // Filter by status
+    if (this.statusFilter) {
+      orders = orders.filter(order => order.status === this.statusFilter);
+    }
+
+    // Filter by date
+    if (this.dateFilter) {
+      orders = orders.filter(order => {
+        const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+        return orderDate === this.dateFilter;
+      });
+    }
+
+    this.filteredOrders = orders;
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
+    this.dateFilter = '';
+    this.applyFilters();
+  }
+
+  goToProduct(productId: string): void {
+    this.router.navigate(['/products', productId]);
   }
 }

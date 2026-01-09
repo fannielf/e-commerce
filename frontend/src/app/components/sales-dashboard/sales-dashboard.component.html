@@ -38,7 +38,7 @@
         <h2>Top Selling Products</h2>
         <div *ngIf="topSellingItems.length > 0; else noTopItems">
           <ul class="list-group">
-            <li *ngFor="let item of topSellingItems" class="list-group-item d-flex justify-content-between align-items-center">
+            <li *ngFor="let item of topSellingItems" class="list-group-item d-flex justify-content-between align-items-center clickable-list-item" (click)="goToProduct(item.productId)" style="cursor: pointer;">
               {{ item.name }}
               <span class="badge rounded-pill dashboard-bg">{{ item.quantity }} sold</span>
             </li>
@@ -51,6 +51,29 @@
 
       <div class="col-lg-8">
         <h2>Recent Orders</h2>
+
+        <!-- Filter Controls -->
+        <div class="row g-3 align-items-center mb-3">
+          <div class="col-auto">
+            <label for="statusFilter" class="col-form-label">Status</label>
+          </div>
+          <div class="col-auto">
+            <select id="statusFilter" class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+              <option value="">All</option>
+              <option *ngFor="let status of orderStatuses" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+          <div class="col-auto">
+            <label for="dateFilter" class="col-form-label">Date</label>
+          </div>
+          <div class="col-auto">
+            <input type="date" id="dateFilter" class="form-control" [(ngModel)]="dateFilter" (ngModelChange)="applyFilters()">
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-secondary" (click)="clearFilters()">Clear</button>
+          </div>
+        </div>
+
         <div *ngIf="orders.length > 0; else noOrders" class="card overflow-hidden">
           <div class="card-body p-0">
             <div class="table-responsive">
@@ -64,7 +87,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr *ngFor="let order of orders">
+                <tr *ngFor="let order of filteredOrders">
                   <td>{{ order.orderId }}</td>
                   <td>{{ order.createdAt | date:'mediumDate' }}</td>
                   <td>
@@ -76,6 +99,9 @@
                       }">{{ order.status }}</span>
                   </td>
                   <td class="text-end">{{ order.totalPrice | currency:'EUR' }}</td>
+                </tr>
+                <tr *ngIf="filteredOrders.length === 0">
+                  <td colspan="4" class="text-center">No orders match your filter criteria.</td>
                 </tr>
                 </tbody>
               </table>
