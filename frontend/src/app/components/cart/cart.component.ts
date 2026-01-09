@@ -34,44 +34,29 @@ export class CartComponent implements OnInit {
     });
   }
 
-  updateQuantity(item: ItemDTO, rawValue: string): void {
-    const originalQty = item.quantity;
-    const newQty = Number(rawValue);
+  updateQuantity(item: ItemDTO, newQty: number): void {
+    if (newQty <= 0 || newQty === item.quantity) {
+      return;
+    }
 
-    if (isNaN(newQty) || newQty <= 0) {
-        setTimeout(() => item.quantity = originalQty, 0);
-        return;
-        }
-    if (newQty === item.quantity) {
-        return;
-      }
-
-    item.quantity = newQty;
     item.updating = true;
 
     this.cartService.updateCartItem(item.productId, { quantity: newQty }).subscribe({
       next: (res: CartResponseDTO) => {
         this.cart = res;
 
-        // update local item quantity to reflect server state
-         const updatedItem = res.items.find(i => i.productId === item.productId);
-         if (updatedItem) {
-             item.quantity = updatedItem.quantity;
-         }
+        const updatedItem = res.items.find(i => i.productId === item.productId);
+        if (updatedItem) {
+          item.quantity = updatedItem.quantity;
+        }
 
-         item.updating = false;
+        item.updating = false;
       },
       error: () => {
-        item.quantity = originalQty;
         item.updating = false;
-        this.snackBar.open(
-          'Cannot add more than available quantity!',
-          'Close',
-          { duration: 3000, panelClass: ['snack-bar-error'] }
-        );
-      }
-    });
-  }
+
+        this.sna
+
 
   removeItem(item: ItemDTO): void {
     this.cartService.deleteItemById(item.productId).subscribe({

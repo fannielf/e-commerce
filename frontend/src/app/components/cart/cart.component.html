@@ -13,16 +13,32 @@
       <!-- Quantity -->
       <div class="d-flex align-items-center gap-2">
         <label class="me-1">Qty</label>
+
+        <button
+          class="btn btn-outline-secondary btn-sm"
+          (click)="updateQuantity(item, item.quantity - 1)"
+          [disabled]="item.quantity <= 1 || item.updating"
+        >
+          −
+        </button>
+
         <input
-          type="number"
-          class="form-control"
-          style="width: 80px"
-          min="1"
+          type="text"
+          class="form-control text-center"
+          style="width: 60px"
           [value]="item.quantity"
-          (change)="updateQuantity(item, $any($event.target).value)"
-          [disabled]="item.updating"
+          readonly
         />
+
+        <button
+          class="btn btn-outline-secondary btn-sm"
+          (click)="updateQuantity(item, item.quantity + 1)"
+          [disabled]="item.updating"
+        >
+          +
+        </button>
       </div>
+
 
       <!-- Subtotal -->
       <div class="fw-bold">
