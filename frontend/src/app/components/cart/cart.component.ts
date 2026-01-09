@@ -55,7 +55,14 @@ export class CartComponent implements OnInit {
       error: () => {
         item.updating = false;
 
-        this.sna
+        this.snackBar.open(
+                'Cannot add more than available quantity!',
+                'Close',
+                { duration: 3000, panelClass: ['snack-bar-error'] }
+              );
+            }
+          });
+        }
 
 
   removeItem(item: ItemDTO): void {
