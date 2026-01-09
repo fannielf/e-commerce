@@ -9,6 +9,8 @@ import com.buy01.order.repository.OrderRepository;
 import com.buy01.order.security.AuthDetails;
 import io.jsonwebtoken.io.IOException;
 import jakarta.ws.rs.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ import java.util.List;
 @Service
 public class OrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
 
@@ -51,10 +54,13 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with orderId: " + orderId));
 
-       return (order.getUserId().equals(currentUser.getCurrentUserId())
+        log.info("getOrderById: {}", orderId);
+       OrderResponseDTO response = (order.getUserId().equals(currentUser.getCurrentUserId())
                     || currentUser.getRole().equals(Role.ADMIN))
                     ? mapToDTO(order) // normal mapping for client and admin
                     : mapToDTO(filterOrderForSeller(order, currentUser)); // seller gets only filtered items
+        log.info("OrderResponseDTO prepared for orderId: {}", response.getTotalPrice());
+        return response;
     }
 
     public OrderResponseDTO createOrder(OrderCreateDTO orderCreateDTO, AuthDetails currentUser) throws IOException {
@@ -149,6 +155,7 @@ public class OrderService {
 
     // map Order to OrderResponseDTO
     private OrderResponseDTO mapToDTO(Order order) {
+        log.info("mapToDTO: {}", order.getId());
         return new OrderResponseDTO(
                 order.getId(),
                 order.getItems().stream()
@@ -157,7 +164,11 @@ public class OrderService {
                 order.getTotalPrice(),
                 order.getStatus(),
                 new ShippingAddressMaskedDTO(order.getShippingAddress()),
-                order.getCreatedAt()
+                order.isPaid(),
+                order.getDeliveryDate(),
+                order.getTrackingNumber(),
+                order.getCreatedAt(),
+                order.getUpdatedAt()
         );
     }
 

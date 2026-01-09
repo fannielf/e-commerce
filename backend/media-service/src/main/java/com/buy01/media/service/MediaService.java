@@ -2,11 +2,11 @@ package com.buy01.media.service;
 
 import com.buy01.media.dto.AvatarResponseDTO;
 import com.buy01.media.dto.MediaResponseDTO;
+import com.buy01.media.exception.ConflictException;
 import com.buy01.media.exception.ForbiddenException;
 import com.buy01.media.exception.NotFoundException;
 import com.buy01.media.repository.MediaRepository;
 import com.buy01.media.exception.FileUploadException;
-import jakarta.ws.rs.InternalServerErrorException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.buy01.media.model.Media;

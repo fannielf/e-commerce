@@ -1,17 +1,19 @@
 package com.buy01.order.dto;
 
+import org.springframework.data.mongodb.core.mapping.Field;
+
 public class ItemDTO {
     private String productId;
-    private String name;
+    private String productName;
     private int quantity;
     private double price;
     private double subtotal;
     private String sellerId;
 
     public ItemDTO() {}
-    public ItemDTO(String productId, String name, int quantity, double price, double subtotal, String sellerId) {
+    public ItemDTO(String productId, String productName, int quantity, double price, double subtotal, String sellerId) {
         this.productId = productId;
-        this.name = name;
+        this.productName = productName;
         this.quantity = quantity;
         this.price = price;
         this.subtotal = subtotal;
@@ -21,8 +23,8 @@ public class ItemDTO {
     public String getProductId() {return this.productId;}
     public void setProductId(String productId) {this.productId = productId;}
 
-    public String getName() {return this.name;}
-    public void setName(String name) {this.name = name;}
+    public String getProductName() {return this.productName;}
+    public void setProductName(String productName) {this.productName = productName;}
 
     public int getQuantity() {return this.quantity;}
     public void setQuantity(int quantity) {this.quantity = quantity;}
