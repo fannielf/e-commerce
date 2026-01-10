@@ -175,7 +175,13 @@ public class OrderService {
 
     // map Order to OrderResponseDTO
     private OrderResponseDTO mapToDTO(Order order) {
-        log.info("mapToDTO: {}", order.getId());
+        log.info("mapToDTO: fullName {}, street {}, postalCode {}, city {}, country {}",
+                order.getShippingAddress().getFullName(),
+                order.getShippingAddress().getStreet(),
+                order.getShippingAddress().getPostalCode(),
+                order.getShippingAddress().getCity(),
+                order.getShippingAddress().getCountry()
+        );
         return new OrderResponseDTO(
                 order.getId(),
                 order.getItems().stream()

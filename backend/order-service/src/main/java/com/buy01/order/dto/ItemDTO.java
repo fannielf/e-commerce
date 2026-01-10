@@ -1,13 +1,22 @@
 package com.buy01.order.dto;
 
-import org.springframework.data.mongodb.core.mapping.Field;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 public class ItemDTO {
+    @NotBlank
     private String productId;
+    @NotBlank
     private String productName;
+    @Min(value = 0, message = "Quantity cannot be negative")
     private int quantity;
+    @Positive(message = "Price must be over 0")
     private double price;
+    @Positive(message = "Subtotal must be over 0")
     private double subtotal;
+    @NotBlank
     private String sellerId;
 
     public ItemDTO() {}

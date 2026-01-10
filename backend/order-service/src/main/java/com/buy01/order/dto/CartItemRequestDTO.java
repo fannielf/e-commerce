@@ -4,9 +4,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 public class CartItemRequestDTO {
-    @NotBlank
+    @NotBlank(message = "Product ID cannot be blank")
     private String productId;
-    @Min(1)
+    @Min(value = 0, message = "Quantity cannot be negative")
     private int quantity;
 
     public CartItemRequestDTO() {}

@@ -1,8 +1,10 @@
 package com.buy01.order.dto;
 
 import com.buy01.order.model.CartStatus;
+import jakarta.validation.Valid;
 
 public class CartUpdateRequest {
+    @Valid
     private CartStatus cartStatus;
 
     public CartUpdateRequest() {}

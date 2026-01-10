@@ -2,16 +2,27 @@ package com.buy01.order.dto;
 
 import com.buy01.order.model.OrderStatus;
 import com.buy01.order.model.ShippingAddress;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.util.Date;
 import java.util.List;
 
 public class OrderResponseDTO {
+    @NotBlank
     private String orderId;
+    @NotNull
+    @Valid
     private List<ItemDTO> items;
+    @Positive(message = "Total price must be over 0")
     private double totalPrice;
+    @Valid
     private OrderStatus status;
+    @Valid
     private ShippingAddressMaskedDTO shippingAddress;
+    @NotNull
     private boolean paid;
     private Date deliveryDate;
     private String trackingNumber;

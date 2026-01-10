@@ -1,9 +1,14 @@
 package com.buy01.order.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.List;
 
 public class CartResponseDTO {
+    @NotBlank
     private String cartId;
+    @Valid
     private List<ItemDTO> items;
     private double totalPrice;
 

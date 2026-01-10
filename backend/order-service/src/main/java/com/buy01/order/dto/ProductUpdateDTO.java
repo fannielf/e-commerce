@@ -1,9 +1,15 @@
 package com.buy01.order.dto;
 
+import jakarta.validation.constraints.*;
+
 public class ProductUpdateDTO {
+    @NotBlank
     private String productId;
+    @NotBlank
     private String productName;
+    @NotNull(message = "Price is required")
     private Double productPrice;
+    @NotNull(message = "Quantity is required")
     private int quantity;
 
     public ProductUpdateDTO() {}
