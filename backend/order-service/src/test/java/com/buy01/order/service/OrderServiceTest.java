@@ -197,7 +197,7 @@ public class OrderServiceTest {
 
         when(orderRepository.findById("order1")).thenReturn(java.util.Optional.of(existingOrder));
 
-        OrderUpdateRequest updateRequest = new OrderUpdateRequest(OrderStatus.CANCELED);
+        OrderUpdateRequest updateRequest = new OrderUpdateRequest(OrderStatus.CANCELLED);
 
         // Act & Assert
         BadRequestException exception = assertThrows(

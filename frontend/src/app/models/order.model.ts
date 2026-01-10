@@ -38,7 +38,7 @@ export enum Status {
   CONFIRMED = 'CONFIRMED',
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
-  CANCELED = 'CANCELED'
+  CANCELLED = 'CANCELLED'
 }
 
 export const OrderStatusList = Object.values(Status);

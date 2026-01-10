@@ -95,7 +95,7 @@
                         'bg-secondary': order.status === 'CREATED' || order.status === 'CONFIRMED',
                         'bg-warning': order.status === 'SHIPPED',
                         'bg-success': order.status === 'DELIVERED',
-                        'bg-danger': order.status === 'CANCELED'
+                        'bg-danger': order.status === 'CANCELLED'
                       }">{{ order.status }}</span>
                   </td>
                   <td class="text-end">{{ order.totalPrice | currency:'EUR' }}</td>

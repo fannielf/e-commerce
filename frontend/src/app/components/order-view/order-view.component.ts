@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { OrderService } from '../../services/order.service';
-import { OrderResponseDTO } from '../../models/order.model';
+import { OrderResponseDTO, OrderStatusList } from '../../models/order.model';
 import { Component, OnInit } from '@angular/core';
+import { DashboardComponent } from '../dashboard/dashboard.component';
+
 
 @Component({
   selector: 'app-order-view',
@@ -15,11 +17,13 @@ import { Component, OnInit } from '@angular/core';
 export class OrderViewComponent implements OnInit {
   order: OrderResponseDTO | null = null;
   isLoggedIn = false;
+  statusSteps: string[] = OrderStatusList as unknown as string[];
 
   constructor(
     private route: ActivatedRoute,
     private orderService: OrderService,
     private authService: AuthService,
+    private dashboardComponent: DashboardComponent,
     private router: Router
   ) {}
 
@@ -39,6 +43,40 @@ export class OrderViewComponent implements OnInit {
         } else {
           this.router.navigate(['']);
         }
+  }
+
+  // Helper to determine if a step in the visual tracker should be green
+  isStatusReached(step: string): boolean {
+    if (!this.order || !this.order.status) return false;
+
+    // We cast to 'any' here because sometimes the DTO status is an Enum 
+    // and the list is Strings, causing TypeScript to block the indexOf check.
+    const currentIdx = this.statusSteps.indexOf(this.order.status as any);
+    const stepIdx = this.statusSteps.indexOf(step);
+
+    // Only return true if both statuses were found in the list (-1 means not found)
+    return currentIdx !== -1 && currentIdx >= stepIdx;
+  }
+
+  getStatusIcon(step: string): string {
+    switch(step) {
+      case 'CREATED': return 'bi-cart';
+      case 'CONFIRMED': return 'bi-check-lg';
+      case 'SHIPPED': return 'bi-truck';
+      case 'DELIVERED': return 'bi-house-door';
+      default: return 'bi-circle';
+    }
+  }
+
+  cancelOrder() {
+    if(confirm('Are you sure you want to cancel this order?')) {
+      // Call service to cancel order
+      console.log('Cancelling order...');
+    }
+  }
+
+  goToProduct(productId: string): void {
+    this.dashboardComponent.goToProduct(productId);
   }
 
 }

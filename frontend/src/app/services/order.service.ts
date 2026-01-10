@@ -56,4 +56,8 @@ export class OrderService {
       map(order => this.mapOrder(order))
     );
   }
+
+  cancelOrder(orderId: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${orderId}`, { status: Status.CANCELLED });
+  }
 }
