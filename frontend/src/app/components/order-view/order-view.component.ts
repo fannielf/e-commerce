@@ -101,7 +101,7 @@ export class OrderViewComponent implements OnInit {
       // Call service to reorder items
       this.cartService.reorderItems(this.order.orderId).subscribe({
         next: (CartResponseDTO) => {
-          console.log('Items reordered successfully:', CartResponseDTO);
+          console.log('Items added to cart:', CartResponseDTO);
           this.showReorderModal = false;
           this.router.navigate(['/cart']);
         },
