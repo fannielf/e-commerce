@@ -77,6 +77,16 @@ public class CartController {
         return ResponseEntity.ok(cartService.updateCart(currentUser, productId, itemUpdate));
     }
 
+    @PutMapping
+    public ResponseEntity<CartResponseDTO> updateCartStatus(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody String status
+    ) throws IOException {
+        AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
+
+        return ResponseEntity.ok(cartService.updateCartStatus(currentUser, status));
+    })
+
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteProduct(

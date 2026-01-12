@@ -126,6 +126,16 @@ public class CartService {
         return mapToDTO(cartRepository.save(cart));
     }
 
+    public CartResponseDTO updateCartStatus(AuthDetails currentUser, CartStatus newStatus) throws IOException {
+        Cart cart = cartRepository.findByUserId(currentUser.getCurrentUserId());
+                .orElseThrow(() -> new NotFoundException("Cart not found for user: " + currentUser.getCurrentUserId()));
+
+        cart.setCartStatus(newStatus);
+        updateCartTotalAndTime(cart);
+
+        return mapToDTO(cartRepository.save(cart));
+    }
+
     public void deleteItemById(String id, AuthDetails currentUser) throws IOException{
         Cart cart = getCurrentCart(currentUser);
 
