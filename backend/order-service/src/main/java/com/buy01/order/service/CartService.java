@@ -127,8 +127,7 @@ public class CartService {
     }
 
     public CartResponseDTO updateCartStatus(AuthDetails currentUser, CartStatus newStatus) throws IOException {
-        Cart cart = cartRepository.findByUserId(currentUser.getCurrentUserId());
-                .orElseThrow(() -> new NotFoundException("Cart not found for user: " + currentUser.getCurrentUserId()));
+        Cart cart = getCurrentCart(currentUser);
 
         cart.setCartStatus(newStatus);
         updateCartTotalAndTime(cart);
