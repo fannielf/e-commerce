@@ -171,7 +171,7 @@ public class CartService {
             cart.getItems().add(itemAdded); // add new item to cart
         }
 
-        productClient.updateQuantity(itemAdded.getProductId(), itemAdded.getQuantity());
+        productClient.updateQuantity(itemAdded.getProductId(), -itemAdded.getQuantity());
     }
 
     // update total price and update time of cart
