@@ -1,6 +1,9 @@
 package com.buy01.order.dto;
 
+import jakarta.validation.constraints.Min;
+
 public class CartItemUpdateDTO {
+    @Min(value = 0, message = "Quantity cannot be negative")
     private int quantity;
 
     public CartItemUpdateDTO() {}

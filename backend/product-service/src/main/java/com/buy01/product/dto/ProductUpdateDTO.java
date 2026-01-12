@@ -1,9 +1,20 @@
 package com.buy01.product.dto;
 
+import jakarta.validation.constraints.*;
+
 public class ProductUpdateDTO {
+    @NotBlank(message = "Product ID cannot be empty")
     private String productId;
+    @NotBlank(message = "Name cannot be empty")
+    @Pattern(regexp = "^[A-Za-z0-9 ]+$", message = "Product name can only contain letters, numbers, and spaces")
     private String name;
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be over 0")
+    @Max(value = 100000, message = "Price cannot exceed 100000")
     private double price;
+    @NotNull(message = "Quantity is required")
+    @Min(value = 0, message = "Quantity cannot be negative")
+    @Max(value = 1000, message = "Quantity cannot exceed 1000")
     private int quantity;
 
     public ProductUpdateDTO() {}

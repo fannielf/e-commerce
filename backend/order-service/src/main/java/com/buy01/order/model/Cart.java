@@ -1,6 +1,12 @@
 package com.buy01.order.model;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -10,11 +16,18 @@ import java.util.List;
 public class Cart {
     @Id
     private String id;
+    @NotBlank
     private String userId;
+    @Valid
     private List<OrderItem> items;
+    @Positive
     private double totalPrice;
+    @NotNull
+    @Valid
     private CartStatus cartStatus;
+    @CreatedDate
     private Date createTime;
+    @LastModifiedDate
     private Date updateTime;
 
     public Cart(){}

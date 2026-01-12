@@ -1,17 +1,28 @@
 package com.buy01.order.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+
 public class ItemDTO {
+    @NotBlank
     private String productId;
-    private String name;
+    @NotBlank
+    private String productName;
+    @Min(value = 0, message = "Quantity cannot be negative")
     private int quantity;
+    @Positive(message = "Price must be over 0")
     private double price;
+    @Positive(message = "Subtotal must be over 0")
     private double subtotal;
+    @NotBlank
     private String sellerId;
 
     public ItemDTO() {}
-    public ItemDTO(String productId, String name, int quantity, double price, double subtotal, String sellerId) {
+    public ItemDTO(String productId, String productName, int quantity, double price, double subtotal, String sellerId) {
         this.productId = productId;
-        this.name = name;
+        this.productName = productName;
         this.quantity = quantity;
         this.price = price;
         this.subtotal = subtotal;
@@ -21,8 +32,8 @@ public class ItemDTO {
     public String getProductId() {return this.productId;}
     public void setProductId(String productId) {this.productId = productId;}
 
-    public String getName() {return this.name;}
-    public void setName(String name) {this.name = name;}
+    public String getProductName() {return this.productName;}
+    public void setProductName(String productName) {this.productName = productName;}
 
     public int getQuantity() {return this.quantity;}
     public void setQuantity(int quantity) {this.quantity = quantity;}

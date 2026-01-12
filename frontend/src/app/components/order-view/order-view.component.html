@@ -1,0 +1,103 @@
+<div class="container mt-4 d-flex justify-content-center">
+  <div *ngIf="order" class="card p-4 order-view-card w-100" style="background-color: transparent; max-width: 900px;">
+
+    <div class="d-flex justify-content-between align-items-start mb-4 border-bottom pb-3">
+      <div>
+        <h2 class="mb-1">Order #{{ order.orderId }}</h2>
+        <p class="text-muted mb-0">Placed on {{ order.createdAt | date:'mediumDate' }}</p>
+      </div>
+      <div class="text-end">
+        <h3 class="text-primary">{{ order.totalPrice | currency:'EUR':'symbol' }}</h3>
+        <span class="badge rounded-pill"
+              [ngClass]="{
+                'bg-warning text-dark': order.status === 'CREATED',
+                'bg-info text-dark': order.status === 'CONFIRMED',
+                'bg-primary': order.status === 'SHIPPED',
+                'bg-success': order.status === 'DELIVERED',
+                'bg-danger': order.status === 'CANCELLED'
+              }">
+          {{ order.status }}
+        </span>
+      </div>
+    </div>
+
+    <div class="status-tracker-container mb-5 d-none d-md-block" *ngIf="order.status !== 'CANCELLED'">
+      <div class="d-flex justify-content-between position-relative">
+        <div class="position-absolute top-50 start-0 w-100 translate-middle-y bg-secondary" style="height: 4px; z-index: 0; opacity: 0.2;"></div>
+
+        <div *ngFor="let step of statusSteps; let i = index" class="d-flex flex-column align-items-center position-relative" style="z-index: 1;">
+          <div class="rounded-circle d-flex align-items-center justify-content-center mb-2"
+               style="width: 40px; height: 40px; border: 2px solid;"
+               [ngClass]="isStatusReached(step) ? 'bg-success border-success text-white' : 'bg-light border-secondary text-secondary'">
+            <i class="bi" [ngClass]="getStatusIcon(step)"></i>
+          </div>
+          <small class="fw-bold" [ngClass]="isStatusReached(step) ? 'text-success' : 'text-muted'">{{ step }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="order.status === 'SHIPPED' || order.status === 'DELIVERED'" class="alert alert-light border mb-4">
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="fw-bold"><i class="bi bi-truck me-2"></i>Delivery Status</h6>
+          <p class="mb-0" *ngIf="order.status === 'SHIPPED'">
+            Estimated Delivery: <strong>{{ order.deliveryDate | date:'mediumDate' }}</strong>
+          </p>
+          <p class="mb-0" *ngIf="order.status === 'DELIVERED'">
+            Delivered on: <strong class="text-success">{{ order.deliveryDate | date:'mediumDate' }}</strong>
+          </p>
+        </div>
+        <div class="col-md-6" *ngIf="order.status === 'SHIPPED'">
+          <h6 class="fw-bold">Tracking Number</h6>
+          <p class="mb-0 text-monospace">{{ order.trackingNumber }}</p>
+        </div>
+      </div>
+    </div>
+
+<h4 class="mb-3">Items</h4>
+
+    <div class="d-flex flex-column gap-3 mb-4">
+      <div *ngFor="let item of order.items"
+           class="product-card-uniform card p-3 shadow-sm"
+           (click)="goToProduct(item.productId)"
+           style="cursor: pointer; background-color: transparent;">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+          <div>
+            <h5 class="mb-1 fw-bold">{{ item.productName }}</h5>
+          </div>
+
+          <div class="text-end">
+            <div class="fw-bold fs-5 text-primary">
+              {{ (item.price * item.quantity) | currency:'EUR':'symbol' }}
+            </div>
+            <div class="text-muted small">
+              {{ item.quantity }} qty &times; {{ item.price | currency:'EUR':'symbol' }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end align-items-center mt-auto border-top pt-3">
+      <button *ngIf="order.status === 'CREATED' || order.status === 'CONFIRMED'"
+              (click)="cancelOrder()"
+              class="btn btn-outline-danger">
+        <i class="bi bi-x-circle me-2"></i>Cancel Order
+      </button>
+
+      <div *ngIf="order.status === 'CANCELLED'" class="text-danger fw-bold">
+        <i class="bi bi-exclamation-circle me-2"></i>This order has been cancelled.
+      </div>
+    </div>
+
+  </div>
+
+  <div *ngIf="!order" class="text-center mt-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>

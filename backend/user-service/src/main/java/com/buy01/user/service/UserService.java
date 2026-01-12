@@ -9,7 +9,6 @@ import com.buy01.user.model.Role;
 import com.buy01.user.model.User;
 import com.buy01.user.repository.UserRepository;
 import com.buy01.user.security.AuthDetails;
-import jakarta.ws.rs.InternalServerErrorException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

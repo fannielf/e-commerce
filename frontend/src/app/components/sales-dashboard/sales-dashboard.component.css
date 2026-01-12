@@ -1,0 +1,7 @@
+.clickable-list-item {
+  cursor: pointer;
+}
+
+.clickable-list-item:hover {
+  background-color: #f8f9fa;
+}

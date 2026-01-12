@@ -49,6 +49,9 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole(Roles.SELLER, Roles.ADMIN)
                         .pathMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole(Roles.SELLER, Roles.ADMIN)
 
+                        // Order endpoints
+                        .pathMatchers("/api/orders/**").hasAnyRole(Roles.CLIENT, Roles.SELLER, Roles.ADMIN)
+
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtRequestFilter, SecurityWebFiltersOrder.AUTHENTICATION);
@@ -58,7 +61,6 @@ public class GatewaySecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        System.out.println("CorsConfigurationSource activated");
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "https://frontend:4200",  // Docker internal
@@ -70,7 +72,6 @@ public class GatewaySecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-        System.out.println("Source after cors: " +  source);
         return source;
     }
 }

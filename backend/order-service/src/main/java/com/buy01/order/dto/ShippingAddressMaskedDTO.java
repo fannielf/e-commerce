@@ -1,12 +1,18 @@
 package com.buy01.order.dto;
 
 import com.buy01.order.model.ShippingAddress;
+import jakarta.validation.constraints.NotNull;
 
 public class ShippingAddressMaskedDTO {
+    @NotNull
     private String fullName;
+    @NotNull
     private String street;
+    @NotNull
     private String city;
+    @NotNull
     private String postalCode;
+    @NotNull
     private String country;
 
     public ShippingAddressMaskedDTO() {}
@@ -47,7 +53,7 @@ public class ShippingAddressMaskedDTO {
 
     private String maskStreet(String street) {
         if (street == null || street.length() < 3) return "**";
-        return city.substring(0, 3) + "*".repeat(city.length() - 3);    }
+        return street.substring(0, 3) + "*".repeat(street.length() - 3);    }
 
     private String maskPostalCode(String postalCode) {
         if (postalCode == null || postalCode.length() < 2) return "**";
@@ -55,6 +61,6 @@ public class ShippingAddressMaskedDTO {
     }
 
     private String maskCity(String city) {
-        return "*".repeat(city.length());
+        return city != null ?"*".repeat(city.length()) : "***";
     }
 }

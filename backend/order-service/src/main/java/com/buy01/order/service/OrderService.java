@@ -1,6 +1,7 @@
 package com.buy01.order.service;
 
 import com.buy01.order.dto.*;
+import com.buy01.order.exception.BadRequestException;
 import com.buy01.order.exception.ForbiddenException;
 import com.buy01.order.exception.NotFoundException;
 import com.buy01.order.model.*;
@@ -8,42 +9,61 @@ import com.buy01.order.repository.CartRepository;
 import com.buy01.order.repository.OrderRepository;
 import com.buy01.order.security.AuthDetails;
 import io.jsonwebtoken.io.IOException;
-import jakarta.ws.rs.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.buy01.order.client.ProductClient;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 // Service layer is responsible for business logic, validation, verification and data manipulation.
 // It chooses how to handle data and interacts with the repository layer.
 @Service
 public class OrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
+    private final ProductClient productClient;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, CartRepository cartRepository) {
+    public OrderService(OrderRepository orderRepository, CartRepository cartRepository, ProductClient productClient) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
+        this.productClient = productClient;
     }
 
-    public List<OrderResponseDTO> getClientOrders(AuthDetails currentUser) {
+    public OrderDashboardDTO getClientOrders(AuthDetails currentUser) {
         List<Order> orders = orderRepository.findOrdersByUserId(currentUser.getCurrentUserId());
 
-        return orders.stream()
+        List<OrderResponseDTO> ordersDto = orders.stream()
                 .map(this::mapToDTO)
                 .toList();
+        List<ItemDTO> topItems = orderRepository.findTopItemsByUserId(currentUser.getCurrentUserId(), 3);
+        double totalSum = orders.stream()
+                .mapToDouble(Order::getTotalPrice)
+                .sum();
+
+
+        return new OrderDashboardDTO(ordersDto, topItems, totalSum);
     }
 
-    public List<OrderResponseDTO> getSellerOrders(AuthDetails currentUser) {
+    public OrderDashboardDTO getSellerOrders(AuthDetails currentUser) {
         List<Order> orders = orderRepository.findByItemsSellerId(currentUser.getCurrentUserId());
 
-        return orders.stream()
+        List<OrderResponseDTO> sellerOrders = orders.stream()
                 .map(order -> filterOrderForSeller(order, currentUser)) // filter items for the current seller
                 .map(this::mapToDTO)
                 .toList();
+
+        List<ItemDTO> topItems = orderRepository.findTopItemsBySellerId(currentUser.getCurrentUserId(), 3);
+        double totalSum = sellerOrders.stream()
+                .mapToDouble(OrderResponseDTO::getTotalPrice)
+                .sum();
+
+        return new OrderDashboardDTO(sellerOrders, topItems, totalSum);
 
 }
 
@@ -51,10 +71,13 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found with orderId: " + orderId));
 
-       return (order.getUserId().equals(currentUser.getCurrentUserId())
+        log.info("getOrderById: {}", orderId);
+       OrderResponseDTO response = (order.getUserId().equals(currentUser.getCurrentUserId())
                     || currentUser.getRole().equals(Role.ADMIN))
                     ? mapToDTO(order) // normal mapping for client and admin
                     : mapToDTO(filterOrderForSeller(order, currentUser)); // seller gets only filtered items
+        log.info("OrderResponseDTO prepared for orderId: {}", response.getTotalPrice());
+        return response;
     }
 
     public OrderResponseDTO createOrder(OrderCreateDTO orderCreateDTO, AuthDetails currentUser) throws IOException {
@@ -67,6 +90,7 @@ public class OrderService {
         if (cart == null || cart.getItems().isEmpty()) {
             throw new BadRequestException("Cart is empty. Cannot create order.");
         }
+        updateProductStock(cart.getItems());
 
         Order order = orderRepository.save(
                 new Order(
@@ -95,9 +119,9 @@ public class OrderService {
             throw new BadRequestException("Order status cannot be null");
         }
 
-        // Restrict clients: only allow CANCELED
+        // Restrict clients: only allow CANCELLED
         if (currentUser.getRole().equals(Role.CLIENT)
-                && orderUpdate.getStatus() != OrderStatus.CANCELED) {
+                && orderUpdate.getStatus() != OrderStatus.CANCELLED) {
             throw new ForbiddenException("Clients can only cancel orders");
         }
 
@@ -110,8 +134,6 @@ public class OrderService {
 
         existingOrder.setStatus(orderUpdate.getStatus());
         existingOrder.setUpdatedAt(new Date());
-
-        // WHAT ELSE CAN BE UPDATED??
 
         return mapToDTO(orderRepository.save(existingOrder));
     }
@@ -136,7 +158,7 @@ public class OrderService {
     // Helper methods
 
     // convert OrderItem to ItemDTO
-    private ItemDTO toItemDTO(OrderItem item) {
+    public ItemDTO toItemDTO(OrderItem item) {
         return new ItemDTO(
                 item.getProductId(),
                 item.getProductName(),
@@ -149,6 +171,13 @@ public class OrderService {
 
     // map Order to OrderResponseDTO
     private OrderResponseDTO mapToDTO(Order order) {
+        log.info("mapToDTO: fullName {}, street {}, postalCode {}, city {}, country {}",
+                order.getShippingAddress().getFullName(),
+                order.getShippingAddress().getStreet(),
+                order.getShippingAddress().getPostalCode(),
+                order.getShippingAddress().getCity(),
+                order.getShippingAddress().getCountry()
+        );
         return new OrderResponseDTO(
                 order.getId(),
                 order.getItems().stream()
@@ -157,7 +186,11 @@ public class OrderService {
                 order.getTotalPrice(),
                 order.getStatus(),
                 new ShippingAddressMaskedDTO(order.getShippingAddress()),
-                order.getCreatedAt()
+                order.isPaid(),
+                order.getDeliveryDate(),
+                order.getTrackingNumber(),
+                order.getCreatedAt(),
+                order.getUpdatedAt()
         );
     }
 
@@ -180,5 +213,11 @@ public class OrderService {
         return order;
     }
 
+    // update reserved quantity for each ordered product in product service
+    private void updateProductStock(List<OrderItem> orderItems) {
+        for (OrderItem orderItem : orderItems) {
+            productClient.updateQuantity(orderItem.getProductId(), -orderItem.getQuantity());
+        }
+    }
 
 }
