@@ -29,5 +29,5 @@ export const routes: Routes = [
   { path: 'order/:id', component: OrderViewComponent, canActivate: [AuthGuard]},
   { path: 'cart', component: CartComponent },
   { path: '404', component: NotFoundComponent },
-  { path: '**', redirectTo: '/404' }
+  { path: '**', redirectTo: '' }
 ];
