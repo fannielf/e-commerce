@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
 import { Product } from '../../models/product.model';
@@ -10,13 +11,16 @@ import { ImageCarouselComponent } from '../shared/image-carousel/image-carousel.
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ImageUrlPipe, ImageCarouselComponent],
+  imports: [CommonModule, ImageUrlPipe, ImageCarouselComponent, FormsModule], // Add FormsModule
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
     products: Product[] = [];
     isLoggedIn = false;
+
+    searchTerm: string = '';
+    sortBy: string = 'latest';
 
     constructor(
         private productService: ProductService,
@@ -41,5 +45,14 @@ export class DashboardComponent implements OnInit {
 
     goToProduct(productId: string) {
       this.router.navigate(['/products', productId]);
+    }
+
+    // Placeholder methods, change for backend!
+    onSearch() {
+      console.log('Searching for:', this.searchTerm);
+    }
+
+    onSortChange() {
+      console.log('Sorting by:', this.sortBy);
     }
 }
