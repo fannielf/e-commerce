@@ -50,8 +50,7 @@ public class CartService {
 
         Cart cart = cartRepository.findByUserId(currentUser.getCurrentUserId()); // find active cart for user
         if (cart == null) { // if no active cart
-            cart = new Cart(currentUser.getCurrentUserId(), new ArrayList<>(), 0, CartStatus.ACTIVE); // create new cart
-            cartRepository.save(cart); // save new cart to repository
+            return null;
         }
 
         if (cart.getCartStatus() == CartStatus.ABANDONED) {
@@ -61,6 +60,16 @@ public class CartService {
         return cart;
     }
 
+    public Cart createNewCart(AuthDetails currentUser) {
+        Cart cart = new Cart(
+                currentUser.getCurrentUserId(),
+                new ArrayList<>(),
+                0.0,
+                CartStatus.ACTIVE
+        );
+        return cartRepository.save(cart);
+    }
+
     public CartResponseDTO addToCart(AuthDetails currentUser, CartItemRequestDTO newItem) throws IOException {
 
         if (!currentUser.getRole().equals(Role.CLIENT)) {
@@ -68,6 +77,9 @@ public class CartService {
         }
 
         Cart cart = getCurrentCart(currentUser); // get or create active cart for user
+        if (cart == null) {
+            cart = createNewCart(currentUser);
+        }
         validStatusForChanges(cart);
 
         ProductUpdateDTO product = productClient.getProductById(newItem.getProductId()); // fetch product details from product service
@@ -97,6 +109,9 @@ public class CartService {
         }
 
         Cart cart = getCurrentCart(currentUser);
+        if (cart == null) {
+            cart = createNewCart(currentUser);
+        }
 
         if (cart.getCartStatus() == CartStatus.ABANDONED) {
             cart = reactivateCart(cart.getId());
@@ -119,6 +134,9 @@ public class CartService {
 
     public CartResponseDTO updateCart(AuthDetails currentUser, String productId, CartItemUpdateDTO newQuantity) throws IOException {
         Cart cart = getCurrentCart(currentUser);
+        if (cart == null) {
+            throw new NotFoundException("Cart not found");
+        }
         validStatusForChanges(cart);
 
         Optional<OrderItem> itemToUpdate = cart.getItems().stream()
@@ -141,6 +159,9 @@ public class CartService {
 
     public CartResponseDTO updateCartStatus(AuthDetails currentUser, CartStatus newStatus) throws IOException {
         Cart cart = getCurrentCart(currentUser);
+        if (cart == null) {
+            throw new NotFoundException("Cart not found");
+        }
 
         cart.setCartStatus(newStatus);
         updateCartTotalAndTime(cart);
@@ -149,36 +170,36 @@ public class CartService {
     }
 
     @PreAuthorize("hasRole('CLIENT') || hasRole('ADMIN')")
-    public void deleteItemById(String id, AuthDetails currentUser) {
+    public CartResponseDTO deleteItemById(String id, AuthDetails currentUser) {
 
         Cart cart = cartRepository.findByUserId(currentUser.getCurrentUserId());
+        if (cart == null) throw new NotFoundException("Cart not found");
 
-        if (cart == null) {
-            throw new NotFoundException("Cart not found");
-        }
         validStatusForChanges(cart);
 
-        Optional<OrderItem> itemToRemove = cart.getItems().stream()
+        OrderItem itemToRemove = cart.getItems().stream()
                 .filter(item -> item.getProductId().equals(id))
-                .findFirst();
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Item not found in cart"));
 
-        if (itemToRemove.isEmpty()) {
-            throw new NotFoundException("Item not found in cart");
-        }
-        int quantity = itemToRemove.get().getQuantity();
 
-        cart.getItems().remove(itemToRemove.get());
+        int quantity = itemToRemove.getQuantity();
+
+        cart.getItems().remove(itemToRemove);
 
         // return item to the stock in product service if it was reserved (ACTIVE cart)
         if (cart.getCartStatus() == CartStatus.ACTIVE) {
             productClient.updateQuantity(id, quantity);
         }
 
+        log.info("cart items {}", cart.getItems().size());
+
         if (cart.getItems().isEmpty()) {
             cartRepository.delete(cart);
+            return null;
         } else {
             updateCartTotalAndTime(cart);
-            cartRepository.save(cart);
+            return mapToDTO(cartRepository.save(cart));
         }
     }
 

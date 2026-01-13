@@ -30,7 +30,7 @@ public class Cart {
     private Date createTime;
     @LastModifiedDate
     private Date updateTime;
-    @ReadOnlyProperty
+    @NotNull
     private Date expiryTime;
 
     public Cart(){}

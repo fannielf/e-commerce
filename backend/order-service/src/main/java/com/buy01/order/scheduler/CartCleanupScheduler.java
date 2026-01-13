@@ -24,11 +24,10 @@ public class CartCleanupScheduler {
     @Scheduled(fixedRate = 30000)
     public void processCartExpirations() {
         Date now =  new Date();
-        Date fifteenMinsAgo = new Date(now.getTime() - (15 * 60 * 1000));
         Date oneMinAgo = new Date(now.getTime() - (60 * 1000));
 
         // Mark ACTIVE Carts started 15min ago to ABANDONED
-        List<Cart> toAbandon = cartRepository.findExpiredActiveCarts(fifteenMinsAgo);
+        List<Cart> toAbandon = cartRepository.findExpiredActiveCarts(now);
         for (Cart cart : toAbandon) {
             if (cart.getCartStatus() == CartStatus.ACTIVE && cart.getUpdateTime().before(oneMinAgo)) { // avoid double processing and give grace
                 abandonCart(cart);

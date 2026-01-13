@@ -11,7 +11,7 @@ public interface CartRepository extends MongoRepository<Cart, String> {
     Cart findByUserId(String userId);
     List<Cart> findByItemsProductId(String productId);
     // Find ACTIVE carts updated before the specific date (fifteenMinsAgo)
-    @Query("{ 'cartStatus': 'ACTIVE', 'createTime': { $lt: ?0 } }")
+    @Query("{ 'cartStatus': 'ACTIVE', 'expiryTime': { $lt: ?0 } }")
     List<Cart> findExpiredActiveCarts(Date expirationTime);
 
     // Find ABANDONED carts updated before the specific date (oneMinAgo)
