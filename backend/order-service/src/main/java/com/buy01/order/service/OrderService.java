@@ -17,7 +17,6 @@ import com.buy01.order.client.ProductClient;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 // Service layer is responsible for business logic, validation, verification and data manipulation.
 // It chooses how to handle data and interacts with the repository layer.
@@ -59,11 +58,10 @@ public class OrderService {
                 .map(order -> mapToSellerDTO(order, currentUser))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .toList();
 
         List<ItemDTO> topItems = orderRepository.findTopItemsBySellerId(currentUser.getCurrentUserId(), 3);
 
-        // Corrected: Filter out CANCELLED orders before summing the total price.
         double totalSum = sellerOrders.stream()
                 .filter(order -> order.getStatus() != OrderStatus.CANCELLED)
                 .mapToDouble(OrderResponseDTO::getTotalPrice)

@@ -27,7 +27,7 @@ export class ProductService {
         description: item.description,
         price: item.price,
         quantity: item.quantity,
-        ownerId: item.ownerId,
+        userId: item.userId,
         images: imagePaths.length > 0 ? imagePaths : ['assets/product_image_placeholder.png'],
         isProductOwner: item.isProductOwner
       };
