@@ -39,7 +39,7 @@ public class CartController {
                 ));
     }
 
-    @PostMapping("redo/{orderId}")
+    @PostMapping("reorder/{orderId}")
     public ResponseEntity<CartResponseDTO> redoCartFromOrder(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String orderId) throws IOException {
@@ -57,10 +57,13 @@ public class CartController {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
+        Cart cart = cartService.getCurrentCart(currentUser);
+        if (cart == null) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(
-                cartService.mapToDTO(
-                        cartService.getCurrentCart(currentUser)
-                ));
+                cartService.mapToDTO(cart));
     }
 
     @PutMapping("/{productId}")
@@ -86,15 +89,18 @@ public class CartController {
 
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> deleteProduct(
+    public ResponseEntity<?> deleteProduct(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId
     ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        cartService.deleteItemById(productId, currentUser);
+        CartResponseDTO updatedCart = cartService.deleteItemById(productId, currentUser);
+        if (updatedCart == null) {
+            return ResponseEntity.noContent().build();
+        }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(updatedCart);
     }
 
     @DeleteMapping("/all")
