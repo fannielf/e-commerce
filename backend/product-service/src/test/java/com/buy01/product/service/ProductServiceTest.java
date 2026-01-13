@@ -231,7 +231,7 @@ public class ProductServiceTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         TestProduct p = new TestProduct("p1", "n", "d", 1.0, 1, "u1");
         Page<Product> productPage = new PageImpl<>(List.of(p), pageable, 1);
-        when(productRepository.findAllByFilters(null, null, null, pageable))
+        when(productRepository.findAllByFilters("", null, null, pageable))
                 .thenReturn(productPage);
         Page<ProductResponseDTO> all = productService.getAllProducts(null, null, null, pageable);
         assertEquals(1, all.getTotalPages());

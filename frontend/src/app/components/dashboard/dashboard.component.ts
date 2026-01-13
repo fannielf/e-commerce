@@ -28,11 +28,15 @@ export class DashboardComponent implements OnInit {
         this.isLoggedIn = this.authService.isLoggedIn?.() ?? false;
 
         // getting the products from the backend
-        this.productService.getAllProducts().subscribe({
-          next: (data: Product[]) => (this.products = data.reverse()),
+        this.productService.getAllProducts(
+          undefined, undefined, undefined, 0, 10
+        ).subscribe({
+          next: (data: { products: Product[]; total: number }) => {
+            this.products = data.products.reverse();
+            console.log(this.products);
+          },
           error: (err: unknown) => console.error(err)
         });
-      console.log(this.products);
       }
 
     goToProduct(productId: string) {

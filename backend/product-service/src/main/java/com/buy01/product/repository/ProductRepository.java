@@ -14,9 +14,9 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     List<Product> findAllProductsByUserId(String userId);
     int getQuantityByProductId(String productId);
     @Query("{ $and: [ " +
-            "{ $or: [ { $where: '?0 == null' }, { 'name': { $regex: ?0, $options: 'i' } } ] }, " +
-            "{ $or: [ { $where: '?1 == null' }, { 'price': { $gte: ?1 } } ] }, " +
-            "{ $or: [ { $where: '?2 == null' }, { 'price': { $lte: ?2 } } ] } " +
+            "{ 'name': { $regex: ?0, $options: 'i' } }, " +
+            "{ $or: [ { $expr: { $eq: [?1, null] } } , { 'price': { $gte: ?1 } } ] }, " +
+            "{ $or: [ { $expr: { $eq: [?2, null] } } , { 'price': { $lte: ?2 } } ] } " +
             "] }")
     Page<Product> findAllByFilters(String name, Double minPrice, Double maxPrice, Pageable pageable);
 }

@@ -109,6 +109,11 @@ public class ProductService {
 
     // Get all products, accessible by anyone (including unauthenticated users)
     public Page<ProductResponseDTO> getAllProducts(String keyword, Double minPrice, Double maxPrice, Pageable pageable) {
+        if (keyword == null) {
+            keyword = "";
+        } else {
+            keyword = keyword.trim();
+        }
         Page<Product> productPage = productRepository.findAllByFilters(keyword, minPrice, maxPrice, pageable);
         return productPage.map(product -> mapToProductResponseDTO(product, null));
     }
