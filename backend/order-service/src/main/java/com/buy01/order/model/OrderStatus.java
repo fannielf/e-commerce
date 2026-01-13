@@ -7,16 +7,16 @@ public enum OrderStatus {
     CONFIRMED,
     SHIPPED,
     DELIVERED,
-    CANCELED;
+    CANCELLED;
 
     private Set<OrderStatus> allowedNext;
 
     static {
-        CREATED.allowedNext = Set.of(CONFIRMED, CANCELED);
-        CONFIRMED.allowedNext = Set.of(SHIPPED, CANCELED);
+        CREATED.allowedNext = Set.of(CONFIRMED, CANCELLED);
+        CONFIRMED.allowedNext = Set.of(SHIPPED, CANCELLED);
         SHIPPED.allowedNext = Set.of(DELIVERED);
         DELIVERED.allowedNext = Set.of();
-        CANCELED.allowedNext = Set.of();
+        CANCELLED.allowedNext = Set.of();
     }
 
     public boolean canTransitionTo(OrderStatus next) {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../services/order.service';
 import { OrderDashboardDTO } from '../../models/order.model';
 import { Router } from '@angular/router';
+import { OrderStatusList } from '../../models/order.model';
 
 @Component({
   selector: 'app-client-dashboard',
@@ -21,7 +22,7 @@ export class ClientDashboardComponent implements OnInit {
   // Filter properties
   statusFilter = '';
   dateFilter = '';
-  orderStatuses = ['CREATED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELED'];
+  public orderStatuses = OrderStatusList;
 
   constructor(private orderService: OrderService, private router: Router) {}
 

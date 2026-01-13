@@ -31,7 +31,7 @@
         <div *ngIf="dashboardData.topItems.length > 0; else noTopItems">
           <ul class="list-group">
             <li *ngFor="let item of dashboardData.topItems" class="list-group-item d-flex justify-content-between align-items-center clickable-list-item" (click)="goToProduct(item.productId)" style="cursor: pointer;">
-              {{ item.name }}
+              {{ item.productName }}
               <span class="badge rounded-pill dashboard-bg">{{ item.quantity }} bought</span>
             </li>
           </ul>
@@ -87,7 +87,7 @@
                         'bg-secondary': order.status === 'CREATED' || order.status === 'PROCESSING',
                         'bg-warning': order.status === 'SHIPPED',
                         'bg-success': order.status === 'DELIVERED',
-                        'bg-danger': order.status === 'CANCELED'
+                        'bg-danger': order.status === 'CANCELLED'
                       }">{{ order.status }}</span>
                   </td>
                   <td class="text-end">{{ order.totalPrice | currency:'EUR' }}</td>

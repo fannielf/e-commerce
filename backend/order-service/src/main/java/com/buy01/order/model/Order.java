@@ -1,10 +1,13 @@
 package com.buy01.order.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Date;
 import java.util.List;
@@ -17,14 +20,23 @@ public class Order {
     @NotBlank
     private String userId;
     @NotEmpty
+    @Valid
     private List<OrderItem> items;
+    @Positive
     private double totalPrice;
+    @NotNull
+    @Valid
     private OrderStatus status;
+    @NotNull
+    @Valid
     private ShippingAddress shippingAddress;
     private boolean paid;
+    @FutureOrPresent
     private Date deliveryDate;
     private String trackingNumber;
+    @CreatedDate
     private Date createdAt;
+    @LastModifiedDate
     private Date updatedAt;
 
     // constructor - both constructors are needed, empty one for Spring Data and one with parameters for creating objects

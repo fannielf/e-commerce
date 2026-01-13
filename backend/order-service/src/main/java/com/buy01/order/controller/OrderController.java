@@ -5,9 +5,11 @@ import com.buy01.order.dto.OrderDashboardDTO;
 import com.buy01.order.model.Role;
 import com.buy01.order.security.AuthDetails;
 import com.buy01.order.service.OrderService;
-import org.apache.coyote.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.buy01.order.exception.BadRequestException;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +24,8 @@ public class OrderController {
 
     private final OrderService orderService;
     private final SecurityUtils securityUtils;
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+
 
     public OrderController(OrderService orderService, SecurityUtils securityUtils) {
         this.orderService = orderService;
@@ -31,7 +35,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponseDTO> createOrder(
             @RequestHeader("Authorization") String authHeader,
-            @Valid @ModelAttribute OrderCreateDTO orderDto) throws IOException {
+            @Valid @RequestBody OrderCreateDTO orderDto) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
         return ResponseEntity.ok(orderService.createOrder(orderDto, currentUser));
@@ -62,9 +66,10 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> getOrderById(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String orderId) {
+        log.info("Fetching order with ID: {}", orderId);
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
-
+        log.info("Current user ID: {}, Role: {}", currentUser.getCurrentUserId(), currentUser.getRole());
         return ResponseEntity.ok(orderService.getOrderById(orderId, currentUser));
     }
 
@@ -72,7 +77,7 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> updateOrder(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String orderId,
-            @Valid @ModelAttribute OrderUpdateRequest request) throws IOException {
+            @Valid @RequestBody OrderUpdateRequest request) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 

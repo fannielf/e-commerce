@@ -1,6 +1,6 @@
 export interface ItemDTO {
   productId: string;
-  name: string;
+  productName: string;
   quantity: number;
   price: number;
   subtotal: number;
@@ -11,8 +11,20 @@ export interface OrderResponseDTO {
   orderId: string;
   items: ItemDTO[];
   totalPrice: number;
-  status: string;
-  createdAt: string;
+  status: Status;
+  shippingAddress: ShippingAddress;
+  paid: boolean;
+  deliveryDate: Date | null;
+  trackingNumber: string | null;
+  createdAt: Date;
+  updatedAt: Date | null; }
+
+export interface ShippingAddress {
+  fullName: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
 }
 
 export interface OrderDashboardDTO {
@@ -20,3 +32,13 @@ export interface OrderDashboardDTO {
   topItems: ItemDTO[];
   total: number;
 }
+
+export enum Status {
+  CREATED = 'CREATED',
+  CONFIRMED = 'CONFIRMED',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED'
+}
+
+export const OrderStatusList = Object.values(Status);

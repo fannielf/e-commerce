@@ -100,7 +100,7 @@ public class ProductController {
                 p.getQuantity(),
                 p.getUserId(),
                 images,
-                currentUser.getCurrentUserId() != null && currentUser.getCurrentUserId().equals(p.getUserId())
+                currentUser != null && currentUser.getCurrentUserId().equals(p.getUserId())
         );
 
         return ResponseEntity.ok(product);
@@ -137,6 +137,7 @@ public class ProductController {
     ) {
 
         Product product = productService.getProductById(productId);
+        log.info("Get product and price: {} {} {} {} {}", product.getProductId(), product.getPrice(), product.getName(), product.getQuantity(), product.getUserId() );
 
         return new ProductResponseDTO(
                 product.getProductId(),
@@ -152,9 +153,20 @@ public class ProductController {
     @PutMapping("/internal/quantity/{productId}")
     public ResponseEntity<Void> updateProductQuantityInternal(
             @PathVariable String productId,
-            @RequestParam int quantityChange
+            @RequestBody int quantityChange
     ) {
+        log.info("Update product quantity: {} {}", productId, quantityChange);
         productService.updateProductQuantity(productId, quantityChange);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("internal/order/{productId}")
+    public ResponseEntity<Void> updateReserveQuantityInternal(
+            @PathVariable String productId,
+            @RequestBody int reserveChange
+    ) {
+        log.info("Update product reserved quantity: {} {}", productId, reserveChange);
+        productService.removeReserveQuantityForOrderPlaced(productId, reserveChange);
         return ResponseEntity.ok().build();
     }
 

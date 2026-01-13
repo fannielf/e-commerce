@@ -1,17 +1,15 @@
 package com.buy01.order.controller;
 
-import com.buy01.order.dto.CartItemRequestDTO;
-import com.buy01.order.dto.CartItemUpdateDTO;
-import com.buy01.order.dto.CartResponseDTO;
-import com.buy01.order.dto.ItemDTO;
+import com.buy01.order.dto.*;
 import com.buy01.order.model.Cart;
+import com.buy01.order.model.Role;
 import com.buy01.order.security.AuthDetails;
 import com.buy01.order.security.SecurityUtils;
 import com.buy01.order.service.CartService;
 import jakarta.validation.Valid;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.buy01.order.exception.BadRequestException;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,63 +27,64 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addToCart(
+    public ResponseEntity<CartResponseDTO> addToCart(
             @RequestHeader("Authorization") String authHeader,
-            @Valid @ModelAttribute CartItemRequestDTO newItem) throws IOException {
+            @Valid @RequestBody CartItemRequestDTO newItem) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        if (!currentUser.getRole().equals("CLIENT")) {
-            throw new BadRequestException("Current user is not a CLIENT");
-        }
-
-        // CART LOGIC
-        // fetch cart for userId and create one or add item to it
-        // product details fetched from product service, not trusting client information
-
-        return ResponseEntity.ok("new item added to cart");
+        return ResponseEntity.ok(cartService.addToCart(
+                currentUser,
+                newItem
+                ));
     }
 
-    @GetMapping
-    public ResponseEntity<?> getCurrentCart(
-            @RequestHeader("Authorization") String authHeader
-            ) throws BadRequestException {
+    @PostMapping("reorder/{orderId}")
+    public ResponseEntity<CartResponseDTO> redoCartFromOrder(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String orderId) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
-
-        if (!currentUser.getRole().equals("CLIENT")) {
-            throw new BadRequestException("Current user is not a CLIENT");
-        }
-
-        Cart cart = cartService.getCurrentCart(currentUser.getCurrentUserId());
-        List<ItemDTO> itemsDto = cart.getItems().stream()
-                .map(item -> new ItemDTO(
-                        item.getProductId(),
-                        item.getProductName(),
-                        item.getQuantity(),
-                        item.getPrice(),
-                        item.getPrice() * item.getQuantity(),
-                        item.getSellerId()
-                ))
-                .toList();
-
-        return ResponseEntity.ok(new CartResponseDTO(
-                cart.getId(),
-                itemsDto,
-                itemsDto.stream().mapToDouble(ItemDTO::getPrice).sum()
+        return ResponseEntity.ok(cartService.addToCartFromOrder(
+                currentUser,
+                orderId
         ));
     }
 
+    @GetMapping
+    public ResponseEntity<CartResponseDTO> getCurrentCart(
+            @RequestHeader("Authorization") String authHeader
+            ) throws IOException {
+
+        AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
+
+        Cart cart = cartService.getCurrentCart(currentUser);
+        if (cart == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(
+                cartService.mapToDTO(cart));
+    }
+
     @PutMapping("/{productId}")
-    public ResponseEntity<?> updateCart(
+    public ResponseEntity<CartResponseDTO> updateCart(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId,
             @Valid @ModelAttribute CartItemUpdateDTO itemUpdate) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        //LOGIC FOR UPDATING AMOUNT FOR ONE ITEM
+        return ResponseEntity.ok(cartService.updateCart(currentUser, productId, itemUpdate));
+    }
 
-        return ResponseEntity.ok("quantity updated");
+    @PutMapping("/status")
+    public ResponseEntity<CartResponseDTO> updateCartStatus(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @RequestBody CartUpdateRequest updateRequest
+    ) throws IOException {
+        AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
+
+        return ResponseEntity.ok(cartService.updateCartStatus(currentUser, updateRequest.getCartStatus()));
     }
 
 
@@ -93,16 +92,21 @@ public class CartController {
     public ResponseEntity<?> deleteProduct(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId
-    ) {
+    ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        cartService.deleteItemById(productId, currentUser);
+        CartResponseDTO updatedCart = cartService.deleteItemById(productId, currentUser);
+        if (updatedCart == null) {
+            return ResponseEntity.noContent().build();
+        }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(updatedCart);
     }
 
     @DeleteMapping("/all")
-    public ResponseEntity<?> deleteCart(@RequestHeader("Authorization") String authHeader) throws IOException {
+    public ResponseEntity<Void> deleteCart(
+            @RequestHeader("Authorization") String authHeader
+    ) throws IOException {
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
         cartService.deleteCart(currentUser);

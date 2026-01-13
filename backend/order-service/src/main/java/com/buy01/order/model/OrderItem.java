@@ -1,11 +1,19 @@
 package com.buy01.order.model;
 
-public class OrderItem {
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
+public class OrderItem {
+    @NotBlank
     private String productId;
+    @NotBlank
     private String productName;
+    @Min(1)
     private int  quantity;
+    @Positive
     private double price;
+    @NotBlank
     private String sellerId;
 
     public OrderItem() {}
