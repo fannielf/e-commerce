@@ -41,11 +41,7 @@ export class ManageProductsComponent implements OnInit {
     rejectedFiles: string[] = [];
     imagePreviews: ImagePreview[] = [];
     deletedImageIds: string[] = [];
-    categories = [
-        'ELECTRONICS', 'FASHION', 'HOME_APPLIANCES', 'BOOKS', 'TOYS',
-        'SPORTS', 'BEAUTY', 'AUTOMOTIVE', 'GROCERY', 'HEALTH', 'OTHER'
-    ];
-
+    categories = Object.values(Category);
 
     constructor(
       private fb: FormBuilder,
