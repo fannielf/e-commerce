@@ -20,6 +20,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+import org.springframework.data.web.PageableDefault;
 
 import java.io.IOException;
 import java.util.List;
@@ -95,7 +97,7 @@ public class ProductServiceTest {
     @Test
     void getProductById_notFound_throwsNotFoundException() {
         when(productRepository.findById("missing")).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> productService.getProductById("missing"));
+        assertThrows(NotFoundException.class, () -> productService.getProductById("missing", null));
     }
 
     @Test
@@ -228,12 +230,15 @@ public class ProductServiceTest {
     }
 
     @Test
-    void getAllProducts_returnsRepositoryList() {
+    void getAllProducts_returnsSortedPage() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         TestProduct p = new TestProduct("p1", "n", "d", 1.0, 1, "u1");
-        when(productRepository.findAll()).thenReturn(List.of(p));
-        List<Product> all = productService.getAllProducts();
-        assertEquals(1, all.size());
-        assertEquals("p1", all.get(0).getProductId());
+        Page<Product> productPage = new PageImpl<>(List.of(p), pageable, 1);
+        when(productRepository.findAllByFilters("", null, null, pageable))
+                .thenReturn(productPage);
+        Page<ProductResponseDTO> all = productService.getAllProducts(null, null, null, pageable);
+        assertEquals(1, all.getTotalPages());
+        assertEquals("p1", all.getContent().get(0).getProductId());
     }
 
 }
