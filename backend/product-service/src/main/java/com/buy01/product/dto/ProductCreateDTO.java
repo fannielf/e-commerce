@@ -1,6 +1,5 @@
 package com.buy01.product.dto;
 
-import com.buy01.product.model.ProductCategories;
 import com.buy01.product.model.ProductCategory;
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
