@@ -183,16 +183,14 @@ public class ProductController {
 
     // update a specific product by ID
     @PutMapping("/{productId}")
-    public ResponseEntity<?> updateProduct(
+    public ResponseEntity<ProductResponseDTO> updateProduct(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String productId,
             @Valid @ModelAttribute ProductUpdateRequest request) throws IOException {
 
         AuthDetails currentUser = securityUtils.getAuthDetails(authHeader);
 
-        ProductResponseDTO updated = productService.updateProduct(productId, request, currentUser);
-
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(productService.updateProduct(productId, request, currentUser));
     }
 
 
