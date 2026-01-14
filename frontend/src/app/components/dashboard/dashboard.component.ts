@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
-import { Product } from '../../models/product.model';
+import { Product, ProductCategory } from '../../models/product.model';
 import { Router } from '@angular/router';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 import { ImageCarouselComponent } from '../shared/image-carousel/image-carousel.component';
@@ -19,8 +19,28 @@ export class DashboardComponent implements OnInit {
   products: Product[] = [];
   isLoggedIn = false;
 
+  // Filter Query Params
   searchTerm: string = '';
   sortBy: string = 'latest';
+  selectedCategory: string = '';
+
+  // Price State (Reverted to standard inputs)
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
+
+  categories: string[] = [
+    'ELECTRONICS',
+    'FASHION',
+    'HOME_APPLIANCES',
+    'BOOKS',
+    'TOYS',
+    'SPORTS',
+    'BEAUTY',
+    'AUTOMOTIVE',
+    'GROCERY',
+    'HEALTH',
+    'OTHER'
+  ];
 
   constructor(
     private productService: ProductService,
@@ -37,6 +57,11 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/products', productId]);
   }
 
+  // Unified trigger for all filter changes
+  onFilterChange() {
+    this.loadProducts();
+  }
+
   onSearch() {
     this.loadProducts();
   }
@@ -49,38 +74,24 @@ export class DashboardComponent implements OnInit {
     let sortParam = 'createdAt,desc';
 
     switch (this.sortBy) {
-      case 'price_asc':
-        sortParam = 'price,asc';
-        break;
-      case 'price_desc':
-        sortParam = 'price,desc';
-        break;
-      case 'alpha_asc':
-        sortParam = 'name,asc';
-        break;
-      case 'alpha_desc':
-        sortParam = 'name,desc';
-        break;
-      case 'latest':
-      default:
-        sortParam = 'createdAt,desc';
-        break;
+      case 'price_asc': sortParam = 'price,asc'; break;
+      case 'price_desc': sortParam = 'price,desc'; break;
+      case 'alpha_asc': sortParam = 'name,asc'; break;
+      case 'alpha_desc': sortParam = 'name,desc'; break;
+      case 'latest': default: sortParam = 'createdAt,desc'; break;
     }
 
-   // undefined for filters we are not using here, need to implement price sliders later
     this.productService.getAllProducts(
-      this.searchTerm, // 1. name/search keyword
-      undefined,       // 2. minPrice
-      undefined,       // 3. maxPrice
-      undefined,       // 4. category
-      sortParam,       // 5. sort
-      0,               // 6. page
-      10               // 7. size
+      this.searchTerm,
+      this.minPrice ?? undefined, // Pass undefined if null
+      this.maxPrice ?? undefined,
+      (this.selectedCategory as ProductCategory) || undefined,
+      sortParam,
+      0,
+      12
     ).subscribe({
-      next: (data: { products: Product[]; total: number }) => {
-        this.products = data.products;
-      },
-      error: (err: unknown) => console.error(err)
+      next: (data) => this.products = data.products,
+      error: (err) => console.error(err)
     });
   }
 }
