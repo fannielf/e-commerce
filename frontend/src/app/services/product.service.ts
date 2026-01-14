@@ -4,7 +4,7 @@ import { Observable, of, map } from 'rxjs';
 import { Product } from '../models/product.model';
 import { PRODUCT_BASE_URL } from '../constants/constants';
 import { tap } from 'rxjs/operators';
-import { ProductCategory } from '../models/product.model';
+import { Category } from '../models/product.model';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +45,7 @@ export class ProductService {
     name?: string,
     min?: number,
     max?: number,
-    category?: ProductCategory,
+    category?: Category,
     page: number = 0,
     size: number = 10
   ): Observable<{ products: Product[]; total: number }> {

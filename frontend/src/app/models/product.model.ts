@@ -5,12 +5,12 @@ export interface Product {
   price: number;
   quantity: number;
   userId: string;
-  category?: ProductCategory;
+  category?: Category;
   images?: string[];
   isProductOwner?: boolean;
 }
 
-export enum ProductCategory {
+export enum Category {
   ELECTRONICS = 'ELECTRONICS',
   FASHION = 'FASHION',
   HOME_APPLIANCES = 'HOME_APPLIANCES',

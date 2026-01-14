@@ -74,6 +74,18 @@
               </div>
             </div>
 
+            <div class="mb-3">
+              <label for="category" class="form-label">Category</label>
+              <select id="category" class="form-select" formControlName="category" [class.is-invalid]="(productForm.get('category')?.invalid && (productForm.get('category')?.dirty || productForm.get('category')?.touched)) || formErrors['category']">
+                <option [ngValue]="null" disabled>Select a category</option>
+                <option *ngFor="let cat of categories" [ngValue]="cat">{{ cat }}</option>
+              </select>
+              <div *ngIf="(productForm.get('category')?.invalid && (productForm.get('category')?.dirty || productForm.get('category')?.touched)) || formErrors['category']" class="invalid-feedback">
+                <div *ngIf="productForm.get('category')?.errors?.['required']">Category is required.</div>
+                <div *ngIf="formErrors['category']">{{ formErrors['category'] }}</div>
+              </div>
+            </div>
+
             <input id="images" type="file" class="d-none" multiple accept="image/*" (change)="onFileSelected($event)" #fileInput>
             <div class="d-flex mt-4">
               <button type="submit" class="btn" [disabled]="productForm.invalid">
