@@ -113,8 +113,19 @@ public class CartService {
         for (OrderItem item : order.getItems()) {
             ProductUpdateDTO product = productClient.getProductById(item.getProductId());
             if (product == null) break;
-            if (product.getQuantity() < item.getQuantity() && product.getQuantity() > 0) {
-                cartItems.add(item);
+            int quantityToAdd = item.getQuantity();
+            if (product.getQuantity() < item.getQuantity()) {
+                quantityToAdd = product.getQuantity();
+            }
+            if (quantityToAdd > 0) {
+                OrderItem itemAdded = new OrderItem(
+                        product.getProductId(),
+                        product.getProductName(),
+                        quantityToAdd,
+                        product.getProductPrice(),
+                        product.getSellerId()
+                );
+                cartItems.add(itemAdded);
             }
         }
         if (cartItems.isEmpty()) {

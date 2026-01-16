@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 
 @Service
 @ExtendWith(MockitoExtension.class)
-public class CartServiceTest {
+class CartServiceTest {
 
     @Mock
     private CartRepository cartRepository;

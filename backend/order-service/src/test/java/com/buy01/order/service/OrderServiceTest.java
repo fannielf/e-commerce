@@ -1,5 +1,6 @@
 package com.buy01.order.service;
 
+import com.buy01.order.client.ProductClient;
 import com.buy01.order.dto.OrderCreateDTO;
 import com.buy01.order.dto.OrderDashboardDTO;
 import com.buy01.order.dto.OrderResponseDTO;
@@ -9,29 +10,33 @@ import com.buy01.order.model.*;
 import com.buy01.order.repository.CartRepository;
 import com.buy01.order.repository.OrderRepository;
 import com.buy01.order.security.AuthDetails;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.HttpClientErrorException;
 import com.buy01.order.exception.BadRequestException;
 
 import java.io.IOException;
 import java.util.List;
 
 import static com.buy01.order.model.OrderStatus.SHIPPED;
+import static com.buy01.order.service.TestAuthFactory.clientUser;
+import static com.buy01.order.service.TestAuthFactory.sellerUser;
+import static com.buy01.order.service.TestAuthFactory.adminUser;
+import static com.buy01.order.service.TestAuthFactory.shippingAddress;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderServiceTest {
+class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
     @Mock
     private CartRepository cartRepository;
+    @Mock
+    private ProductClient productClient;
 
     @InjectMocks
     private OrderService orderService;
@@ -49,26 +54,14 @@ public class OrderServiceTest {
         }
     }
 
-    private AuthDetails clientUser() {
-        return new AuthDetails("user1", Role.CLIENT);
-    }
-
-    private AuthDetails sellerUser() {
-        return new AuthDetails("seller1", Role.SELLER);
-    }
-
-    private AuthDetails adminUser() {
-        return new AuthDetails("admin1", Role.ADMIN);
-    }
-
     @Test
     void getClientOrders_existingOrders_returnsOrderResponseDTOList() throws IOException {
         // Mock auth check
         AuthDetails currentUser = clientUser();
 
         when(orderRepository.findOrdersByUserIdOrderByCreatedAtDesc("user1")).thenReturn(List.of(
-                new TestOrder("order1", "user1", List.of(new OrderItem()), 100.0, OrderStatus.CREATED, null),
-                new TestOrder("order2", "user1", List.of(), 200.0, SHIPPED, null)));
+                new TestOrder("order1", "user1", List.of(new OrderItem()), 100.0, OrderStatus.CREATED, shippingAddress()),
+                new TestOrder("order2", "user1", List.of(), 200.0, SHIPPED, shippingAddress())));
 
         OrderDashboardDTO orderDashboard = orderService.getClientOrders(currentUser);
 
@@ -90,9 +83,9 @@ public class OrderServiceTest {
         when(orderRepository.findByItemsSellerId("seller1")).thenReturn(List.of(
                 new TestOrder("order1", "user1", List.of(
                         new OrderItem("prod1", "Product 1", 2, 50.0, "seller1"),
-                        new OrderItem("prod2", "Product 2", 1, 30.0, "seller2")), 130.0, OrderStatus.CREATED, null),
+                        new OrderItem("prod2", "Product 2", 1, 30.0, "seller2")), 130.0, OrderStatus.CREATED, shippingAddress()),
                 new TestOrder("order2", "user2", List.of(
-                        new OrderItem("prod3", "Product 3", 3, 20.0, "seller1")), 60.0, SHIPPED, null)));
+                        new OrderItem("prod3", "Product 3", 3, 20.0, "seller1")), 60.0, SHIPPED, shippingAddress())));
 
         OrderDashboardDTO orderDashboard = orderService.getSellerOrders(currentUser);
 
@@ -100,7 +93,7 @@ public class OrderServiceTest {
 
         OrderResponseDTO order1 = orderDashboard.getOrders().get(0);
         assertEquals("order1", order1.getOrderId(), "Order ID should match");
-        assertEquals(130.0, order1.getTotalPrice(), "Total price should match");
+        assertEquals(100.0, order1.getTotalPrice(), "Total price should match");
         assertEquals(OrderStatus.CREATED, order1.getStatus(), "Order Status should match");
         assertEquals(1, order1.getItems().size(), "Order items size should match for seller");
 
@@ -121,7 +114,7 @@ public class OrderServiceTest {
         when(orderRepository.findById("order1")).thenReturn(java.util.Optional.of(
                 new TestOrder("order1", "user1", List.of(
                         new OrderItem("prod1", "Product 1", 2, 50.0, "seller1"),
-                        new OrderItem("prod2", "Product 2", 1, 30.0, "seller2")), 130.0, OrderStatus.CREATED, null)));
+                        new OrderItem("prod2", "Product 2", 1, 30.0, "seller2")), 130.0, OrderStatus.CREATED, shippingAddress())));
         OrderResponseDTO order = orderService.getOrderById("order1", currentUser);
         assertEquals("order1", order.getOrderId(), "Order ID should match");
         assertEquals(130.0, order.getTotalPrice(), "Total price should match");
@@ -131,7 +124,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    void createOrder_validCart_createsOrderSuccessfully() throws IOException {
+    void createOrder_validCart_createsOrderSuccessfully() {
         // Mock auth check
         AuthDetails currentUser = clientUser();
 
@@ -143,7 +136,7 @@ public class OrderServiceTest {
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
             Order order = invocation.getArgument(0);
             return new TestOrder("order1", order.getUserId(), order.getItems(), order.getTotalPrice(),
-                    order.getStatus(), order.getShippingAddress());
+                    order.getStatus(), shippingAddress());
         });
 
         OrderResponseDTO orderResponse = orderService.createOrder(new OrderCreateDTO(), currentUser);
@@ -163,12 +156,12 @@ public class OrderServiceTest {
         AuthDetails currentUser = clientUser();
 
         TestOrder existingOrder = new TestOrder("order1", "user1", List.of(
-                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, OrderStatus.CONFIRMED, null);
+                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, OrderStatus.CONFIRMED, shippingAddress());
 
         when(orderRepository.findById("order1")).thenReturn(java.util.Optional.of(existingOrder));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        OrderUpdateRequest updateRequest = new OrderUpdateRequest(SHIPPED);
+        OrderUpdateRequest updateRequest = new OrderUpdateRequest(OrderStatus.CANCELLED);
 
         OrderResponseDTO updatedOrder = orderService.updateOrder("order1", updateRequest, currentUser);
 
@@ -186,7 +179,7 @@ public class OrderServiceTest {
         AuthDetails currentUser = clientUser();
 
         TestOrder existingOrder = new TestOrder("order1", "user1", List.of(
-                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, SHIPPED, null);
+                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, SHIPPED, shippingAddress());
 
         when(orderRepository.findById("order1")).thenReturn(java.util.Optional.of(existingOrder));
 
@@ -212,7 +205,7 @@ public class OrderServiceTest {
         AuthDetails currentUser = adminUser();
 
         TestOrder existingOrder = new TestOrder("order1", "user1", List.of(
-                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, OrderStatus.CONFIRMED, null);
+                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, OrderStatus.CONFIRMED, shippingAddress());
 
         when(orderRepository.findById("order1")).thenReturn(java.util.Optional.of(existingOrder));
         orderService.deleteOrderById("order1", currentUser);
@@ -226,7 +219,7 @@ public class OrderServiceTest {
         AuthDetails currentUser = clientUser();
 
         TestOrder existingOrder = new TestOrder("order1", "user1", List.of(
-                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, OrderStatus.CONFIRMED, null);
+                new OrderItem("prod1", "Product 1", 2, 50.0, "seller1")), 100.0, OrderStatus.CONFIRMED, shippingAddress());
 
         when(orderRepository.findById("order1")).thenReturn(java.util.Optional.of(existingOrder));
         // Act & Assert
