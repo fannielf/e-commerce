@@ -1,10 +1,7 @@
 package com.buy01.order.service;
 
 import com.buy01.order.client.ProductClient;
-import com.buy01.order.dto.OrderCreateDTO;
-import com.buy01.order.dto.OrderDashboardDTO;
-import com.buy01.order.dto.OrderResponseDTO;
-import com.buy01.order.dto.OrderUpdateRequest;
+import com.buy01.order.dto.*;
 import com.buy01.order.exception.ForbiddenException;
 import com.buy01.order.model.*;
 import com.buy01.order.repository.CartRepository;
@@ -55,17 +52,25 @@ class OrderServiceTest {
     }
 
     @Test
-    void getClientOrders_existingOrders_returnsOrderResponseDTOList() throws IOException {
+    void getClientDashboard_returnsOrderList_topItems_totalSpent() throws IOException {
         // Mock auth check
         AuthDetails currentUser = clientUser();
 
         when(orderRepository.findOrdersByUserIdOrderByCreatedAtDesc("user1")).thenReturn(List.of(
                 new TestOrder("order1", "user1", List.of(new OrderItem()), 100.0, OrderStatus.CREATED, shippingAddress()),
-                new TestOrder("order2", "user1", List.of(), 200.0, SHIPPED, shippingAddress())));
+                new TestOrder("order2", "user1", List.of(), 200.0, SHIPPED, shippingAddress()),
+                new TestOrder("order3", "user1", List.of(), 150.0, OrderStatus.CANCELLED, shippingAddress())));
+        when(orderRepository.findTopItemsByUserId(currentUser.getCurrentUserId(), 3)).thenReturn(List.of(
+                new ItemDTO("prod1", "Product 1", 3, 50.0, 150.0, "seller1"),
+                new ItemDTO("prod2", "Product 2", 2, 30.0, 60.0, "seller2")
+        ));
 
         OrderDashboardDTO orderDashboard = orderService.getClientOrders(currentUser);
 
-        assertEquals(2, orderDashboard.getOrders().size(), "Expected 2 orders for the client");
+        assertEquals(3, orderDashboard.getOrders().size(), "Expected 2 orders for the client");
+        assertEquals(300.0, orderDashboard.getTotal(), "Total spent should match");
+        assertEquals("prod1", orderDashboard.getTopItems().get(0).getProductId(), "Top item ID should match");
+
         OrderResponseDTO order = orderDashboard.getOrders().get(0);
         assertEquals("order1", order.getOrderId(), "Order ID should match");
         assertEquals(100.0, order.getTotalPrice(), "Total price should match");
@@ -76,7 +81,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void getSellerOrders_existingOrders_returnsOrderResponseDTOList() throws IOException {
+    void getSellerDashboard_returnsOrderList_topItems_totalRevenue() throws IOException {
         // Mock auth check
         AuthDetails currentUser = sellerUser();
 
@@ -85,11 +90,17 @@ class OrderServiceTest {
                         new OrderItem("prod1", "Product 1", 2, 50.0, "seller1"),
                         new OrderItem("prod2", "Product 2", 1, 30.0, "seller2")), 130.0, OrderStatus.CREATED, shippingAddress()),
                 new TestOrder("order2", "user2", List.of(
-                        new OrderItem("prod3", "Product 3", 3, 20.0, "seller1")), 60.0, SHIPPED, shippingAddress())));
+                        new OrderItem("prod3", "Product 3", 3, 20.0, "seller1")), 60.0, OrderStatus.SHIPPED, shippingAddress())));
+        when(orderRepository.findTopItemsBySellerId("seller1", 3)).thenReturn(List.of(
+                new ItemDTO("prod3", "Product 3", 3, 20.0, 60.0, "seller1"),
+                new ItemDTO("prod1", "Product 1", 2, 50.0, 100.0, "seller1")
+        ));
 
         OrderDashboardDTO orderDashboard = orderService.getSellerOrders(currentUser);
 
         assertEquals(2, orderDashboard.getOrders().size(), "Expected 2 orders for the seller");
+        assertEquals(160.0, orderDashboard.getTotal(), "Total revenue should match");
+        assertEquals("prod3", orderDashboard.getTopItems().get(0).getProductId(), "Top item ID should match");
 
         OrderResponseDTO order1 = orderDashboard.getOrders().get(0);
         assertEquals("order1", order1.getOrderId(), "Order ID should match");
