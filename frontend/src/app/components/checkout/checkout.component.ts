@@ -33,7 +33,8 @@ export class CheckoutComponent implements OnInit {
       street: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
       city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       postalCode: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(10)]],
-      country: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]]
+      country: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      payOnDelivery: [false, Validators.requiredTrue]
     });
   }
 
