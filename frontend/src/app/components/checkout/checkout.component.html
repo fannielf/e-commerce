@@ -138,14 +138,22 @@
               </div>
             </div>
 
-            <!-- Submit Button -->
-            <button
-              type="submit"
-              class="btn btn-primary w-100 py-2"
-              [disabled]="checkoutForm.invalid || isSubmitting">
-              <span *ngIf="!isSubmitting">Place Order</span>
-              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            </button>
+            <!-- Submit & Continue Shopping Buttons -->
+             <div class="d-flex gap-2">
+
+                <button type="button"
+                        class="btn btn-outline-secondary w-50 py-2"
+                        (click)="onContinueShopping()">
+                  Continue Shopping
+                </button>
+
+                <button type="submit"
+                        class="btn btn-primary w-100 py-2"
+                        [disabled]="checkoutForm.invalid || isSubmitting">
+                  <span *ngIf="!isSubmitting">Place Order</span>
+                  <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
 
           </form>
         </div>

@@ -78,4 +78,16 @@ export class CheckoutComponent implements OnInit {
       }
     });
   }
+  onContinueShopping() {
+
+    this.cartService.updateCartStatus({ cartStatus: CartStatus.ACTIVE }).subscribe({
+      next: (response) => {
+        console.log('Cart status updated to ACTIVE');
+        this.router.navigate(['']); 
+      },
+      error: (error) => {
+        console.error('Failed to update cart status', error);
+      }
+    });
+  }
 }
