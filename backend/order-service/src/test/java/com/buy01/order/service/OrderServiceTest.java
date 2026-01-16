@@ -66,7 +66,7 @@ public class OrderServiceTest {
         // Mock auth check
         AuthDetails currentUser = clientUser();
 
-        when(orderRepository.findOrdersByUserId("user1")).thenReturn(List.of(
+        when(orderRepository.findOrdersByUserIdOrderByCreatedAtDesc("user1")).thenReturn(List.of(
                 new TestOrder("order1", "user1", List.of(new OrderItem()), 100.0, OrderStatus.CREATED, null),
                 new TestOrder("order2", "user1", List.of(), 200.0, SHIPPED, null)));
 
@@ -79,7 +79,7 @@ public class OrderServiceTest {
         assertEquals(OrderStatus.CREATED, order.getStatus(), "Order Status should match");
         assertEquals(1, order.getItems().size(), "Order items size should match");
 
-        verify(orderRepository, times(1)).findOrdersByUserId("user1");
+        verify(orderRepository, times(1)).findOrdersByUserIdOrderByCreatedAtDesc("user1");
     }
 
     @Test

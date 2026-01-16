@@ -108,6 +108,19 @@ public class CartService {
             throw new ForbiddenException("Order does not belong to the current userId " + currentUser.getCurrentUserId());
         }
 
+        List<OrderItem> cartItems = new ArrayList<>();
+
+        for (OrderItem item : order.getItems()) {
+            ProductUpdateDTO product = productClient.getProductById(item.getProductId());
+            if (product == null) break;
+            if (product.getQuantity() < item.getQuantity() && product.getQuantity() > 0) {
+                cartItems.add(item);
+            }
+        }
+        if (cartItems.isEmpty()) {
+            return null;
+        }
+
         Cart cart = getCurrentCart(currentUser);
         if (cart == null) {
             cart = createNewCart(currentUser);
@@ -116,20 +129,16 @@ public class CartService {
         if (cart.getCartStatus() == CartStatus.ABANDONED) {
             reactivateCart(cart.getId());
         }
+
         validStatusForChanges(cart);
 
-        for (OrderItem itemAdded : order.getItems()) {
-            ProductUpdateDTO product = productClient.getProductById(itemAdded.getProductId());
-            if (product == null) break;
-            if (product.getQuantity() < itemAdded.getQuantity()) {
-                itemAdded.setQuantity(product.getQuantity());
-            }
+        for (OrderItem itemAdded : cartItems) {
             addOrUpdateItemInCart(cart, itemAdded);
         }
 
         updateCartTotalAndTime(cart);
 
-        return mapToDTO(cartRepository.save(cart));  // save and return updated cart
+        return mapToDTO(cartRepository.save(cart));
     }
 
     public CartResponseDTO updateCart(AuthDetails currentUser, String productId, CartItemUpdateDTO newQuantity) throws IOException {
