@@ -6,6 +6,7 @@ import com.buy01.order.exception.ForbiddenException;
 import com.buy01.order.model.*;
 import com.buy01.order.repository.CartRepository;
 import com.buy01.order.repository.OrderRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +43,8 @@ class CartServiceTest {
     private CartService cartService;
 
     @Test
-    void getCurrentCartNull_createACart_success() throws Exception {
+    @DisplayName("Get current cart when none exists creates a new cart")
+    void getCurrentCartNull() throws Exception {
         when(cartRepository.findByUserId("user1")).thenReturn(null);
         when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -57,13 +59,15 @@ class CartServiceTest {
     }
 
     @Test
-    void getCurrentCart_nonClient_throws() {
+    @DisplayName("Get current cart for non-client user throws exception")
+    void getCurrentCartFail() {
         assertThrows(Exception.class,
                 () -> cartService.getCurrentCart(adminUser()));
     }
 
     @Test
-    void addToCart_addsNewItem_successful() throws Exception {
+    @DisplayName("Add to cart adds new item successfully")
+    void addToCart() throws Exception {
         OrderServiceTest.TestCart cart = new TestCart(
                 "cart1", "user1", new ArrayList<>(), 0, CartStatus.ACTIVE);
 
@@ -84,7 +88,8 @@ class CartServiceTest {
     }
 
     @Test
-    void addToCart_insufficientStock_throws() throws Exception {
+    @DisplayName("Add to cart with insufficient stock throws exception")
+    void addToCartNoStock() throws Exception {
         OrderServiceTest.TestCart cart = new TestCart(
                 "cart1", "user1", new ArrayList<>(), 0, CartStatus.ACTIVE);
 
@@ -100,7 +105,8 @@ class CartServiceTest {
     }
 
     @Test
-    void updateCart_addingToCart_updatesQuantity() throws Exception {
+    @DisplayName("Update cart item quantity successfully")
+    void updateCartAddToQuantity() throws Exception {
         OrderItem item = new OrderItem("p1", "Phone", 1, 100.0, "seller1");
         TestCart cart = new TestCart(
                 "cart1", "user1", new ArrayList<>(List.of(item)), 100, CartStatus.ACTIVE);
@@ -118,7 +124,8 @@ class CartServiceTest {
     }
 
     @Test
-    void updateCart_removeFromCart_updatesQuantity() throws Exception {
+    @DisplayName("Update cart item quantity to remove items successfully")
+    void updateCartReduceFromQuantity() throws Exception {
         OrderItem item = new OrderItem("p1", "Phone", 3, 100.0, "seller1");
         TestCart cart = new TestCart(
                 "cart1", "user1", new ArrayList<>(List.of(item)), 300, CartStatus.ACTIVE);
@@ -136,7 +143,8 @@ class CartServiceTest {
     }
 
     @Test
-    void deleteItemById_removesAndReturnsStock() throws Exception {
+    @DisplayName("Delete item by ID removes item and returns stock")
+    void deleteItemById() throws Exception {
         OrderItem item = new OrderItem("p1", "Phone", 2, 100.0, "seller1");
         TestCart cart = new TestCart(
                 "cart1", "user1", new ArrayList<>(List.of(item)), 200, CartStatus.ACTIVE);
@@ -152,7 +160,8 @@ class CartServiceTest {
     }
 
     @Test
-    void addToCartFromOrder_successful() throws Exception {
+    @DisplayName("Add to cart from order copies items successfully")
+    void addToCartFromOrderSuccessful() throws Exception {
         TestOrder order = new TestOrder(
                 "o1", "user1",
                 List.of(
@@ -183,7 +192,8 @@ class CartServiceTest {
     }
 
     @Test
-    void addToCartFromOrder_forbiddenIfOtherUser() throws Exception {
+    @DisplayName("Add to cart from order for another user throws forbidden")
+    void addToCartFromOrderForbidden() throws Exception {
         TestOrder order = new TestOrder(
                 "o1", "otherUser", List.of(), 0,
                 OrderStatus.DELIVERED, null);
