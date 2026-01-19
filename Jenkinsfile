@@ -230,18 +230,21 @@ pipeline {
     post {
         always {
             script {
-                // Backend test reports
-                junit allowEmptyResults: true, testResults: 'backend/*/target/surefire-reports/*.xml'
-                archiveArtifacts artifacts: 'backend/*/target/surefire-reports/*.xml', allowEmptyArchive: true
+                try {
+                    // Backend test reports
+                    junit allowEmptyResults: true, testResults: 'backend/*/target/surefire-reports/*.xml'
+                    archiveArtifacts artifacts: 'backend/*/target/surefire-reports/*.xml', allowEmptyArchive: true
 
-                // Frontend reports
-                junit allowEmptyResults: true, testResults: 'frontend/test-results/junit/*.xml'
-                archiveArtifacts artifacts: 'frontend/test-results/junit/*.xml', allowEmptyArchive: true
+                    // Frontend reports
+                    junit allowEmptyResults: true, testResults: 'frontend/test-results/junit/*.xml'
+                    archiveArtifacts artifacts: 'frontend/test-results/junit/*.xml', allowEmptyArchive: true
 
-                if (env.WORKSPACE) {
-                    cleanWs notFailBuild: true //clean the workspace after build
-                } else {
-                    echo "No workspace available; skipping cleanWs"
+                    if (env.WORKSPACE) {
+                        cleanWs notFailBuild: true
+                    }
+
+                } catch (err) {
+                    echo "Post-build actions failed: ${err.getMessage()}"
                 }
             }
         }
