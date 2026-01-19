@@ -15,6 +15,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 const mockProduct: Product = {
   productId: 'prod-123',
@@ -49,7 +50,7 @@ describe('ManageProductsComponent', () => {
   let fixture: ComponentFixture<ManageProductsComponent>;
   let productServiceSpy: jasmine.SpyObj<ProductService>;
   let userServiceSpy: jasmine.SpyObj<UserService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let router: Router;
   let dialog: MatDialog;
 
   const configureTestBed = (productId: string | null) => {
@@ -60,7 +61,6 @@ describe('ManageProductsComponent', () => {
       'deleteProduct',
     ]);
     userServiceSpy = jasmine.createSpyObj('UserService', ['getMe']);
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
       imports: [
@@ -69,11 +69,11 @@ describe('ManageProductsComponent', () => {
         HttpClientTestingModule,
         NoopAnimationsModule,
         MatDialogModule,
+        RouterTestingModule,
       ],
       providers: [
         { provide: ProductService, useValue: productServiceSpy },
         { provide: UserService, useValue: userServiceSpy },
-        { provide: Router, useValue: routerSpy },
         { provide: MatDialog, useClass: MatDialogMock },
         {
           provide: ActivatedRoute,
@@ -90,6 +90,8 @@ describe('ManageProductsComponent', () => {
     fixture = TestBed.createComponent(ManageProductsComponent);
     component = fixture.componentInstance;
     dialog = TestBed.inject(MatDialog);
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate').and.stub();
     userServiceSpy.getMe.and.returnValue(of(mockUser as any));
   };
 
@@ -176,7 +178,7 @@ describe('ManageProductsComponent', () => {
 
     it('should navigate when edit is called', () => {
       component.edit(mockProduct);
-      expect(routerSpy.navigate).toHaveBeenCalledWith([
+      expect(router.navigate).toHaveBeenCalledWith([
         '/products/update',
         mockProduct.productId,
       ]);
