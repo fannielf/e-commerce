@@ -33,7 +33,7 @@ public class CartCleanupScheduler {
         // Mark ACTIVE Carts started 15min ago to ABANDONED
         List<Cart> toAbandon = cartRepository.findExpiredActiveCarts(now);
         for (Cart cart : toAbandon) {
-            if (cart.getCartStatus() == CartStatus.ACTIVE && cart.getUpdateTime().before(oneMinAgo)) { // avoid double processing and give grace
+            if (cart.getCartStatus() == CartStatus.ACTIVE && cart.getExpiryTime().before(now)) {
                 abandonCart(cart);
             }
         }

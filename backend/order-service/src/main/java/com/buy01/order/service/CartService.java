@@ -42,7 +42,7 @@ public class CartService {
         this.orderRepository = orderRepository;
     }
 
-    public Cart getCurrentCart(AuthDetails currentUser) throws IOException {
+    public Cart getCurrentCart(AuthDetails currentUser) {
 
         if (!currentUser.getRole().equals(Role.CLIENT)) {
             throw new BadRequestException("Current user is not a CLIENT");
@@ -53,8 +53,14 @@ public class CartService {
             return null;
         }
 
-        if (cart.getCartStatus() == CartStatus.ABANDONED) {
-            reactivateCart(cart.getId());
+        if (cart.getCartStatus() == CartStatus.ABANDONED || (cart.getExpiryTime()) != null && cart.getExpiryTime().before(new Date())) {
+            if (cart.getCartStatus().equals(CartStatus.ACTIVE)) {
+                for (OrderItem item : cart.getItems()) {
+                    productClient.updateQuantity(item.getProductId(), item.getQuantity());
+                }
+            }
+            cartRepository.delete(cart);
+            return null;
         }
 
         return cart;
