@@ -45,7 +45,7 @@ class OrderStatusSchedulerTest {
 
         // Assert
         ArgumentCaptor<OrderUpdateRequest> captor = ArgumentCaptor.forClass(OrderUpdateRequest.class);
-        verify(orderService).updateOrder(eq("order-1"), captor.capture(), any(AuthDetails.class));
+        verify(orderService).updateOrder(eq(order.getId()), captor.capture(), any(AuthDetails.class));
 
         // Check if the request contains the correct next status
         assertEquals("status should match", OrderStatus.CONFIRMED.getNextActiveStatus(), captor.getValue().getStatus());
