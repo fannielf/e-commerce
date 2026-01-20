@@ -43,13 +43,13 @@ export class ManageProductsComponent implements OnInit {
     categories = Object.values(Category);
 
     constructor(
-      private fb: FormBuilder,
-      private route: ActivatedRoute,
-      private productService: ProductService,
-      private router: Router,
-      private userService: UserService,
+      private readonly fb: FormBuilder,
+      private readonly route: ActivatedRoute,
+      private readonly productService: ProductService,
+      private readonly router: Router,
+      private readonly userService: UserService,
       public dialog: MatDialog,
-      private snackBar: MatSnackBar
+      private readonly snackBar: MatSnackBar
     ) {
       this.productForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(255)]],
