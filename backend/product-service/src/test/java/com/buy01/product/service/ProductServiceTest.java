@@ -56,6 +56,9 @@ class ProductServiceTest {
         }
     }
 
+    private static Product product1 = new TestProduct("prod-1", "Product 1", "Description 1", 10.0, 5, ProductCategory.OTHER, "user-1");
+    private static Product product2 = new TestProduct("prod-2", "Product 2", "Description 2", 20.0, 3, ProductCategory.OTHER, "user-2");
+
     @BeforeEach
     void setUp() {
         // productService is created by @InjectMocks with all mocks injected
@@ -205,23 +208,20 @@ class ProductServiceTest {
     @Test
     @DisplayName("deleteProductsByUserId deletes each product and publishes events")
     void deleteProductsByUserId() {
-        TestProduct p1 = new TestProduct(product1().getProductId(), "n", "d", 1.0, 1, ProductCategory.OTHER, "u1");
-        TestProduct p2 = new TestProduct(product2().getProductId(), "n2", "d2", 2.0, 2, ProductCategory.OTHER, "u1");
-        when(productRepository.findAllProductsByUserId("u1")).thenReturn(List.of(p1, p2));
+        when(productRepository.findAllProductsByUserId("u1")).thenReturn(List.of(product1, product2));
 
         productService.deleteProductsByUserId("u1");
 
-        verify(productRepository).delete(p1);
-        verify(productRepository).delete(p2);
-        verify(productEventService).publishProductDeletedEvent(product1().getProductId());
-        verify(productEventService).publishProductDeletedEvent(product2().getProductId());
+        verify(productRepository).delete(product1);
+        verify(productRepository).delete(product2);
+        verify(productEventService).publishProductDeletedEvent(product1.getProductId());
+        verify(productEventService).publishProductDeletedEvent(product2.getProductId());
     }
 
     @Test
     @DisplayName("authProductOwner allows owner and admin, forbids others")
     void authProductOwner() {
-        TestProduct p = new TestProduct(product1().getProductId(), "n", "d", 1.0, 1, ProductCategory.OTHER, "owner-1");
-        assertThrows(ForbiddenException.class, () -> productService.authProductOwner(p, "someone-else", Role.SELLER));
+        assertThrows(ForbiddenException.class, () -> productService.authProductOwner(product1, "someone-else", Role.SELLER));
     }
 
     @Test
@@ -237,13 +237,12 @@ class ProductServiceTest {
     @DisplayName("getAllProducts returns sorted page of products")
     void getAllProducts() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
-        TestProduct p = new TestProduct(product1().getProductId(), "n", "d", 1.0, 1, ProductCategory.OTHER, "u1");
-        Page<Product> productPage = new PageImpl<>(List.of(p), pageable, 1);
+        Page<Product> productPage = new PageImpl<>(List.of(product1), pageable, 1);
         when(productRepository.findAllByFilters("", null, null, null, pageable))
                 .thenReturn(productPage);
         Page<ProductResponseDTO> all = productService.getAllProducts(null, null, null, null, pageable);
         assertEquals(1, all.getTotalPages());
-        assertEquals(product1().getProductId(), all.getContent().get(0).getProductId());
+        assertEquals(product1.getProductId(), all.getContent().get(0).getProductId());
     }
 
     @Test
