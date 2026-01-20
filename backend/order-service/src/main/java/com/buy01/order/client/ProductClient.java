@@ -74,7 +74,7 @@ public class ProductClient {
     public void cancelOrder(String productId, int quantity) {
         try {
             String url = PRODUCT_SERVICE_BASE_URL + "/internal/cancel/" + productId;
-            restTemplate.put(url, -quantity);
+            restTemplate.put(url, quantity);
         } catch (HttpClientErrorException e) {
 
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {

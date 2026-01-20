@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-import org.springframework.data.web.PageableDefault;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,10 +49,14 @@ class ProductServiceTest {
     private ProductService productService;
 
     static class TestProduct extends Product {
-        TestProduct(String productId, String name, String description, double price, int quantity, ProductCategory category, String userId) {
+        TestProduct(String productId, String name, String description, double price, int quantity,
+                ProductCategory category, String userId) {
             super(productId, name, description, price, quantity, category, userId);
         }
     }
+
+    private static final Product product1 = new TestProduct("prod-1", "Product 1", "Description 1", 10.0, 5, ProductCategory.OTHER, "user-1");
+    private static final Product product2 = new TestProduct("prod-2", "Product 2", "Description 2", 20.0, 3, ProductCategory.OTHER, "user-2");
 
     @BeforeEach
     void setUp() {
@@ -77,7 +80,8 @@ class ProductServiceTest {
 
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
             Product p = invocation.getArgument(0);
-            return new TestProduct("prod-1", p.getName(), p.getDescription(), p.getPrice(), p.getQuantity(), p.getCategory(), p.getUserId());
+            return new TestProduct("prod-1", p.getName(), p.getDescription(), p.getPrice(), p.getQuantity(),
+                    p.getCategory(), p.getUserId());
         });
 
         ProductResponseDTO resp = productService.createProduct(request, new AuthDetails("current-user-1", Role.SELLER));
@@ -92,9 +96,8 @@ class ProductServiceTest {
     @DisplayName("createProduct with forbidden role throws ForbiddenException")
     void createProductForbidden() throws IOException {
         ProductCreateDTO request = mock(ProductCreateDTO.class);
-        assertThrows(ForbiddenException.class, () ->
-                productService.createProduct(request, new AuthDetails( "some-user", Role.CLIENT))
-        );
+        assertThrows(ForbiddenException.class,
+                () -> productService.createProduct(request, new AuthDetails("some-user", Role.CLIENT)));
         verify(productRepository, never()).save(any());
         verify(mediaClient, never()).postProductImages(anyString(), anyList());
         verify(userClient, never()).getRoleIfUserExists(anyString());
@@ -127,18 +130,19 @@ class ProductServiceTest {
         when(mediaClient.updateProductImages(eq(productId), anyList(), anyList())).thenReturn(List.of());
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
             Product p = invocation.getArgument(0);
-            return new TestProduct(productId, p.getName(), p.getDescription(), p.getPrice(), p.getQuantity(), p.getCategory(), p.getUserId());
+            return new TestProduct(productId, p.getName(), p.getDescription(), p.getPrice(), p.getQuantity(),
+                    p.getCategory(), p.getUserId());
         });
 
-        ProductResponseDTO resp = productService.updateProduct(productId, request, new AuthDetails("owner-1", Role.SELLER));
+        ProductResponseDTO resp = productService.updateProduct(productId, request,
+                new AuthDetails("owner-1", Role.SELLER));
 
         assertNotNull(resp);
         assertEquals("New Name", resp.getName());
         assertEquals(10.0, resp.getPrice());
         assertTrue(Boolean.TRUE.equals(resp.getIsProductOwner()));
 
-        ArgumentCaptor<ProductUpdateDTO> captor =
-                ArgumentCaptor.forClass(ProductUpdateDTO.class);
+        ArgumentCaptor<ProductUpdateDTO> captor = ArgumentCaptor.forClass(ProductUpdateDTO.class);
 
         verify(productEventService).publishProductUpdatedEvent(captor.capture());
 
@@ -174,20 +178,20 @@ class ProductServiceTest {
         when(request.getUserId()).thenReturn("current-user"); // Use the actual user ID
 
         var mockFile = new org.springframework.mock.web.MockMultipartFile(
-                "file", "orig.jpg", "image/jpeg", new byte[] {1}
-        );
+                "file", "orig.jpg", "image/jpeg", new byte[] { 1 });
         when(request.getImagesList()).thenReturn(List.of(mockFile));
 
         when(userClient.getRoleIfUserExists("current-user")).thenReturn(Role.SELLER);
 
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
             Product p = invocation.getArgument(0);
-            return new TestProduct("prod-x", p.getName(), p.getDescription(), p.getPrice(), p.getQuantity(), ProductCategory.OTHER, p.getUserId());
+            return new TestProduct("prod-x", p.getName(), p.getDescription(), p.getPrice(), p.getQuantity(),
+                    ProductCategory.OTHER, p.getUserId());
         });
 
         when(mediaClient.postProductImages(anyString(), anyList())).thenThrow(new RuntimeException("upstream fail"));
 
-        ProductResponseDTO resp = productService.createProduct(request, new AuthDetails( "current-user", Role.SELLER));
+        ProductResponseDTO resp = productService.createProduct(request, new AuthDetails("current-user", Role.SELLER));
         assertNotNull(resp);
         assertEquals("prod-x", resp.getProductId());
         assertTrue(resp.getImages().isEmpty());
@@ -203,23 +207,20 @@ class ProductServiceTest {
     @Test
     @DisplayName("deleteProductsByUserId deletes each product and publishes events")
     void deleteProductsByUserId() {
-        TestProduct p1 = new TestProduct("p1", "n", "d", 1.0, 1, ProductCategory.OTHER, "u1");
-        TestProduct p2 = new TestProduct("p2", "n2", "d2", 2.0, 2, ProductCategory.OTHER, "u1");
-        when(productRepository.findAllProductsByUserId("u1")).thenReturn(List.of(p1, p2));
+        when(productRepository.findAllProductsByUserId("u1")).thenReturn(List.of(product1, product2));
 
         productService.deleteProductsByUserId("u1");
 
-        verify(productRepository).delete(p1);
-        verify(productRepository).delete(p2);
-        verify(productEventService).publishProductDeletedEvent("p1");
-        verify(productEventService).publishProductDeletedEvent("p2");
+        verify(productRepository).delete(product1);
+        verify(productRepository).delete(product2);
+        verify(productEventService).publishProductDeletedEvent(product1.getProductId());
+        verify(productEventService).publishProductDeletedEvent(product2.getProductId());
     }
 
     @Test
     @DisplayName("authProductOwner allows owner and admin, forbids others")
     void authProductOwner() {
-        TestProduct p = new TestProduct("p1", "n", "d", 1.0, 1, ProductCategory.OTHER, "owner-1");
-        assertThrows(ForbiddenException.class, () -> productService.authProductOwner(p, "someone-else", Role.SELLER));
+        assertThrows(ForbiddenException.class, () -> productService.authProductOwner(product1, "someone-else", Role.SELLER));
     }
 
     @Test
@@ -227,22 +228,20 @@ class ProductServiceTest {
     void createProductBadRequest() {
         ProductCreateDTO request = mock(ProductCreateDTO.class);
         when(request.getName()).thenReturn("abc"); // only stub used by validation
-        assertThrows(IllegalArgumentException.class, () ->
-                productService.createProduct(request, new AuthDetails( "current-user", Role.SELLER))
-        );
+        assertThrows(IllegalArgumentException.class,
+                () -> productService.createProduct(request, new AuthDetails("current-user", Role.SELLER)));
     }
 
     @Test
     @DisplayName("getAllProducts returns sorted page of products")
     void getAllProducts() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
-        TestProduct p = new TestProduct("p1", "n", "d", 1.0, 1, ProductCategory.OTHER, "u1");
-        Page<Product> productPage = new PageImpl<>(List.of(p), pageable, 1);
+        Page<Product> productPage = new PageImpl<>(List.of(product1), pageable, 1);
         when(productRepository.findAllByFilters("", null, null, null, pageable))
                 .thenReturn(productPage);
         Page<ProductResponseDTO> all = productService.getAllProducts(null, null, null, null, pageable);
         assertEquals(1, all.getTotalPages());
-        assertEquals("p1", all.getContent().get(0).getProductId());
+        assertEquals(product1.getProductId(), all.getContent().get(0).getProductId());
     }
 
     @Test
