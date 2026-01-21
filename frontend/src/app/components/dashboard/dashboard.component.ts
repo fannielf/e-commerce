@@ -80,7 +80,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadProducts() {
-    let sortParam = 'createdAt,desc';
+    let sortParam;
 
     switch (this.sortBy) {
       case 'price_asc': sortParam = 'price,asc'; break;
