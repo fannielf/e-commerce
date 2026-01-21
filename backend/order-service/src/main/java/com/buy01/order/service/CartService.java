@@ -16,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.buy01.order.client.ProductClient;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -75,7 +74,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    public CartResponseDTO addToCart(AuthDetails currentUser, CartItemRequestDTO newItem) throws IOException {
+    public CartResponseDTO addToCart(AuthDetails currentUser, CartItemRequestDTO newItem) {
 
         if (!currentUser.getRole().equals(Role.CLIENT)) {
             throw new BadRequestException("Current user is not a CLIENT");
@@ -101,7 +100,7 @@ public class CartService {
 
     }
 
-    public CartResponseDTO addToCartFromOrder(AuthDetails currentUser, String orderId) throws IOException {
+    public CartResponseDTO addToCartFromOrder(AuthDetails currentUser, String orderId) {
         if (!currentUser.getRole().equals(Role.CLIENT)) {
             throw new BadRequestException("Current user is not a CLIENT");
         }
@@ -116,8 +115,13 @@ public class CartService {
         List<OrderItem> cartItems = new ArrayList<>();
 
         for (OrderItem item : order.getItems()) {
-            ProductUpdateDTO product = productClient.getProductById(item.getProductId());
-            if (product == null) break;
+            ProductUpdateDTO product;
+            try {
+                product = productClient.getProductById(item.getProductId());
+            } catch (Exception e) {
+                log.info("Product not found for item {}", item.getProductId());
+                break;
+            }
             int quantityToAdd = item.getQuantity();
             if (product.getQuantity() < item.getQuantity()) {
                 quantityToAdd = product.getQuantity();
@@ -157,7 +161,7 @@ public class CartService {
         return mapToDTO(cartRepository.save(cart));
     }
 
-    public CartResponseDTO updateCart(AuthDetails currentUser, String productId, CartItemUpdateDTO newQuantity) throws IOException {
+    public CartResponseDTO updateCart(AuthDetails currentUser, String productId, CartItemUpdateDTO newQuantity) {
         Cart cart = getCurrentCart(currentUser);
         if (cart == null) {
             throw new NotFoundException("Cart not found");
@@ -182,10 +186,11 @@ public class CartService {
         return mapToDTO(cartRepository.save(cart));
     }
 
-    public CartResponseDTO updateCartStatus(AuthDetails currentUser, CartStatus newStatus) throws IOException {
+    public CartResponseDTO updateCartStatus(AuthDetails currentUser, CartStatus newStatus) {
         Cart cart = getCurrentCart(currentUser);
         if (cart == null) {
-            throw new NotFoundException("Cart not found");
+            log.info("Cart not found with userId: {}", currentUser.getCurrentUserId());
+            return null;
         }
 
         if (cart.getCartStatus() == CartStatus.ABANDONED && newStatus != CartStatus.ABANDONED) {
