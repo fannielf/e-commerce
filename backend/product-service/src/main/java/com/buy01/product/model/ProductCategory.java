@@ -3,7 +3,7 @@ package com.buy01.product.model;
 public enum ProductCategory {
     ELECTRONICS,
     FASHION,
-    HOME_APPLIANCES,
+    HOME,
     BOOKS,
     TOYS,
     SPORTS,
