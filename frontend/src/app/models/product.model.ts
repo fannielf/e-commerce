@@ -13,7 +13,7 @@ export interface Product {
 export enum Category {
   ELECTRONICS = 'ELECTRONICS',
   FASHION = 'FASHION',
-  HOME_APPLIANCES = 'HOME_APPLIANCES',
+  HOME = 'HOME',
   BOOKS = 'BOOKS',
   TOYS = 'TOYS',
   SPORTS = 'SPORTS',
