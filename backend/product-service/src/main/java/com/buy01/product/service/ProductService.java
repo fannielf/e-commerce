@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.buy01.product.dto.ProductUpdateRequest;
@@ -111,12 +112,11 @@ public class ProductService {
 
     // Get all products, accessible by anyone (including unauthenticated users)
     public Page<ProductResponseDTO> getAllProducts(String keyword, Double minPrice, Double maxPrice, ProductCategory category, Pageable pageable) {
-        if (keyword == null) {
-            keyword = "";
-        } else {
-            keyword = keyword.trim();
+        String searchKeyword = "";
+        if (keyword != null && !keyword.isBlank()) {
+            searchKeyword = Pattern.quote(keyword.trim()); // Escape special regex characters
         }
-        Page<Product> productPage = productRepository.findAllByFilters(keyword, minPrice, maxPrice, category, pageable);
+        Page<Product> productPage = productRepository.findAllByFilters(searchKeyword, minPrice, maxPrice, category, pageable);
         return productPage.map(product -> mapToProductResponseDTO(product, null));
     }
 
