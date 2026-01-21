@@ -30,9 +30,10 @@ describe('CheckoutComponent', () => {
   } as unknown as OrderResponseDTO;
 
   beforeEach(async () => {
-    cartServiceSpy = jasmine.createSpyObj('CartService', ['updateCartStatus']);
-    // Default return value (so we don't get issues with ngDestroy)
+    cartServiceSpy = jasmine.createSpyObj('CartService', ['updateCartStatus', 'getCart']);
+
     cartServiceSpy.updateCartStatus.and.returnValue(of(void 0));
+    cartServiceSpy.getCart.and.returnValue(of({} as any));
 
     orderServiceSpy = jasmine.createSpyObj('OrderService', ['createOrder']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
@@ -61,6 +62,7 @@ describe('CheckoutComponent', () => {
       cartServiceSpy.updateCartStatus.and.returnValue(of(void 0));
       fixture.detectChanges(); // triggers ngOnInit
       expect(cartServiceSpy.updateCartStatus).toHaveBeenCalledWith({ cartStatus: CartStatus.CHECKOUT });
+      expect(cartServiceSpy.getCart).toHaveBeenCalled();
     });
   });
 
