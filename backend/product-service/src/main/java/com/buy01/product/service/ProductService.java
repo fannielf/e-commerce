@@ -124,7 +124,7 @@ public class ProductService {
     public ProductResponseDTO getProductById(String productId, AuthDetails currentUser) {
         return productRepository.findById(productId)
                 .map(product -> mapToProductResponseDTO(product, currentUser))
-                .orElseThrow(() -> new NotFoundException(productId));
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
     }
 
     // Get all products by userId

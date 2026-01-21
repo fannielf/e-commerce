@@ -14,41 +14,42 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    String error = "error";
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, String>> handleMaxSizeException(MaxUploadSizeExceededException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("PAYLOAD_TOO_LARGE_ERROR", "File size exceeds the maximum limit");
-        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body);  //413
+        body.put(error, "File size exceeds the maximum limit");
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body); // 413
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("INTERNAL_SERVER_ERROR", "Internal server error"));
+                .body(Map.of(error, "Internal server error"));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("ILLEGAL_ARGUMENT_ERROR", ex.getMessage());
+        body.put(error, ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Map<String, String>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("METHOD_NOT_ALLOWED_ERROR", "Method not allowed or endpoint does not exist");
+        body.put(error, "Method not allowed or endpoint does not exist");
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(body);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(NoHandlerFoundException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("NO_HANDLER_FOUND_ERROR", "Endpoint does not exist");
+        body.put(error, "Endpoint does not exist");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
@@ -57,30 +58,27 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult()
-        .getFieldErrors()
-        .forEach(error ->
-            errors.put(error.getField(), error.getDefaultMessage())
-        );
+                .getFieldErrors()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest().body(
-                Map.of("METHOD_ARGUMENT_NOT_VALID_ERROR", errors.toString())
-        );
+                Map.of(error, errors.toString()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String,String>> handleInvalidJson(HttpMessageNotReadableException ex) {
+    public ResponseEntity<Map<String, String>> handleInvalidJson(HttpMessageNotReadableException ex) {
         String message = "Bad Request";
         if (ex.getCause() instanceof InvalidFormatException invalidFormat) {
             message = String.format("Invalid value '%s' for field '%s",
                     invalidFormat.getValue(),
                     invalidFormat.getPath().get(0).getFieldName());
         }
-        return ResponseEntity.badRequest().body(Map.of("HTTP_MESSAGE_NOT_READABLE_ERROR", message));
+        return ResponseEntity.badRequest().body(Map.of(error, message));
     }
 
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<Map<String, String>> handleFileUploadException(FileUploadException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("FILE_UPLOAD_ERROR", ex.getMessage());
+        body.put(error, ex.getMessage());
         // 400 Bad Request is appropriate for invalid file type/size
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
@@ -88,21 +86,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(NotFoundException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("NOT_FOUND_ERROR", ex.getMessage());
+        body.put(error, ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Map<String, String>> handleForbidden(ForbiddenException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("FORBIDDEN_ERROR", ex.getMessage());
+        body.put(error, ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, String>> handleConflict(ConflictException ex) {
         Map<String, String> body = new HashMap<>();
-        body.put("CONFLICT_ERROR", ex.getMessage());
+        body.put(error, ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 }
