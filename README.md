@@ -181,5 +181,3 @@ Upcoming planned phases:
 * [Linnea](https://github.com/Linnie43)
 * [Maris](https://github.com/karusmari)
 * [Fanni](https://github.com/fannielf)
-
-// adding a comment just to have some changes in the file 
